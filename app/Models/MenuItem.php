@@ -1,0 +1,70 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class MenuItem extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'category_id',
+        'name',
+        'description',
+        'price',
+        'original_price',
+        'image',
+        'is_featured',
+        'is_active',
+        'sort_order',
+        'size',
+        'discount_percentage',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'original_price' => 'decimal:2',
+        'is_featured' => 'boolean',
+        'is_active' => 'boolean',
+        'sort_order' => 'integer',
+        'discount_percentage' => 'integer',
+    ];
+
+    protected $appends = ['image_url', 'has_discount'];
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(MenuCategory::class, 'category_id');
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if ($this->image) {
+            return asset('storage/' . $this->image);
+        }
+        return null;
+    }
+
+    public function getHasDiscountAttribute(): bool
+    {
+        return $this->discount_percentage > 0 || ($this->original_price && $this->original_price > $this->price);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('sort_order');
+    }
+}
