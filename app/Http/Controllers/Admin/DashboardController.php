@@ -13,19 +13,19 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
-
-        // Total revenue (completed orders only)
+        // Total revenue for CURRENT month only (completed orders)
         $totalRevenue = Order::where('status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
             ->sum('total_amount');
 
-        // Total completed orders
-        $totalOrders = Order::where('status', 'completed')->count();
+        // Total completed orders for CURRENT month only
+        $totalOrders = Order::where('status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
 
-        // Growth percentage (compare to last month completed orders)
+        // Growth percentage (compare CURRENT month to LAST month completed orders)
         $lastMonthOrders = Order::where('status', 'completed')
             ->whereMonth('created_at', now()->subMonth()->month)
             ->whereYear('created_at', now()->subMonth()->year)
@@ -33,7 +33,7 @@ class DashboardController extends Controller
         
         $growthPercentage = $lastMonthOrders > 0 
             ? (($totalOrders - $lastMonthOrders) / $lastMonthOrders) * 100 
-            : 0;
+            : ($totalOrders > 0 ? 100 : 0);
 
         // Daily sales for bar chart (last 7 days)
         $dailySales = collect();

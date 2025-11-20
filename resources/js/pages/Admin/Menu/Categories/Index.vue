@@ -1,113 +1,7 @@
-<template>
-  <div class="min-h-screen bg-black text-white">
-    <!-- Header -->
-    <header class="border-b border-gray-800 px-6 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-orange-500">Admin - Menüü kategooriad</h1>
-        <Link href="/admin/dashboard" class="text-gray-400 hover:text-white transition">← Tagasi</Link>
-      </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-6 py-12">
-      <!-- Header with Add Button -->
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h2 class="text-3xl font-bold mb-2">Menüü kategooriad</h2>
-          <p class="text-gray-400">Halda menüü kategooriaid</p>
-        </div>
-        <Link
-          href="/admin/menu/categories/create"
-          class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Lisa kategooria
-        </Link>
-      </div>
-
-      <!-- Categories Table -->
-      <div v-if="categories.length > 0" class="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
-        <table class="w-full">
-          <thead class="bg-gray-800">
-            <tr>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-400">Järjekord</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-400">Nimi</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-400">Slug</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-400">Tooteid</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-400">Staatus</th>
-              <th class="px-6 py-4 text-right text-sm font-semibold text-gray-400">Tegevused</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-800">
-            <tr
-              v-for="category in categories"
-              :key="category.id"
-              class="hover:bg-gray-800/50 transition"
-            >
-              <td class="px-6 py-4">
-                <span class="text-gray-400 font-mono">{{ category.sort_order }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="font-semibold">{{ category.name }}</span>
-              </td>
-              <td class="px-6 py-4">
-                <code class="text-sm text-orange-400 bg-gray-800 px-2 py-1 rounded">{{ category.slug }}</code>
-              </td>
-              <td class="px-6 py-4">
-                <span class="text-gray-400">{{ category.items_count }} toode(t)</span>
-              </td>
-              <td class="px-6 py-4">
-                <span
-                  :class="[
-                    'px-3 py-1 rounded-full text-xs font-semibold',
-                    category.is_active
-                      ? 'bg-green-900/30 text-green-400'
-                      : 'bg-gray-700 text-gray-400'
-                  ]"
-                >
-                  {{ category.is_active ? 'Aktiivne' : 'Mitteaktiivne' }}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <div class="flex items-center justify-end gap-2">
-                  <Link
-                    :href="`/admin/menu/categories/${category.id}/edit`"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-semibold transition text-sm"
-                  >
-                    Muuda
-                  </Link>
-                  <button
-                    @click="deleteCategory(category.id)"
-                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-semibold transition text-sm"
-                  >
-                    Kustuta
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else class="text-center py-16 bg-gray-900 rounded-lg border border-gray-800">
-        <div class="text-6xl mb-4">📂</div>
-        <h3 class="text-2xl font-bold mb-2">Kategooriaid pole veel</h3>
-        <p class="text-gray-400 mb-6">Lisa oma esimene menüü kategooria</p>
-        <Link
-          href="/admin/menu/categories/create"
-          class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded font-semibold transition"
-        >
-          Lisa kategooria
-        </Link>
-      </div>
-    </main>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Plus, Edit, Trash2, GripVertical, Eye, EyeOff } from 'lucide-vue-next';
 
 interface Category {
   id: number;
@@ -133,3 +27,162 @@ const deleteCategory = (categoryId: number) => {
   }
 };
 </script>
+
+<template>
+  <AdminLayout>
+    <template #header>
+      <div class="flex items-center justify-between w-full">
+        <div>
+          <h2 class="text-xl lg:text-2xl font-bold">Menüü kategooriad</h2>
+          <p class="text-sm text-gray-400 mt-1">Halda menüü kategooriaid ja järjekorda</p>
+        </div>
+        <Link
+          href="/admin/menu/categories/create"
+          class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold transition flex items-center gap-2"
+        >
+          <Plus :size="18" />
+          <span class="hidden sm:inline">Lisa kategooria</span>
+        </Link>
+      </div>
+    </template>
+
+    <!-- Categories Table -->
+    <div v-if="categories.length > 0" class="bg-[#111111] rounded-xl border border-gray-800 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-[#0a0a0a] border-b border-gray-800">
+            <tr>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Järjekord
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Kategooria
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Slug
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Tooteid
+              </th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Staatus
+              </th>
+              <th class="px-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Tegevused
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800">
+            <tr
+              v-for="category in categories"
+              :key="category.id"
+              class="hover:bg-[#1a1a1a] transition"
+            >
+              <!-- Sort Order -->
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <GripVertical :size="16" class="text-gray-600" />
+                  <span class="text-gray-400 font-mono text-sm">#{{ category.sort_order }}</span>
+                </div>
+              </td>
+
+              <!-- Category Name -->
+              <td class="px-6 py-4">
+                <div>
+                  <p class="font-semibold text-white">{{ category.name }}</p>
+                  <p v-if="category.description" class="text-xs text-gray-500 mt-1 line-clamp-1">
+                    {{ category.description }}
+                  </p>
+                </div>
+              </td>
+
+              <!-- Slug -->
+              <td class="px-6 py-4">
+                <code class="text-xs text-orange-400 bg-[#0a0a0a] px-2 py-1 rounded border border-gray-800">
+                  {{ category.slug }}
+                </code>
+              </td>
+
+              <!-- Items Count -->
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-800 text-gray-300 text-xs font-medium">
+                  <div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
+                  {{ category.items_count }} toode(t)
+                </span>
+              </td>
+
+              <!-- Status -->
+              <td class="px-6 py-4">
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold',
+                    category.is_active
+                      ? 'bg-green-600/10 text-green-400'
+                      : 'bg-gray-700 text-gray-400'
+                  ]"
+                >
+                  <component :is="category.is_active ? Eye : EyeOff" :size="14" />
+                  {{ category.is_active ? 'Aktiivne' : 'Peidetud' }}
+                </span>
+              </td>
+
+              <!-- Actions -->
+              <td class="px-6 py-4">
+                <div class="flex items-center justify-end gap-2">
+                  <Link
+                    :href="`/admin/menu/categories/${category.id}/edit`"
+                    class="p-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 rounded-lg font-semibold transition"
+                    title="Muuda"
+                  >
+                    <Edit :size="16" />
+                  </Link>
+                  <button
+                    @click="deleteCategory(category.id)"
+                    class="p-2 bg-red-600/10 hover:bg-red-600/20 text-red-400 rounded-lg font-semibold transition"
+                    title="Kustuta"
+                  >
+                    <Trash2 :size="16" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else class="text-center py-16 bg-[#111111] rounded-xl border border-gray-800">
+      <div class="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-2">Kategooriaid pole veel</h3>
+      <p class="text-gray-400 mb-6">Lisa oma esimene menüü kategooria alustamiseks</p>
+      <Link
+        href="/admin/menu/categories/create"
+        class="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+      >
+        <Plus :size="18" />
+        Lisa kategooria
+      </Link>
+    </div>
+
+    <!-- Quick Info Cards -->
+    <div v-if="categories.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+      <div class="bg-[#111111] rounded-lg border border-gray-800 p-4">
+        <p class="text-sm text-gray-400 mb-1">Kokku kategooriaid</p>
+        <p class="text-2xl font-bold text-white">{{ categories.length }}</p>
+      </div>
+      <div class="bg-[#111111] rounded-lg border border-gray-800 p-4">
+        <p class="text-sm text-gray-400 mb-1">Aktiivseid</p>
+        <p class="text-2xl font-bold text-green-400">{{ categories.filter(c => c.is_active).length }}</p>
+      </div>
+      <div class="bg-[#111111] rounded-lg border border-gray-800 p-4">
+        <p class="text-sm text-gray-400 mb-1">Kokku tooteid</p>
+        <p class="text-2xl font-bold text-orange-500">{{ categories.reduce((sum, c) => sum + c.items_count, 0) }}</p>
+      </div>
+    </div>
+  </AdminLayout>
+</template>

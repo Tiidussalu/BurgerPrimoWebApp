@@ -12,10 +12,6 @@ class OrderController extends Controller
 {
     public function index(Request $request): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $query = Order::with(['user', 'items', 'confirmedBy']);
 
@@ -43,10 +39,6 @@ class OrderController extends Controller
 
     public function show(Order $order): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $order->load(['user', 'items', 'confirmedBy']);
 
@@ -57,10 +49,6 @@ class OrderController extends Controller
 
     public function updateStatus(Request $request, Order $order)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $validated = $request->validate([
             'status' => 'required|in:pending,confirmed,preparing,ready,completed,cancelled',
@@ -86,10 +74,6 @@ class OrderController extends Controller
 
     public function confirm(Order $order)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         if ($order->status !== 'pending') {
             return redirect()->back()->with('error', 'Only pending orders can be confirmed.');
@@ -102,10 +86,6 @@ class OrderController extends Controller
 
     public function bulkUpdateStatus(Request $request)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $validated = $request->validate([
             'order_ids' => 'required|array',
@@ -121,10 +101,6 @@ class OrderController extends Controller
 
     public function reject(Request $request, Order $order)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $validated = $request->validate([
             'admin_notes' => 'nullable|string|max:500',

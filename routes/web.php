@@ -63,38 +63,38 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::post('/orders/bulk-delete', [OrderController::class, 'bulkDelete'])->name('orders.bulk-delete'); // Bulk delete completed orders
 
-    // Admin Routes (with prefix & namespacing)
-    Route::prefix('admin')->name('admin.')->group(function () {
-        // Orders
-        Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
-        Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
-        Route::post('/orders/{order}/confirm', [AdminOrderController::class, 'confirm'])->name('orders.confirm');
-        Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
-        Route::post('/orders/bulk-status', [AdminOrderController::class, 'bulkUpdateStatus'])->name('orders.bulk-status');
-        Route::delete('/orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
-        Route::post('/orders/{order}/reject', [AdminOrderController::class, 'reject'])->name('orders.reject');
-        
-        // Dashboard
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-        
-        // MENU MANAGEMENT - Categories
-        Route::get('/menu/categories', [MenuCategoryController::class, 'index'])->name('menu.categories.index');
-        Route::get('/menu/categories/create', [MenuCategoryController::class, 'create'])->name('menu.categories.create');
-        Route::post('/menu/categories', [MenuCategoryController::class, 'store'])->name('menu.categories.store');
-        Route::get('/menu/categories/{category}/edit', [MenuCategoryController::class, 'edit'])->name('menu.categories.edit');
-        Route::put('/menu/categories/{category}', [MenuCategoryController::class, 'update'])->name('menu.categories.update');
-        Route::delete('/menu/categories/{category}', [MenuCategoryController::class, 'destroy'])->name('menu.categories.destroy');
-        Route::post('/menu/categories/update-order', [MenuCategoryController::class, 'updateOrder'])->name('menu.categories.update-order');
-        
-        // MENU MANAGEMENT - Items
-        Route::get('/menu/items', [MenuItemController::class, 'index'])->name('menu.items.index');
-        Route::get('/menu/items/create', [MenuItemController::class, 'create'])->name('menu.items.create');
-        Route::post('/menu/items', [MenuItemController::class, 'store'])->name('menu.items.store');
-        Route::get('/menu/items/{item}/edit', [MenuItemController::class, 'edit'])->name('menu.items.edit');
-        Route::post('/menu/items/{item}', [MenuItemController::class, 'update'])->name('menu.items.update'); // Using POST for file uploads
-        Route::delete('/menu/items/{item}', [MenuItemController::class, 'destroy'])->name('menu.items.destroy');
-        Route::post('/menu/items/update-order', [MenuItemController::class, 'updateOrder'])->name('menu.items.update-order');
-    });
+    // ADMIN ROUTES
+    Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    
+    // Orders
+    Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/confirm', [AdminOrderController::class, 'confirm'])->name('orders.confirm');
+    Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
+    Route::post('/orders/bulk-status', [AdminOrderController::class, 'bulkUpdateStatus'])->name('orders.bulk-status');
+    Route::delete('/orders/{order}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
+    Route::post('/orders/{order}/reject', [AdminOrderController::class, 'reject'])->name('orders.reject');
+    
+    // MENU MANAGEMENT - Categories
+    Route::get('/menu/categories', [MenuCategoryController::class, 'index'])->name('menu.categories.index');
+    Route::get('/menu/categories/create', [MenuCategoryController::class, 'create'])->name('menu.categories.create');
+    Route::post('/menu/categories', [MenuCategoryController::class, 'store'])->name('menu.categories.store');
+    Route::get('/menu/categories/{category}/edit', [MenuCategoryController::class, 'edit'])->name('menu.categories.edit');
+    Route::put('/menu/categories/{category}', [MenuCategoryController::class, 'update'])->name('menu.categories.update');
+    Route::delete('/menu/categories/{category}', [MenuCategoryController::class, 'destroy'])->name('menu.categories.destroy');
+    Route::post('/menu/categories/update-order', [MenuCategoryController::class, 'updateOrder'])->name('menu.categories.update-order');
+    
+    // MENU MANAGEMENT - Items
+    Route::get('/menu/items', [MenuItemController::class, 'index'])->name('menu.items.index');
+    Route::get('/menu/items/create', [MenuItemController::class, 'create'])->name('menu.items.create');
+    Route::post('/menu/items', [MenuItemController::class, 'store'])->name('menu.items.store');
+    Route::get('/menu/items/{item}/edit', [MenuItemController::class, 'edit'])->name('menu.items.edit');
+    Route::post('/menu/items/{item}', [MenuItemController::class, 'update'])->name('menu.items.update');
+    Route::delete('/menu/items/{item}', [MenuItemController::class, 'destroy'])->name('menu.items.destroy');
+    Route::post('/menu/items/update-order', [MenuItemController::class, 'updateOrder'])->name('menu.items.update-order');
+});
 });
 
 // Additional route includes

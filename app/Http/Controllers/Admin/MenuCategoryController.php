@@ -12,11 +12,6 @@ class MenuCategoryController extends Controller
 {
     public function index(): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
-
         $categories = MenuCategory::withCount('items')
             ->orderBy('sort_order')
             ->get();
@@ -28,20 +23,12 @@ class MenuCategoryController extends Controller
 
     public function create(): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         return Inertia::render('Admin/Menu/Categories/Create');
     }
 
     public function store(Request $request)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -59,10 +46,6 @@ class MenuCategoryController extends Controller
 
     public function edit(MenuCategory $category): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         return Inertia::render('Admin/Menu/Categories/Edit', [
             'category' => $category,
@@ -71,10 +54,6 @@ class MenuCategoryController extends Controller
 
     public function update(Request $request, MenuCategory $category)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -92,10 +71,6 @@ class MenuCategoryController extends Controller
 
     public function destroy(MenuCategory $category)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $category->delete();
 
@@ -105,10 +80,6 @@ class MenuCategoryController extends Controller
 
     public function updateOrder(Request $request)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
 
         $validated = $request->validate([
             'categories' => 'required|array',

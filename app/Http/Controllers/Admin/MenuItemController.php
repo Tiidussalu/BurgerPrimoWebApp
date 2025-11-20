@@ -14,10 +14,7 @@ class MenuItemController extends Controller
 {
     public function index(Request $request): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
+        
 
         $query = MenuItem::with('category');
 
@@ -47,10 +44,7 @@ class MenuItemController extends Controller
 
     public function create(): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
+        
 
         $categories = MenuCategory::orderBy('sort_order')->get();
 
@@ -61,10 +55,7 @@ class MenuItemController extends Controller
 
     public function store(Request $request)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
+        
 
         $validated = $request->validate([
             'category_id' => 'required|exists:menu_categories,id',
@@ -92,10 +83,7 @@ class MenuItemController extends Controller
 
     public function edit(MenuItem $item): Response
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
+        
 
         $categories = MenuCategory::orderBy('sort_order')->get();
 
@@ -107,10 +95,7 @@ class MenuItemController extends Controller
 
     public function update(Request $request, MenuItem $item)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
+        
 
         $validated = $request->validate([
             'category_id' => 'required|exists:menu_categories,id',
@@ -142,11 +127,6 @@ class MenuItemController extends Controller
 
     public function destroy(MenuItem $item)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
-
         // Delete image if exists
         if ($item->image) {
             Storage::disk('public')->delete($item->image);
@@ -160,10 +140,7 @@ class MenuItemController extends Controller
 
     public function updateOrder(Request $request)
     {
-        // Check admin access
-        if (!auth()->user()?->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
+        
 
         $validated = $request->validate([
             'items' => 'required|array',
