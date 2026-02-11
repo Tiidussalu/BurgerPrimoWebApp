@@ -284,6 +284,7 @@ const deliveryMethod = ref<'dine_in' | 'takeaway' | null>(null);
 import { Link, router } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
 
+
 interface CartItem {
   type: 'custom_burger' | 'menu_item';
   id: string | number;

@@ -169,4 +169,45 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    
+    /* Add to your app.css or main CSS file */
+
+/* Prevent layout shift when scrollbar appears/disappears */
+html {
+    overflow-y: scroll; /* Always show scrollbar space */
+    scrollbar-gutter: stable; /* Modern browsers - reserve space for scrollbar */
+}
+
+/* For browsers that support scrollbar-gutter */
+@supports (scrollbar-gutter: stable) {
+    html {
+        overflow-y: auto;
+        scrollbar-gutter: stable;
+    }
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) - thin scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0B0B0B;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1a1a1a;
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #2a2a2a;
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #1a1a1a #0B0B0B;
+}
 }

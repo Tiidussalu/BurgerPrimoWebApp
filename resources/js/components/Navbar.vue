@@ -50,10 +50,10 @@
             </svg>
             <span>Korv</span>
             <span 
-              v-if="cartCount > 0"
+              v-if="actualCartCount > 0"
               class="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-[#D2691E] to-[#B8571A] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg shadow-[#D2691E]/50 animate-pulse"
             >
-              {{ cartCount }}
+              {{ actualCartCount }}
             </span>
           </Link>
         </nav>
@@ -234,10 +234,10 @@
           >
             <span>Korv</span>
             <span 
-              v-if="cartCount > 0"
+              v-if="actualCartCount > 0"
               class="px-2 py-1 bg-[#D2691E] text-white text-xs font-bold rounded-full"
             >
-              {{ cartCount }}
+              {{ actualCartCount }}
             </span>
           </Link>
 
@@ -320,6 +320,22 @@ const props = withDefaults(defineProps<Props>(), {
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user as User | null);
+
+// Get cart count from either prop or Inertia shared props
+const actualCartCount = computed(() => {
+  // First try the prop (for Cart page which passes it explicitly)
+  if (props.cartCount > 0) {
+    return props.cartCount;
+  }
+  
+  // Then try to get from shared Inertia props (if available from backend)
+  const sharedCart = page.props.cartCount as number | undefined;
+  if (sharedCart !== undefined) {
+    return sharedCart;
+  }
+  
+  return 0;
+});
 
 const dropdownOpen = ref(false);
 const mobileMenuOpen = ref(false);

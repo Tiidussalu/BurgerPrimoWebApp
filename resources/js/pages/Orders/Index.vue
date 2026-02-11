@@ -1,19 +1,6 @@
 <template>
-  <div class="min-h-screen bg-black text-white">
-    <!-- Header -->
-    <header class="border-b border-gray-800 px-6 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-orange-500">Burger Primo</h1>
-        <nav class="flex gap-6">
-          <Link href="/" class="text-gray-400 hover:text-white">Eriüd</Link>
-          <Link href="/menu" class="text-gray-400 hover:text-white">Menüükaart</Link>
-          <Link href="/burger-builder" class="text-gray-400 hover:text-white">Ehita</Link>
-          <Link href="/orders" class="text-white">Tellimused</Link>
-          <Link href="/cart" class="text-gray-400 hover:text-white">Korv</Link>
-        </nav>
-        <Link href="/profile" class="text-gray-400 hover:text-white">Logi sisse</Link>
-      </div>
-    </header>
+  <div class="min-h-screen bg-[#0B0B0B] text-white">
+    <Navbar />
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-6 py-12">
@@ -184,6 +171,7 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import Navbar from '@/components/Navbar.vue';
 
 interface OrderItem {
   id: number;

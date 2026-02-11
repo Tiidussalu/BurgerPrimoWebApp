@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-[#0B0B0B] text-white">
-    <Navbar />
+    <Navbar :cartCount="cartItems.length" />
+
 
     <!-- Hero Section -->
     <section class="relative min-h-[600px] flex items-center justify-center overflow-hidden">
@@ -412,6 +413,8 @@ import { ref, reactive, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
 import EditableSection from '@/components/EditableSection.vue';
+
+const cartItems = ref([]);
 
 const content = ref({
   hero: {

@@ -1,132 +1,130 @@
 <template>
   <MainLayout>
-  <div class="min-h-screen bg-black text-white">
+    <div class="min-h-screen bg-[#0B0B0B] text-white">
+      <!-- Main Content -->
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <!-- Title Section -->
+        <div class="mb-12">
+          <h2 class="text-4xl font-bold mb-2">Ehita enda burger</h2>
+          <p class="text-gray-400">Lisa enda unistuste burger</p>
+        </div>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-6 py-12">
-      <!-- Title Section -->
-      <div class="mb-12">
-        <h2 class="text-4xl font-bold mb-2">Ehita enda burger</h2>
-        <p class="text-gray-400">Lisa enda unistuste burger</p>
-      </div>
-
-      <!-- Burger Name Input -->
-      <div class="mb-8">
-        <label class="block text-sm mb-2">Burgeri nimi</label>
-        <input
-          v-model="burgerName"
-          type="text"
-          placeholder="Sisesta burgeri nimi"
-          class="w-full max-w-md bg-gray-900 border border-gray-700 rounded px-4 py-2 text-white focus:outline-none focus:border-orange-500"
-        />
-      </div>
-
-      <!-- Ingredients Grid -->
-      <div class="space-y-12">
-        <!-- Vöi Section -->
-        <IngredientSection
-          v-if="ingredients['vöi']"
-          title="Vöi"
-          subtitle="Vali endale sobiv kastee"
-          :items="ingredients['vöi']"
-          :selected="selectedIngredients['vöi'] || []"
-          @update="(items) => updateIngredients('vöi', items)"
-        />
-
-        <!-- Pitav Section -->
-        <IngredientSection
-          v-if="ingredients.pitav"
-          title="Pitav"
-          subtitle="Vali endale sobiv pitav"
-          :items="ingredients.pitav"
-          :selected="selectedIngredients.pitav || []"
-          @update="(items) => updateIngredients('pitav', items)"
-        />
-
-        <!-- Juust Section -->
-        <IngredientSection
-          v-if="ingredients.juust"
-          title="Juust"
-          subtitle="Vali endale sobiv juust"
-          :items="ingredients.juust"
-          :selected="selectedIngredients.juust || []"
-          @update="(items) => updateIngredients('juust', items)"
-        />
-
-        <!-- Salat Section -->
-        <IngredientSection
-          v-if="ingredients.salat"
-          title="Salat"
-          subtitle="Vali endale sobiv salat"
-          :items="ingredients.salat"
-          :selected="selectedIngredients.salat || []"
-          @update="(items) => updateIngredients('salat', items)"
-        />
-
-        <!-- Lisand Section -->
-        <IngredientSection
-          v-if="ingredients.lisand"
-          title="Lisand"
-          subtitle="Vali endale sobiv lisand"
-          :items="ingredients.lisand"
-          :selected="selectedIngredients.lisand || []"
-          @update="(items) => updateIngredients('lisand', items)"
-        />
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="mt-12 flex gap-4">
-        <button
-          @click="saveBurger(false)"
-          :disabled="!canSave"
-          class="bg-orange-500 hover:bg-orange-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-3 rounded font-semibold transition"
-        >
-          Salvesta burger
-        </button>
-        <button
-          @click="saveBurger(true)"
-          :disabled="!canSave"
-          class="bg-transparent border-2 border-orange-500 hover:bg-orange-500 disabled:border-gray-700 disabled:cursor-not-allowed text-white px-8 py-3 rounded font-semibold transition"
-        >
-          Lisa lemmikutesse
-        </button>
-        <button
-          @click="orderBurger"
-          :disabled="!canSave"
-          class="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-3 rounded font-semibold transition"
-        >
-          Lisa ostukorvi ({{ totalPrice.toFixed(2) }}€)
-        </button>
-      </div>
-
-      <!-- Total Price Display -->
-      <div class="mt-8 text-2xl font-bold">
-        Kogusumma: <span class="text-orange-500">{{ totalPrice.toFixed(2) }}€</span>
-      </div>
-
-      <!-- Favorites Section -->
-      <div v-if="favorites.length > 0" class="mt-16">
-        <h3 class="text-2xl font-bold mb-6">Lemmik burgerid</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FavoriteBurgerCard
-            v-for="burger in favorites"
-            :key="burger.id"
-            :burger="burger"
-            @load="loadBurger"
-            @order="orderFavorite"
+        <!-- Burger Name Input -->
+        <div class="mb-8">
+          <label class="block text-sm mb-2 font-semibold">Burgeri nimi</label>
+          <input
+            v-model="burgerName"
+            type="text"
+            placeholder="Sisesta burgeri nimi"
+            class="w-full max-w-md bg-[#121212] border border-[#0B0B0B] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#D2691E]"
           />
         </div>
-      </div>
-    </main>
-  </div>
+
+        <!-- Ingredients Grid -->
+        <div class="space-y-12">
+          <!-- Vöi Section -->
+          <IngredientSection
+            v-if="ingredients['vöi']"
+            title="Vöi"
+            subtitle="Vali endale sobiv kastee"
+            :items="ingredients['vöi']"
+            :selected="selectedIngredients['vöi'] || []"
+            @update="(items) => updateIngredients('vöi', items)"
+          />
+
+          <!-- Pitav Section -->
+          <IngredientSection
+            v-if="ingredients.pitav"
+            title="Pitav"
+            subtitle="Vali endale sobiv pitav"
+            :items="ingredients.pitav"
+            :selected="selectedIngredients.pitav || []"
+            @update="(items) => updateIngredients('pitav', items)"
+          />
+
+          <!-- Juust Section -->
+          <IngredientSection
+            v-if="ingredients.juust"
+            title="Juust"
+            subtitle="Vali endale sobiv juust"
+            :items="ingredients.juust"
+            :selected="selectedIngredients.juust || []"
+            @update="(items) => updateIngredients('juust', items)"
+          />
+
+          <!-- Salat Section -->
+          <IngredientSection
+            v-if="ingredients.salat"
+            title="Salat"
+            subtitle="Vali endale sobiv salat"
+            :items="ingredients.salat"
+            :selected="selectedIngredients.salat || []"
+            @update="(items) => updateIngredients('salat', items)"
+          />
+
+          <!-- Lisand Section -->
+          <IngredientSection
+            v-if="ingredients.lisand"
+            title="Lisand"
+            subtitle="Vali endale sobiv lisand"
+            :items="ingredients.lisand"
+            :selected="selectedIngredients.lisand || []"
+            @update="(items) => updateIngredients('lisand', items)"
+          />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-12 flex flex-wrap gap-4">
+          <button
+            @click="saveBurger(false)"
+            :disabled="!canSave"
+            class="bg-gradient-to-r from-[#D2691E] to-[#B8571A] hover:from-[#E07A2E] hover:to-[#D2691E] disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-semibold transition shadow-lg hover:shadow-[#D2691E]/50"
+          >
+            Salvesta burger
+          </button>
+          <button
+            @click="saveBurger(true)"
+            :disabled="!canSave"
+            class="bg-transparent border-2 border-[#D2691E] hover:bg-[#D2691E]/10 disabled:border-gray-700 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-semibold transition"
+          >
+            Lisa lemmikutesse
+          </button>
+          <button
+            @click="orderBurger"
+            :disabled="!canSave"
+            class="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-semibold transition"
+          >
+            Lisa ostukorvi ({{ totalPrice.toFixed(2) }}€)
+          </button>
+        </div>
+
+        <!-- Total Price Display -->
+        <div class="mt-8 text-2xl font-bold">
+          Kogusumma: <span class="text-[#D2691E]">{{ totalPrice.toFixed(2) }}€</span>
+        </div>
+
+        <!-- Favorites Section -->
+        <div v-if="favorites.length > 0" class="mt-16">
+          <h3 class="text-2xl font-bold mb-6">Lemmik burgerid</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FavoriteBurgerCard
+              v-for="burger in favorites"
+              :key="burger.id"
+              :burger="burger"
+              @load="loadBurger"
+              @order="orderFavorite"
+            />
+          </div>
+        </div>
+      </main>
+    </div>
   </MainLayout>
 </template>
 
 <script setup lang="ts">
 import MainLayout from '@/layouts/MainLayout.vue';
-
 import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import IngredientSection from '@/components/IngredientSection.vue';
 import FavoriteBurgerCard from '@/components/FavoriteBurgerCard.vue';
 import type { Ingredient, SelectedIngredient, CustomBurger } from '@/types/burger-types';
@@ -188,13 +186,11 @@ const saveBurger = (isFavorite: boolean) => {
 };
 
 const orderBurger = () => {
-  // Add burger to cart
   router.post('/cart/add-new', {
     name: burgerName.value,
     ingredients: getAllSelectedIngredients(),
   } as any, {
     onSuccess: () => {
-      // Redirect to cart
       router.visit('/cart');
     },
   });
