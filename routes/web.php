@@ -25,11 +25,6 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-// Dashboard
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 // PUBLIC MENU ROUTE (No authentication required - anyone can view)
 Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
 Route::get('/menu/{slug}', [MenuController::class, 'category'])->name('menu.category');

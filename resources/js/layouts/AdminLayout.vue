@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Link, usePage } from '@inertiajs/vue3';
-import { Home, ShoppingBag, Menu, X, ChevronDown, ChevronUp, LogOut, User as UserIcon } from 'lucide-vue-next';
+import { Link, usePage, router } from '@inertiajs/vue3';
+import { Home, ShoppingBag, Menu, X, ChevronDown, ChevronUp, LogOut, User as UserIcon, ArrowLeft } from 'lucide-vue-next';
 import type { AppPageProps } from '@/types';
 
 const page = usePage<AppPageProps>();
@@ -28,8 +28,8 @@ const isActive = (routeName: string): boolean => {
 };
 
 const logout = () => {
-  // Using Inertia's router to handle logout
-  window.location.href = '/logout';
+  // FIXED: Use Inertia router with POST method
+  router.post('/logout');
 };
 </script>
 
@@ -52,8 +52,8 @@ const logout = () => {
       <!-- Logo/Brand -->
       <div class="p-6 border-b border-gray-800 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold bg-gradient-to-r from-orange-500 to-orange-600 bg-clip-text text-transparent">
-            BurgerPrimo
+          <h1 class="text-2xl font-bold bg-gradient-to-r from-[#D2691E] to-[#E07A2E] bg-clip-text text-transparent">
+            Burger Primo
           </h1>
           <p class="text-sm text-gray-400 mt-1">Admin Panel</p>
         </div>
@@ -63,6 +63,17 @@ const logout = () => {
         >
           <X :size="20" />
         </button>
+      </div>
+
+      <!-- Back to Site Button -->
+      <div class="p-4 border-b border-gray-800">
+        <Link
+          href="/"
+          class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-[#D2691E]/10 border border-[#D2691E]/20 text-[#D2691E] hover:bg-[#D2691E]/20 transition-all duration-200 group"
+        >
+          <ArrowLeft :size="18" class="group-hover:-translate-x-1 transition-transform" />
+          <span class="text-sm font-semibold">Tagasi saidile</span>
+        </Link>
       </div>
 
       <!-- Navigation -->
@@ -75,7 +86,7 @@ const logout = () => {
             :class="[
               'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
               isActive('/admin/dashboard')
-                ? 'bg-orange-600 text-white'
+                ? 'bg-[#D2691E] text-white'
                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             ]"
           >
@@ -89,12 +100,12 @@ const logout = () => {
             :class="[
               'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
               isActive('/admin/orders')
-                ? 'bg-orange-600 text-white'
+                ? 'bg-[#D2691E] text-white'
                 : 'text-gray-400 hover:bg-gray-800 hover:text-white'
             ]"
           >
             <ShoppingBag :size="20" />
-            <span class="font-medium">Orders</span>
+            <span class="font-medium">Tellimused</span>
           </Link>
 
           <!-- Menu (with submenu) -->
@@ -104,13 +115,13 @@ const logout = () => {
               :class="[
                 'w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-colors',
                 isActive('/admin/menu')
-                  ? 'bg-orange-600 text-white'
+                  ? 'bg-[#D2691E] text-white'
                   : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               ]"
             >
               <div class="flex items-center gap-3">
                 <Menu :size="20" />
-                <span class="font-medium">Menu</span>
+                <span class="font-medium">Menüü</span>
               </div>
               <ChevronDown v-if="!menuExpanded" :size="16" />
               <ChevronUp v-else :size="16" />
@@ -130,7 +141,7 @@ const logout = () => {
                     : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                 ]"
               >
-                Categories
+                Kategooriad
               </Link>
               <Link
                 href="/admin/menu/items"
@@ -141,7 +152,7 @@ const logout = () => {
                     : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                 ]"
               >
-                Items
+                Tooted
               </Link>
             </div>
           </div>
@@ -155,12 +166,12 @@ const logout = () => {
             @click="toggleUserMenu"
             class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition-colors"
           >
-            <div class="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center text-sm font-bold">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#D2691E] to-[#B8571A] flex items-center justify-center text-sm font-bold">
               {{ user?.name?.charAt(0).toUpperCase() || 'A' }}
             </div>
             <div class="flex-1 text-left">
               <p class="text-sm font-medium">{{ user?.name || 'Admin' }}</p>
-              <p class="text-xs text-gray-400">Admin</p>
+              <p class="text-xs text-gray-400">Administraator</p>
             </div>
             <ChevronUp v-if="userMenuOpen" :size="16" class="text-gray-400" />
             <ChevronDown v-else :size="16" class="text-gray-400" />
@@ -172,18 +183,18 @@ const logout = () => {
             class="absolute bottom-full left-0 right-0 mb-2 bg-[#1a1a1a] border border-gray-800 rounded-lg shadow-xl overflow-hidden"
           >
             <Link
-              href="/dashboard"
+              href="/"
               class="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors text-gray-300"
             >
-              <UserIcon :size="18" />
-              <span class="text-sm">User Dashboard</span>
+              <ArrowLeft :size="18" />
+              <span class="text-sm">Tagasi saidile</span>
             </Link>
             <button
               @click="logout"
               class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors text-red-400"
             >
               <LogOut :size="18" />
-              <span class="text-sm">Logout</span>
+              <span class="text-sm">Logi välja</span>
             </button>
           </div>
         </div>
@@ -210,7 +221,14 @@ const logout = () => {
         </div>
 
         <!-- Header Actions Slot -->
-        <div>
+        <div class="flex items-center gap-3">
+          <!-- Back to Site Button (Mobile) -->
+          <Link
+            href="/"
+            class="lg:hidden px-3 py-2 rounded-lg bg-[#D2691E]/10 border border-[#D2691E]/20 text-[#D2691E] hover:bg-[#D2691E]/20 transition-all text-sm font-semibold"
+          >
+            <ArrowLeft :size="18" class="inline" />
+          </Link>
           <slot name="header-actions" />
         </div>
       </header>

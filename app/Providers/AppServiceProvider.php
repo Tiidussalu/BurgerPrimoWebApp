@@ -3,29 +3,19 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Gate;
-use App\Models\CustomBurger;
-use App\Models\Order;
-use App\Policies\CustomBurgerPolicy;
-use App\Policies\OrderPolicy;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use App\Http\Responses\LoginResponse;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        // This binding is CRITICAL
+        $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        // Register policies
-        Gate::policy(CustomBurger::class, CustomBurgerPolicy::class);
-        Gate::policy(Order::class, OrderPolicy::class);
+        //
     }
 }
