@@ -4,6 +4,12 @@
         <meta charset="utf-8">
         <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <meta name="apple-mobile-web-app-title" content="Burger Primo" />
+        <link rel="manifest" href="/site.webmanifest" />
 
         
         <script>
@@ -31,11 +37,7 @@
             }
         </style>
 
-        <title inertia><?php echo e(config('app.name', 'Laravel')); ?></title>
-
-        <link rel="icon" href="/favicon.ico" sizes="any">
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <title inertia><?php echo e(config('app.name', 'Burger Primo')); ?></title>
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
@@ -47,4 +49,4 @@
         <?php if (!isset($__inertiaSsrDispatched)) { $__inertiaSsrDispatched = true; $__inertiaSsrResponse = app(\Inertia\Ssr\Gateway::class)->dispatch($page); }  if ($__inertiaSsrResponse) { echo $__inertiaSsrResponse->body; } else { ?><div id="app" data-page="<?php echo e(json_encode($page)); ?>"></div><?php } ?>
     </body>
 </html>
-<?php /**PATH /home/taaniel/BurgerPrimoWebApp/resources/views/app.blade.php ENDPATH**/ ?>
+<?php /**PATH /home/kennu/BurgerPrimoWebApp/resources/views/app.blade.php ENDPATH**/ ?>
