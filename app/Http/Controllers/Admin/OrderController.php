@@ -65,7 +65,7 @@ class OrderController extends Controller
 
         if (isset($validated['admin_notes'])) {
             $updateData['admin_notes'] = $validated['admin_notes'];
-        }
+        }   
 
         $order->update($updateData);
 
@@ -99,20 +99,51 @@ class OrderController extends Controller
         return redirect()->back()->with('success', 'Orders updated successfully!');
     }
 
-    public function reject(Request $request, Order $order)
-    {
+public function reject(Request $request, Order $order)
+{
+    $validated = $request->validate([
+        'admin_notes' => 'nullable|string|max:500',
+    ]);
 
-        $validated = $request->validate([
-            'admin_notes' => 'nullable|string|max:500',
-        ]);
-
-        $order->update([
-            'status' => 'rejected',
-            'admin_notes' => $validated['admin_notes'] ?? 'Tellimus lükati tagasi',
-        ]);
-
-        return redirect()->back()->with('success', 'Order rejected successfully!');
+    // If order was paid with card via Stripe, process refund
+    if ($order->payment_status === 'succeeded' && $order->payment_intent_id) {
+        try {
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret_key'));
+            
+            // Create full refund in Stripe
+            $refund = \Stripe\Refund::create([
+                'payment_intent' => $order->payment_intent_id,
+                'reason' => 'requested_by_customer',
+            ]);
+            
+            // Update order with rejection and refund status
+            $order->update([
+                'status' => 'rejected',
+                'payment_status' => 'refunded',
+                'admin_notes' => $validated['admin_notes'] ?? 'Tellimus lükati tagasi ja makse tagastati',
+            ]);
+            
+            return redirect()->back()->with('success', 'Tellimus tagasi lükatud ja €' . number_format($order->total_amount, 2) . ' tagastatud kliendile!');
+            
+        } catch (\Exception $e) {
+            \Log::error('Refund failed: ' . $e->getMessage());
+            $order->update([
+                'status' => 'rejected',
+                'admin_notes' => $validated['admin_notes'] ?? 'Tellimus lükati tagasi (tagasimakse ebaõnnestus)',
+            ]);
+            
+            return redirect()->back()->with('error', 'Tellimus tagasi lükatud, kuid tagasimakse ebaõnnestus: ' . $e->getMessage());
+        }
     }
+    
+    // If order wasn't paid via Stripe, just reject it
+    $order->update([
+        'status' => 'rejected',
+        'admin_notes' => $validated['admin_notes'] ?? 'Tellimus lükati tagasi',
+    ]);
+    
+    return redirect()->back()->with('success', 'Order rejected successfully!');
+}
 
     /**
      * Bulk delete completed orders

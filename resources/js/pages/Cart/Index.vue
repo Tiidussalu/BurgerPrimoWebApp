@@ -196,42 +196,48 @@
               <span>€{{ Number(total).toFixed(2) }}</span>
             </div>
 
+            <!-- Delivery Method Selection -->
+            <div class="mb-4">
+              <label class="text-sm text-gray-400 mb-3 block font-semibold">Tellimuse tüüp *</label>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  @click="deliveryMethod = 'dine_in'"
+                  :class="deliveryMethod === 'dine_in' ? 'border-[#D2691E] bg-[#D2691E]/10 text-white' : 'border-[#0B0B0B] text-gray-400'"
+                  class="py-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  <span class="text-sm font-semibold">Kohapeal</span>
+                </button>
+                <button
+                  type="button"
+                  @click="deliveryMethod = 'takeaway'"
+                  :class="deliveryMethod === 'takeaway' ? 'border-[#D2691E] bg-[#D2691E]/10 text-white' : 'border-[#0B0B0B] text-gray-400'"
+                  class="py-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  <span class="text-sm font-semibold">Kaasa</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Packaging Fee (only for takeaway) -->
+            <div v-if="deliveryMethod === 'takeaway'" class="flex justify-between mb-4 text-[#D2691E]">
+              <span>Pakendamise tasu:</span>
+              <span>€{{ packagingFee.toFixed(2) }}</span>
+            </div>
+
             <hr class="border-[#0B0B0B] my-6" />
 
             <!-- Total -->
             <div class="flex justify-between mb-6">
               <span class="text-xl font-bold">Kokku:</span>
-              <span class="text-3xl font-bold text-[#D2691E]">€{{ (Number(total) + 3).toFixed(2) }}</span>
+              <span class="text-3xl font-bold text-[#D2691E]">€{{ finalTotal.toFixed(2) }}</span>
             </div>
-
-            <!-- Delivery Method Selection -->
-<div class="mb-6">
-  <label class="text-sm text-gray-400 mb-3 block font-semibold">Tellimuse tüüp *</label>
-  <div class="grid grid-cols-2 gap-3">
-    <button
-      type="button"
-      @click="deliveryMethod = 'dine_in'"
-      :class="deliveryMethod === 'dine_in' ? 'border-[#D2691E] bg-[#D2691E]/10 text-white' : 'border-[#0B0B0B] text-gray-400'"
-      class="py-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-      <span class="text-sm font-semibold">Kohapeal</span>
-    </button>
-    <button
-      type="button"
-      @click="deliveryMethod = 'takeaway'"
-      :class="deliveryMethod === 'takeaway' ? 'border-[#D2691E] bg-[#D2691E]/10 text-white' : 'border-[#0B0B0B] text-gray-400'"
-      class="py-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-      </svg>
-      <span class="text-sm font-semibold">Kaasa</span>
-    </button>
-  </div>
-</div>
             
             <!-- Checkout Button -->
             <form @submit.prevent="checkout">
@@ -279,11 +285,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-const deliveryMethod = ref<'dine_in' | 'takeaway' | null>(null);
+import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
-
 
 interface CartItem {
   type: 'custom_burger' | 'menu_item';
@@ -309,6 +313,21 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const deliveryMethod = ref<'dine_in' | 'takeaway' | null>(null);
+
+// Packaging fee: €0.20 per item for takeaway
+const packagingFee = computed(() => {
+  if (deliveryMethod.value === 'takeaway') {
+    return props.cartItems.length * 0.20;
+  }
+  return 0;
+});
+
+// Final total including packaging fee
+const finalTotal = computed(() => {
+  return props.total + packagingFee.value;
+});
 
 const getSizeName = (size?: string) => {
   const sizes: Record<string, string> = {
@@ -351,8 +370,15 @@ const checkout = () => {
     return;
   }
 
-  router.post('/cart/checkout', {
-    delivery_method: deliveryMethod.value,
+  // Store delivery method and navigate to payment
+  router.visit('/payment/checkout', {
+    method: 'get',
+    data: {
+      delivery_method: deliveryMethod.value,
+    },
   });
 };
 </script>
+EOF
+
+cat /home/claude/Cart_Index.vue

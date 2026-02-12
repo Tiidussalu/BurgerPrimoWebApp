@@ -20,11 +20,17 @@ class Order extends Model
         'admin_notes',
         'confirmed_at',
         'confirmed_by',
+        'delivery_method',
+        'payment_intent_id',
+        'payment_status',
+        'payment_method',
+        'paid_at',
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
         'confirmed_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

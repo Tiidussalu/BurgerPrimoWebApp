@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\BurgerBuilderController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\Admin\MenuCategoryController;
@@ -49,6 +50,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/cart/{burger}', [CartController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+
+    // Payment Routes
+    Route::get('/payment/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout');
+    Route::post('/payment/create-intent', [PaymentController::class, 'createIntent'])->name('payment.create-intent');
+    Route::post('/payment/process', [PaymentController::class, 'processPayment'])->name('payment.process');
 
     // Order Routes
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
