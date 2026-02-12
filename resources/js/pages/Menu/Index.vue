@@ -1,4 +1,5 @@
 <template>
+  <Head title="Menüü" />
   <div class="min-h-screen bg-[#0B0B0B] text-white">
     <!-- Navbar -->
     <Navbar />
@@ -46,6 +47,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { Head } from '@inertiajs/vue3'
 import Navbar from '@/components/Navbar.vue';
 import MenuItem from '@/components/Menu/MenuItem.vue';
 

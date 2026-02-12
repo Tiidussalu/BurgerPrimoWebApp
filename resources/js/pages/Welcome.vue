@@ -1,4 +1,97 @@
+<script setup lang="ts">
+import { Head } from '@inertiajs/vue3'
+import { ref, reactive } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
+import Navbar from '@/components/Navbar.vue';
+import EditableSection from '@/components/EditableSection.vue';
+
+const cartItems = ref([]);
+
+const reviews = [
+  { text: 'Parim', initial: 'R', name: 'Robby' },
+  { text: 'Mu lemmik burger ja pitsa ja asi ja...', initial: 'T', name: 'Taaniel' },
+  { text: 'Robby on läks', initial: 'K', name: 'Keanu' }
+];
+
+const content = ref({
+  hero: {
+    title: 'Kirega valmistatud preemium burgerid, mida serveeritakse unkusega',
+    titleColor: '#FFFFFF',
+    subtitle: 'Kurssaare südames',
+    subtitleColor: '#FFFFFF',
+    buttonText: 'Avasta menüüd',
+    buttonLink: '/menu',
+    buttonBgColor: '#D2691E',
+  },
+  popular: {
+    label: 'MEIE VALIK',
+    labelColor: '#D2691E',
+    title: 'Populaarsed',
+    titleColor: '#F5DEB3',
+    subtitle: 'Primos enim tuntud ja rohkelt tellitud toidud',
+    buttonText: 'Avasta Kogu Menüüd',
+    buttonLink: '/menu',
+    buttonBgColor: '#D2691E',
+  },
+  contact: {
+    label: 'LEIA MEID',
+    labelColor: '#D2691E',
+    title: 'Külasta Meid',
+    titleColor: '#F5DEB3',
+    addressTitle: 'Meie Asukoht',
+    address: ['Kauba tn 5/2', 'Kuressaare, Saaremaa 93819', 'Eesti', '', 'Telefon: +372 5743 8483', 'Email: info@burgerprimo.ee'],
+    hoursTitle: 'Lahtiolekuajad',
+    hours: ['Esmaspäev - Neljapäev: 11:00 - 22:00', 'Reede - Laupäev: 11:00 - 23:00', 'Pühapäev: 12:00 - 21:00'],
+  },
+  reviews: {
+    label: 'ARVUSTUSED',
+    labelColor: '#D2691E',
+    title: 'Klientide Kogemus',
+    titleColor: '#F5DEB3',
+  },
+});
+
+const editContent = reactive(JSON.parse(JSON.stringify(content.value)));
+
+const saveHero = () => {
+  content.value.hero = { ...editContent.hero };
+  router.post('/admin/page-content', { page: 'welcome', section: 'hero', content: content.value.hero });
+};
+
+const savePopular = () => {
+  content.value.popular = { ...editContent.popular };
+  router.post('/admin/page-content', { page: 'welcome', section: 'popular', content: content.value.popular });
+};
+
+const saveContact = () => {
+  content.value.contact = { ...editContent.contact };
+  router.post('/admin/page-content', { page: 'welcome', section: 'contact', content: content.value.contact });
+};
+
+const saveReviews = () => {
+  content.value.reviews = { ...editContent.reviews };
+  router.post('/admin/page-content', { page: 'welcome', section: 'reviews', content: content.value.reviews });
+};
+
+const cancelHero = () => {
+  Object.assign(editContent.hero, content.value.hero);
+};
+
+const cancelPopular = () => {
+  Object.assign(editContent.popular, content.value.popular);
+};
+
+const cancelContact = () => {
+  Object.assign(editContent.contact, content.value.contact);
+};
+
+const cancelReviews = () => {
+  Object.assign(editContent.reviews, content.value.reviews);
+};
+</script>
+
 <template>
+  <Head title="Avaleht" />
   <div class="min-h-screen bg-[#0B0B0B] text-white">
     <Navbar :cartCount="cartItems.length" />
 
@@ -12,11 +105,11 @@
             
             <div class="absolute inset-0 w-full h-full">
               <img 
-                src="/img/main.jpg" 
+                src="/img/main2.jpg" 
                 alt="Burger Primo Interior" 
                 class="w-full h-full object-cover"
               />
-              <div class="absolute inset-0 backdrop-blur-xl bg-black/40"></div>
+              <div class="absolute inset-0 backdrop-blur-xl bg-black/40 bg-gradient-to-b from-black/80 via-black/40 to-black z-0"></div>
             </div>
             
             <div class="relative max-w-4xl mx-auto px-6 text-center w-full z-10 flex flex-col justify-center min-h-[calc(100vh-8rem)]">
@@ -457,93 +550,3 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
-import Navbar from '@/components/Navbar.vue';
-import EditableSection from '@/components/EditableSection.vue';
-
-const cartItems = ref([]);
-
-const reviews = [
-  { text: 'Parim', initial: 'R', name: 'Robby' },
-  { text: 'Mu lemmik burger ja pitsa ja asi ja...', initial: 'T', name: 'Taaniel' },
-  { text: 'Robby on läks', initial: 'K', name: 'Keanu' }
-];
-
-const content = ref({
-  hero: {
-    title: 'Kirega valmistatud preemium burgerid, mida serveeritakse unkusega',
-    titleColor: '#FFFFFF',
-    subtitle: 'Kurssaare südames',
-    subtitleColor: '#FFFFFF',
-    buttonText: 'Avasta menüüd',
-    buttonLink: '/menu',
-    buttonBgColor: '#D2691E',
-  },
-  popular: {
-    label: 'MEIE VALIK',
-    labelColor: '#D2691E',
-    title: 'Populaarsed',
-    titleColor: '#F5DEB3',
-    subtitle: 'Primos enim tuntud ja rohkelt tellitud toidud',
-    buttonText: 'Avasta Kogu Menüüd',
-    buttonLink: '/menu',
-    buttonBgColor: '#D2691E',
-  },
-  contact: {
-    label: 'LEIA MEID',
-    labelColor: '#D2691E',
-    title: 'Külasta Meid',
-    titleColor: '#F5DEB3',
-    addressTitle: 'Meie Asukoht',
-    address: ['Kauba tn 5/2', 'Kuressaare, Saaremaa 93819', 'Eesti', '', 'Telefon: +372 5743 8483', 'Email: info@burgerprimo.ee'],
-    hoursTitle: 'Lahtiolekuajad',
-    hours: ['Esmaspäev - Neljapäev: 11:00 - 22:00', 'Reede - Laupäev: 11:00 - 23:00', 'Pühapäev: 12:00 - 21:00'],
-  },
-  reviews: {
-    label: 'ARVUSTUSED',
-    labelColor: '#D2691E',
-    title: 'Klientide Kogemus',
-    titleColor: '#F5DEB3',
-  },
-});
-
-const editContent = reactive(JSON.parse(JSON.stringify(content.value)));
-
-const saveHero = () => {
-  content.value.hero = { ...editContent.hero };
-  router.post('/admin/page-content', { page: 'welcome', section: 'hero', content: content.value.hero });
-};
-
-const savePopular = () => {
-  content.value.popular = { ...editContent.popular };
-  router.post('/admin/page-content', { page: 'welcome', section: 'popular', content: content.value.popular });
-};
-
-const saveContact = () => {
-  content.value.contact = { ...editContent.contact };
-  router.post('/admin/page-content', { page: 'welcome', section: 'contact', content: content.value.contact });
-};
-
-const saveReviews = () => {
-  content.value.reviews = { ...editContent.reviews };
-  router.post('/admin/page-content', { page: 'welcome', section: 'reviews', content: content.value.reviews });
-};
-
-const cancelHero = () => {
-  Object.assign(editContent.hero, content.value.hero);
-};
-
-const cancelPopular = () => {
-  Object.assign(editContent.popular, content.value.popular);
-};
-
-const cancelContact = () => {
-  Object.assign(editContent.contact, content.value.contact);
-};
-
-const cancelReviews = () => {
-  Object.assign(editContent.reviews, content.value.reviews);
-};
-</script>
