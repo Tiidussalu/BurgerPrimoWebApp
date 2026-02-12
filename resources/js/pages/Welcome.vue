@@ -2,123 +2,125 @@
   <div class="min-h-screen bg-[#0B0B0B] text-white">
     <Navbar :cartCount="cartItems.length" />
 
-
-    <!-- Hero Section -->
-    <section class="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-      <EditableSection section-id="hero" @save="saveHero" @cancel="cancelHero">
+    <section class="w-full h-screen overflow-hidden">
+      <EditableSection section-id="hero" container-class="h-full" @save="saveHero" @cancel="cancelHero">
         <template #default="{ isEditing }">
-          <!-- Debug indicator -->
-          <div v-if="isEditing" class="fixed top-4 left-4 z-[999] bg-red-500 text-white px-4 py-2 rounded font-bold">
-            EDIT MODE ACTIVE - HERO
-          </div>
-          
-          <div class="absolute inset-0">
-            <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black"></div>
-          </div>
-          
-          <div class="relative z-10 max-w-7xl mx-auto px-6 py-20 text-center">
-            <h1 
-              v-if="!isEditing"
-              class="text-5xl font-bold mb-4"
-              :style="{ color: content.hero.titleColor }"
-            >
-              {{ content.hero.title }}
-            </h1>
-            <div v-else class="mb-4 space-y-2">
-              <input
-                v-model="editContent.hero.title"
-                type="text"
-                placeholder="Enter title..."
-                class="w-full max-w-2xl mx-auto p-3 bg-gray-800 text-white rounded border-2 border-white"
+          <div class="w-full h-full flex items-center justify-center">
+            <div v-if="isEditing" class="fixed top-4 left-4 z-[999] bg-red-500 text-white px-4 py-2 rounded font-bold">
+              EDIT MODE ACTIVE - HERO
+            </div>
+            
+            <div class="absolute inset-0 w-full h-full">
+              <img 
+                src="/img/main.jpg" 
+                alt="Burger Primo Interior" 
+                class="w-full h-full object-cover"
               />
-              <div class="flex gap-2 justify-center items-center">
-                <label class="text-sm">Title color:</label>
-                <input
-                  v-model="editContent.hero.titleColor"
-                  type="color"
-                  class="p-2 bg-gray-800 rounded border-2 border-white"
-                />
-              </div>
+              <div class="absolute inset-0 backdrop-blur-xl bg-black/40"></div>
             </div>
+            
+            <div class="relative max-w-4xl mx-auto px-6 text-center w-full z-10 flex flex-col justify-center min-h-[calc(100vh-8rem)]">
 
-            <p 
-              v-if="!isEditing"
-              class="text-lg mb-8"
-              :style="{ color: content.hero.subtitleColor }"
-            >
-              {{ content.hero.subtitle }}
-            </p>
-            <div v-else class="mb-8 space-y-2">
-              <textarea
-                v-model="editContent.hero.subtitle"
-                placeholder="Enter subtitle..."
-                class="w-full max-w-2xl mx-auto p-3 bg-gray-800 text-white rounded border-2 border-white"
-                rows="2"
-              ></textarea>
-              <div class="flex gap-2 justify-center items-center">
-                <label class="text-sm">Subtitle color:</label>
-                <input
-                  v-model="editContent.hero.subtitleColor"
-                  type="color"
-                  class="p-2 bg-gray-800 rounded border-2 border-white"
-                />
-              </div>
-            </div>
+              <div class="mb-6 flex flex-col items-center">
+                  <img 
+                    src="/img/Logo4.png" 
+                    alt="Burger Primo Logo" 
+                    class="w-64 h-64 md:w-96 md:h-96 object-contain"
+                    style="filter: drop-shadow(0 25px 25px rgba(0, 0, 0, 0.6));"
+                  />
+                </div>
 
-            <div v-if="!isEditing">
-              <Link
-                :href="content.hero.buttonLink"
-                class="inline-block px-8 py-3 rounded-lg font-semibold transition"
-                :style="{ backgroundColor: content.hero.buttonBgColor, color: '#FFFFFF' }"
+
+              <h1 
+                v-if="!isEditing"
+                class="text-xl md:text-2xl font-light mb-8 leading-tight max-w-2xl mx-auto"
+                :style="{ color: content.hero.titleColor }"
               >
-                {{ content.hero.buttonText }}
-              </Link>
-            </div>
-            <div v-else class="space-y-2">
-              <input
-                v-model="editContent.hero.buttonText"
-                type="text"
-                placeholder="Button text..."
-                class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white"
-              />
-              <input
-                v-model="editContent.hero.buttonLink"
-                type="text"
-                placeholder="Button link..."
-                class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white"
-              />
-              <div class="flex gap-2 justify-center">
-                <label class="text-sm">Button color:</label>
-                <input
-                  v-model="editContent.hero.buttonBgColor"
-                  type="color"
-                  class="p-1 bg-gray-800 rounded border-2 border-white"
-                />
+                {{ content.hero.title }}
+              </h1>
+              <div v-else class="mb-8 space-y-2">
+                <textarea
+                  v-model="editContent.hero.title"
+                  placeholder="Enter title..."
+                  class="w-full max-w-2xl mx-auto p-3 bg-gray-800 text-white rounded border-2 border-white"
+                  rows="2"
+                ></textarea>
+                <div class="flex gap-2 justify-center items-center">
+                  <label class="text-sm">Title color:</label>
+                  <input
+                    v-model="editContent.hero.titleColor"
+                    type="color"
+                    class="p-2 bg-gray-800 rounded border-2 border-white"
+                  />
+                </div>
               </div>
+              <div v-if="!isEditing">
+                <Link
+                  :href="content.hero.buttonLink"
+                  class="inline-block px-10 py-4 rounded-md font-semibold transition hover:opacity-90 text-white uppercase tracking-wide"
+                  :style="{ backgroundColor: content.hero.buttonBgColor }"
+                >
+                  {{ content.hero.buttonText }}
+                </Link>
+              </div>
+              <div v-else class="space-y-2">
+                <input
+                  v-model="editContent.hero.buttonText"
+                  type="text"
+                  placeholder="Button text..."
+                  class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white"
+                />
+                <input
+                  v-model="editContent.hero.buttonLink"
+                  type="text"
+                  placeholder="Button link..."
+                  class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white"
+                />
+                <div class="flex gap-2 justify-center">
+                  <label class="text-sm">Button color:</label>
+                  <input
+                    v-model="editContent.hero.buttonBgColor"
+                    type="color"
+                    class="p-1 bg-gray-800 rounded border-2 border-white"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="absolute bottom-18 left-1/2 -translate-x-1/2 flex flex-col items-center text-white animate-bounce cursor-pointer z-20">
+              <span class="text-sm tracking-widest uppercase mb-2">Keri alla</span>
+              
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                class="w-6 h-6"
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
             </div>
           </div>
         </template>
       </EditableSection>
     </section>
 
-    <!-- Popular Section -->
     <section class="max-w-7xl mx-auto px-6 py-20">
       <EditableSection section-id="popular" @save="savePopular" @cancel="cancelPopular">
         <template #default="{ isEditing }">
-          <!-- Debug indicator -->
           <div v-if="isEditing" class="fixed top-4 left-4 z-[999] bg-blue-500 text-white px-4 py-2 rounded font-bold">
             EDIT MODE ACTIVE - POPULAR
           </div>
           
-          <div class="text-center mb-12">
+          <div class="text-center mb-16">
             <h2 
               v-if="!isEditing"
-              class="text-sm uppercase mb-2"
+              class="text-sm uppercase mb-3 tracking-widest font-semibold"
               :style="{ color: content.popular.labelColor }"
             >
               {{ content.popular.label }}
             </h2>
-            <div v-else class="mb-2 space-y-2">
+            <div v-else class="mb-3 space-y-2">
               <input
                 v-model="editContent.popular.label"
                 type="text"
@@ -137,7 +139,7 @@
             
             <h3 
               v-if="!isEditing"
-              class="text-4xl font-bold mb-4"
+              class="text-4xl md:text-5xl font-bold mb-4"
               :style="{ color: content.popular.titleColor }"
             >
               {{ content.popular.title }}
@@ -161,7 +163,7 @@
 
             <p 
               v-if="!isEditing"
-              class="text-gray-400"
+              class="text-gray-300 text-lg"
             >
               {{ content.popular.subtitle }}
             </p>
@@ -172,17 +174,27 @@
               class="w-full max-w-md mx-auto p-3 bg-gray-800 text-white rounded border-2 border-white mb-4"
               rows="2"
             ></textarea>
+          </div>
 
+          <div class="grid md:grid-cols-3 gap-8 mb-12">
+            <div v-for="i in 3" :key="i" class="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition">
+              <div class="aspect-square bg-gray-200 flex items-center justify-center">
+                <span class="text-6xl font-bold text-gray-400">Pilt</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center">
             <div v-if="!isEditing">
               <Link
                 :href="content.popular.buttonLink"
-                class="inline-block mt-8 px-8 py-3 rounded-lg font-semibold transition"
-                :style="{ backgroundColor: content.popular.buttonBgColor, color: '#FFFFFF' }"
+                class="inline-block px-10 py-4 rounded-md font-semibold transition hover:opacity-90 text-white uppercase tracking-wide"
+                :style="{ backgroundColor: content.popular.buttonBgColor }"
               >
                 {{ content.popular.buttonText }}
               </Link>
             </div>
-            <div v-else class="space-y-2 mt-4">
+            <div v-else class="space-y-2">
               <input
                 v-model="editContent.popular.buttonText"
                 type="text"
@@ -209,12 +221,10 @@
       </EditableSection>
     </section>
 
-    <!-- Contact Section -->
     <section class="bg-[#121212] py-20">
       <div class="max-w-7xl mx-auto px-6">
         <EditableSection section-id="contact" @save="saveContact" @cancel="cancelContact">
           <template #default="{ isEditing }">
-            <!-- Debug indicator -->
             <div v-if="isEditing" class="fixed top-4 left-4 z-[999] bg-purple-500 text-white px-4 py-2 rounded font-bold">
               EDIT MODE ACTIVE - CONTACT
             </div>
@@ -222,12 +232,12 @@
             <div class="text-center mb-12">
               <h2 
                 v-if="!isEditing"
-                class="text-sm uppercase mb-2"
+                class="text-sm uppercase mb-3 tracking-widest font-semibold"
                 :style="{ color: content.contact.labelColor }"
               >
                 {{ content.contact.label }}
               </h2>
-              <div v-else class="mb-2 space-y-2">
+              <div v-else class="mb-3 space-y-2">
                 <input
                   v-model="editContent.contact.label"
                   type="text"
@@ -246,7 +256,7 @@
               
               <h3 
                 v-if="!isEditing"
-                class="text-4xl font-bold"
+                class="text-4xl md:text-5xl font-bold"
                 :style="{ color: content.contact.titleColor }"
               >
                 {{ content.contact.title }}
@@ -264,16 +274,16 @@
                     v-model="editContent.contact.titleColor"
                     type="color"
                     class="p-1 bg-gray-800 rounded border-2 border-white"
-                  />
+                />
                 </div>
               </div>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
               <div>
                 <h4 
                   v-if="!isEditing"
-                  class="text-xl font-bold mb-4"
+                  class="text-xl font-bold mb-6 text-white"
                 >
                   {{ content.contact.addressTitle }}
                 </h4>
@@ -282,10 +292,10 @@
                   v-model="editContent.contact.addressTitle"
                   type="text"
                   placeholder="Address title..."
-                  class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white mb-4"
+                  class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white mb-6"
                 />
                 
-                <div v-if="!isEditing" class="text-gray-300 space-y-2">
+                <div v-if="!isEditing" class="text-gray-300 space-y-2 text-base">
                   <p v-for="(line, i) in content.contact.address" :key="i">{{ line }}</p>
                 </div>
                 <div v-else class="space-y-2">
@@ -294,15 +304,27 @@
                     :key="i"
                     v-model="editContent.contact.address[i]"
                     type="text"
-                    :placeholder="`Address line ${i + 1}`"
+                    :placeholder="`Address line ${(i as number) + 1}`"
                     class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white"
                   />
                 </div>
+
+                <div class="rounded-lg overflow-hidden h-64 mt-6 shadow-lg">
+                      <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d8397.343520194667!2d22.483251!3d58.252736999999996!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46f26ce2774f2b63%3A0xea0f9eafb8fa644c!2sPrimo%20Burger!5e0!3m2!1sen!2see!4v1770927348729!5m2!1sen!2see" 
+                        width="100%" 
+                        height="100%" 
+                        style="border:0;" 
+                        allowfullscreen=true 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                      </iframe>
+                    </div>
               </div>
+
               <div>
                 <h4 
                   v-if="!isEditing"
-                  class="text-xl font-bold mb-4"
+                  class="text-xl font-bold mb-6 text-white"
                 >
                   {{ content.contact.hoursTitle }}
                 </h4>
@@ -311,11 +333,14 @@
                   v-model="editContent.contact.hoursTitle"
                   type="text"
                   placeholder="Hours title..."
-                  class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white mb-4"
+                  class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white mb-6"
                 />
                 
-                <div v-if="!isEditing" class="text-gray-300 space-y-2">
-                  <p v-for="(line, i) in content.contact.hours" :key="i">{{ line }}</p>
+                <div v-if="!isEditing" class="space-y-4 text-base">
+                  <div v-for="(line, i) in content.contact.hours" :key="i" class="flex justify-between items-center">
+                    <span class="text-gray-300">{{ line.split(':')[0] }}</span>
+                    <span class="text-white font-medium">{{ line.split(':').slice(1).join(':').trim() }}</span>
+                  </div>
                 </div>
                 <div v-else class="space-y-2">
                   <input
@@ -323,9 +348,18 @@
                     :key="i"
                     v-model="editContent.contact.hours[i]"
                     type="text"
-                    :placeholder="`Hours line ${i + 1}`"
+                    :placeholder="`Hours line ${(i as number) + 1}`"
                     class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white"
                   />
+                </div>
+
+                <div v-if="!isEditing" class="mt-8 p-4 bg-[#1a1a1a] rounded-lg">
+                  <p class="text-sm text-gray-300 mb-2">Toidu kohaletoimetamine</p>
+                  <p class="text-sm text-gray-400">Toitu toimetab kohale Bolt Food ja Wolt, restorani lahtiolekuaegadel</p>
+                  <div class="mt-3 flex gap-3">
+                    <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger?srsltid=AfmBOoou9cug0gwJK-jJ-cEYiEtXBpvTEVDKnMaQkcQmfLMcCPv-CaLl" class="px-3 py-1 bg-[#12dcff] text-white rounded-full text-sm hover:scale-105 transition-transform">Wolt</a>
+                    <a href="https://food.bolt.eu/en-US/164/p/90859-primo-burger" class="px-3 py-1 bg-[#21c93d] text-white rounded-full text-sm hover:scale-105 transition-transform">Bolt Food</a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -334,11 +368,9 @@
       </div>
     </section>
 
-    <!-- Reviews Section -->
     <section class="max-w-7xl mx-auto px-6 py-20">
       <EditableSection section-id="reviews" @save="saveReviews" @cancel="cancelReviews">
         <template #default="{ isEditing }">
-          <!-- Debug indicator -->
           <div v-if="isEditing" class="fixed top-4 left-4 z-[999] bg-yellow-500 text-black px-4 py-2 rounded font-bold">
             EDIT MODE ACTIVE - REVIEWS
           </div>
@@ -346,12 +378,12 @@
           <div class="text-center mb-12">
             <h2 
               v-if="!isEditing"
-              class="text-sm uppercase mb-2"
+              class="text-sm uppercase mb-3 tracking-widest font-semibold"
               :style="{ color: content.reviews.labelColor }"
             >
               {{ content.reviews.label }}
             </h2>
-            <div v-else class="mb-2 space-y-2">
+            <div v-else class="mb-3 space-y-2">
               <input
                 v-model="editContent.reviews.label"
                 type="text"
@@ -370,12 +402,12 @@
             
             <h3 
               v-if="!isEditing"
-              class="text-4xl font-bold"
+              class="text-4xl md:text-5xl font-bold mb-4"
               :style="{ color: content.reviews.titleColor }"
             >
               {{ content.reviews.title }}
             </h3>
-            <div v-else class="space-y-2">
+            <div v-else class="space-y-2 mb-4">
               <input
                 v-model="editContent.reviews.title"
                 type="text"
@@ -391,37 +423,60 @@
                 />
               </div>
             </div>
+
+            <p v-if="!isEditing" class="text-gray-300 text-lg">
+              Mida meie kliendid Burger Primo kogemuse kohta ütlevad
+            </p>
           </div>
           
           <div class="grid md:grid-cols-3 gap-6">
-            <div v-for="i in 3" :key="i" class="bg-[#121212] p-6 rounded-lg">
+            <div v-for="(review, i) in reviews" :key="i" class="bg-[#1a1a1a] p-8 rounded-lg">
               <div class="flex gap-1 mb-4">
-                <span v-for="j in 5" :key="j" class="text-[#D2691E]">★</span>
+                <span v-for="j in 5" :key="j" class="text-yellow-500 text-xl">★</span>
               </div>
-              <p class="text-gray-300 mb-4">Parim burger mida olen söönud!</p>
-              <p class="text-sm text-gray-400">Klient</p>
+              <p class="text-gray-200 mb-6 text-base leading-relaxed">{{ review.text }}</p>
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
+                  <span class="text-white font-semibold">{{ review.initial }}</span>
+                </div>
+                <p class="text-sm text-gray-300 font-medium">{{ review.name }}</p>
+              </div>
             </div>
           </div>
         </template>
       </EditableSection>
     </section>
+
+    <footer class="bg-black py-12 border-t border-gray-800">
+      <div class="max-w-7xl mx-auto px-6 text-center">
+        <h3 class="text-2xl font-bold mb-2">Burger Primo</h3>
+        <p class="text-gray-400 mb-1">Kirglikult valmistatud, unkusega serveeritud</p>
+        <p class="text-gray-500 text-sm">© 2026 Burger Primo. Kõik õigused kaitstud.</p>
+      </div>
+    </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
 import EditableSection from '@/components/EditableSection.vue';
 
 const cartItems = ref([]);
 
+const reviews = [
+  { text: 'Parim', initial: 'R', name: 'Robby' },
+  { text: 'Mu lemmik burger ja pitsa ja asi ja...', initial: 'T', name: 'Taaniel' },
+  { text: 'Robby on läks', initial: 'K', name: 'Keanu' }
+];
+
 const content = ref({
   hero: {
-    title: 'Meile oluliselt premeeritud burgerid meie aastakümnete kogemuse tulemus',
+    title: 'Kirega valmistatud preemium burgerid, mida serveeritakse unkusega',
     titleColor: '#FFFFFF',
-    subtitle: 'Kõrgeim nivoo kvaliteet ja armastus',
-    subtitleColor: '#D2691E',
+    subtitle: 'Kurssaare südames',
+    subtitleColor: '#FFFFFF',
     buttonText: 'Avasta menüüd',
     buttonLink: '/menu',
     buttonBgColor: '#D2691E',
@@ -430,27 +485,27 @@ const content = ref({
     label: 'MEIE VALIK',
     labelColor: '#D2691E',
     title: 'Populaarsed',
-    titleColor: '#FFFFFF',
-    subtitle: 'Proovi meie menüü ja valitud tellitud roogud',
-    buttonText: 'Avasta kogu menüüd',
+    titleColor: '#F5DEB3',
+    subtitle: 'Primos enim tuntud ja rohkelt tellitud toidud',
+    buttonText: 'Avasta Kogu Menüüd',
     buttonLink: '/menu',
     buttonBgColor: '#D2691E',
   },
   contact: {
-    label: 'LOC MEID',
+    label: 'LEIA MEID',
     labelColor: '#D2691E',
     title: 'Külasta Meid',
-    titleColor: '#FFFFFF',
+    titleColor: '#F5DEB3',
     addressTitle: 'Meie Asukoht',
-    address: ['Burger Primo', 'Rannamäe tee 5', '+372 543 9483', 'info@burgerprimo.ee'],
+    address: ['Kauba tn 5/2', 'Kuressaare, Saaremaa 93819', 'Eesti', '', 'Telefon: +372 5743 8483', 'Email: info@burgerprimo.ee'],
     hoursTitle: 'Lahtiolekuajad',
-    hours: ['Esmaspäev - Reede: 10:00 - 22:00', 'Laupäev - Pühapäev: 12:00 - 23:00'],
+    hours: ['Esmaspäev - Neljapäev: 11:00 - 22:00', 'Reede - Laupäev: 11:00 - 23:00', 'Pühapäev: 12:00 - 21:00'],
   },
   reviews: {
     label: 'ARVUSTUSED',
     labelColor: '#D2691E',
     title: 'Klientide Kogemus',
-    titleColor: '#FFFFFF',
+    titleColor: '#F5DEB3',
   },
 });
 
@@ -476,7 +531,6 @@ const saveReviews = () => {
   router.post('/admin/page-content', { page: 'welcome', section: 'reviews', content: content.value.reviews });
 };
 
-// Cancel handlers to reset editContent
 const cancelHero = () => {
   Object.assign(editContent.hero, content.value.hero);
 };
