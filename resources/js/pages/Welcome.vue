@@ -34,10 +34,10 @@ const content = ref({
     buttonBgColor: '#D2691E',
   },
   contact: {
-    label: 'LEIA MEID',
-    labelColor: '#D2691E',
-    title: 'Külasta Meid',
-    titleColor: '#F5DEB3',
+    label: 'Külasta Burger Primot Kuressaare südames',
+    labelColor: '#F5DEB3',
+    title: 'Külastage Meid',
+    titleColor: '#D2691E',
     addressTitle: 'Meie Asukoht',
     address: ['Kauba tn 5/2', 'Kuressaare, Saaremaa 93819', 'Eesti', '', 'Telefon: +372 5743 8483', 'Email: info@burgerprimo.ee'],
     hoursTitle: 'Lahtiolekuajad',
@@ -49,6 +49,27 @@ const content = ref({
     title: 'Klientide Kogemus',
     titleColor: '#F5DEB3',
   },
+  entertain: {
+    label: 'Nautige sõpradega piljardimängu, nautides samal ajal meie maitsvaid toite ja jooke.',
+    labelColor: '#fffff',
+    title: 'Mängi piljardit',
+    sectionTitle: 'Piljardilaud',
+    titleColor: '#D2691E',
+    sectionTitleColor: '#F5DEB3',
+    description: 'Nautige piljardilauda koos vastupidava villase segukanga ja pallikomplektiga. Ideaalne algajatele ja ka edasijõudnutele mänginiseks, nautides samal ajal oma lemmik Primo burgereid ja jooke.',
+    pricingTitle: 'Hinnakiri',
+    pricingTitleColor: '#F5DEB3',
+    pricingItems: [
+      { label: '8-palli mäng', price: '2€ mäng' },
+    ],
+    galleryTitle: 'Galerii',
+    galleryTitleColor: '#F5DEB3',
+    galleryImages: [
+      '/img/pool1.jpg',
+      '/img/pool2.jpg',
+      '/img/pool3.jpg',
+    ]
+  }
 });
 
 const editContent = reactive(JSON.parse(JSON.stringify(content.value)));
@@ -73,6 +94,11 @@ const saveReviews = () => {
   router.post('/admin/page-content', { page: 'welcome', section: 'reviews', content: content.value.reviews });
 };
 
+const saveEntertain = () => {
+  content.value.contact = { ...editContent.entertain };
+  router.post('/admin/page-content', { page: 'welcome', section: 'entertainment', content: content.value.entertain });
+};
+
 const cancelHero = () => {
   Object.assign(editContent.hero, content.value.hero);
 };
@@ -87,6 +113,10 @@ const cancelContact = () => {
 
 const cancelReviews = () => {
   Object.assign(editContent.reviews, content.value.reviews);
+};
+
+const cancelEntertain = () => {
+  Object.assign(editContent.entertain, content.value.entertain);
 };
 </script>
 
@@ -179,7 +209,7 @@ const cancelReviews = () => {
                 </div>
               </div>
             </div>
-            <div class="absolute bottom-18 left-1/2 -translate-x-1/2 flex flex-col items-center text-white animate-bounce cursor-pointer z-20">
+            <div class="absolute bottom-18 left-1/2 -translate-x-1/2 flex flex-col items-center text-white animate-bounce z-20">
               <span class="text-sm tracking-widest uppercase mb-2">Keri alla</span>
               
               <svg 
@@ -323,31 +353,7 @@ const cancelReviews = () => {
             </div>
             
             <div class="text-center mb-12">
-              <h2 
-                v-if="!isEditing"
-                class="text-sm uppercase mb-3 tracking-widest font-semibold"
-                :style="{ color: content.contact.labelColor }"
-              >
-                {{ content.contact.label }}
-              </h2>
-              <div v-else class="mb-3 space-y-2">
-                <input
-                  v-model="editContent.contact.label"
-                  type="text"
-                  placeholder="Label..."
-                  class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white"
-                />
-                <div class="flex gap-2 justify-center items-center">
-                  <label class="text-sm">Label color:</label>
-                  <input
-                    v-model="editContent.contact.labelColor"
-                    type="color"
-                    class="p-1 bg-gray-800 rounded border-2 border-white"
-                  />
-                </div>
-              </div>
-              
-              <h3 
+             <h3 
                 v-if="!isEditing"
                 class="text-4xl md:text-5xl font-bold"
                 :style="{ color: content.contact.titleColor }"
@@ -369,7 +375,32 @@ const cancelReviews = () => {
                     class="p-1 bg-gray-800 rounded border-2 border-white"
                 />
                 </div>
+              </div> 
+              <h2 
+                v-if="!isEditing"
+                class="text-sm uppercase mt-4 tracking-widest font-semibold"
+                :style="{ color: content.contact.labelColor }"
+              >
+                {{ content.contact.label }}
+              </h2>
+              <div v-else class="mb-3 space-y-2">
+                <input
+                  v-model="editContent.contact.label"
+                  type="text"
+                  placeholder="Label..."
+                  class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white"
+                />
+                <div class="flex gap-2 justify-center items-center">
+                  <label class="text-sm">Label color:</label>
+                  <input
+                    v-model="editContent.contact.labelColor"
+                    type="color"
+                    class="p-1 bg-gray-800 rounded border-2 border-white"
+                  />
+                </div>
               </div>
+              
+              
             </div>
 
             <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
@@ -388,7 +419,7 @@ const cancelReviews = () => {
                   class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white mb-6"
                 />
                 
-                <div v-if="!isEditing" class="text-gray-300 space-y-2 text-base">
+                <div v-if="!isEditing" class="text-gray-300  text-base">
                   <p v-for="(line, i) in content.contact.address" :key="i">{{ line }}</p>
                 </div>
                 <div v-else class="space-y-2">
@@ -460,6 +491,218 @@ const cancelReviews = () => {
         </EditableSection>
       </div>
     </section>
+
+    <section class="bg-[#121212] py-20">
+  <div class="max-w-7xl mx-auto px-6">
+    <EditableSection section-id="entertainment" @save="saveEntertain" @cancel="cancelEntertain">
+      <template #default="{ isEditing }">
+        <div v-if="isEditing" class="fixed top-4 left-4 z-[999] bg-purple-500 text-white px-4 py-2 rounded font-bold">
+          EDIT MODE ACTIVE - ENTERTAINMENT
+        </div>
+
+            <div class="text-center mb-12">
+              <h3 
+                v-if="!isEditing"
+                class="text-4xl md:text-5xl font-bold"
+                :style="{ color: content.entertain.titleColor }"
+              >
+                {{ content.entertain.title }}
+              </h3>
+              <div v-else class="space-y-2">
+                <input
+                  v-model="editContent.entertain.title"
+                  type="text"
+                  placeholder="Title..."
+                  class="w-full max-w-md mx-auto p-3 bg-gray-800 text-white rounded border-2 border-white"
+                />
+                <div class="flex gap-2 justify-center items-center">
+                  <label class="text-sm">Title color:</label>
+                  <input
+                    v-model="editContent.entertain.titleColor"
+                    type="color"
+                    class="p-1 bg-gray-800 rounded border-2 border-white"
+                />
+                </div>
+              </div>
+              <h2 
+                v-if="!isEditing"
+                class="text-sm uppercase mt-4 tracking-widest font-semibold"
+                :style="{ color: content.entertain.labelColor }"
+              >
+                {{ content.entertain.label }}
+              </h2>
+              <div v-else class="mb-3 space-y-2">
+                <input
+                  v-model="editContent.entertain.label"
+                  type="text"
+                  placeholder="Label..."
+                  class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white"
+                />
+                <div class="flex gap-2 justify-center items-center">
+                  <label class="text-sm">Label color:</label>
+                  <input
+                    v-model="editContent.entertain.labelColor"
+                    type="color"
+                    class="p-1 bg-gray-800 rounded border-2 border-white"
+                  />
+                </div>
+              </div>
+              
+              
+            </div>
+
+        
+        <div class="grid md:grid-cols-2 gap-8 items-start">
+          <div class="rounded-lg overflow-hidden">
+            <img 
+              src="/img/pool2.jpg" 
+              alt="Billiard table" 
+              class="w-full h-auto object-cover"
+            />
+          </div>
+
+          <div>
+            <h2 
+              v-if="!isEditing"
+              class="text-3xl md:text-4xl font-bold mb-6"
+              :style="{ color: content.entertain.sectionTitleColor }"
+            >
+              {{ content.entertain.sectionTitle }}
+            </h2>
+            <div v-else class="space-y-2 mb-6">
+              <input
+                v-model="editContent.entertain.title"
+                type="text"
+                placeholder="Title..."
+                class="w-full p-3 bg-gray-800 text-white rounded border-2 border-white"
+              />
+              <div class="flex gap-2 items-center">
+                <label class="text-sm">Title color:</label>
+                <input
+                  v-model="editContent.entertain.sectionTitleColor"
+                  type="color"
+                  class="p-1 bg-gray-800 rounded border-2 border-white"
+                />
+              </div>
+            </div>
+            <p 
+              v-if="!isEditing"
+              class="text-gray-300 text-base leading-relaxed mb-8"
+            >
+              {{ content.entertain.description }}
+            </p>
+            <textarea
+              v-else
+              v-model="editContent.entertain.description"
+              placeholder="Description..."
+              rows="4"
+              class="w-full p-3 bg-gray-800 text-white rounded border-2 border-white mb-8"
+            ></textarea>
+
+            <div class="bg-[#1a1a1a] rounded-lg p-6 border border-gray-800">
+              <h3 
+                v-if="!isEditing"
+                class="text-xl font-bold mb-4"
+                :style="{ color: content.entertain.pricingTitleColor }"
+              >
+                {{ content.entertain.pricingTitle }}
+              </h3>
+              <div v-else class="space-y-2 mb-4">
+                <input
+                  v-model="editContent.entertain.pricingTitle"
+                  type="text"
+                  placeholder="Pricing title..."
+                  class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white"
+                />
+                <div class="flex gap-2 items-center">
+                  <label class="text-sm">Pricing title color:</label>
+                  <input
+                    v-model="editContent.entertain.pricingTitleColor"
+                    type="color"
+                    class="p-1 bg-gray-800 rounded border-2 border-white"
+                  />
+                </div>
+              </div>
+
+              <div v-if="!isEditing" class="space-y-3">
+                <div 
+                  v-for="(item, i) in content.entertain.pricingItems" 
+                  :key="i"
+                  class="flex justify-between items-center"
+                >
+                  <span class="text-gray-300">{{ item.label }}</span>
+                  <span class="text-white font-semibold text-lg">{{ item.price }}</span>
+                </div>
+              </div>
+              <div v-else class="space-y-2">
+                <div 
+                  v-for="(item, i) in editContent.entertain.pricingItems" 
+                  :key="i"
+                  class="flex gap-2"
+                >
+                  <input
+                    v-model="editContent.entertain.pricingItems[i].label"
+                    type="text"
+                    placeholder="Label..."
+                    class="flex-1 p-2 bg-gray-800 text-white rounded border-2 border-white"
+                  />
+                  <input
+                    v-model="editContent.entertain.pricingItems[i].price"
+                    type="text"
+                    placeholder="Price..."
+                    class="w-32 p-2 bg-gray-800 text-white rounded border-2 border-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-16">
+          <h3 
+            v-if="!isEditing"
+            class="text-3xl md:text-4xl font-bold mb-8"
+            :style="{ color: content.entertain.galleryTitleColor }"
+          >
+            {{ content.entertain.galleryTitle }}
+          </h3>
+          <div v-else class="space-y-2 mb-8">
+            <input
+              v-model="editContent.entertain.galleryTitle"
+              type="text"
+              placeholder="Gallery title..."
+              class="w-full max-w-md p-3 bg-gray-800 text-white rounded border-2 border-white"
+            />
+            <div class="flex gap-2 items-center">
+              <label class="text-sm">Gallery title color:</label>
+              <input
+                v-model="editContent.entertain.galleryTitleColor"
+                type="color"
+                class="p-1 bg-gray-800 rounded border-2 border-white"
+              />
+            </div>
+          </div>
+
+          <div class="grid md:grid-cols-3 gap-6">
+            <div 
+              v-for="(image, i) in content.entertain.galleryImages" 
+              :key="i"
+              class="rounded-lg overflow-hidden aspect-[4/3]"
+            >
+              <img 
+                :src="image" 
+                :alt="`Gallery image ${i + 1}`"
+                class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          </div>
+        </div>
+      </template>
+    </EditableSection>
+  </div>
+</section>
+
+    
 
     <section class="max-w-7xl mx-auto px-6 py-20">
       <EditableSection section-id="reviews" @save="saveReviews" @cancel="cancelReviews">
@@ -549,4 +792,3 @@ const cancelReviews = () => {
     </footer>
   </div>
 </template>
-
