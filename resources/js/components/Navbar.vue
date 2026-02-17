@@ -108,7 +108,7 @@
                   class="absolute right-0 mt-2 w-56 bg-[#121212] border border-[#0B0B0B] rounded-xl shadow-2xl py-2 overflow-hidden"
                 >
                   <Link 
-                    href="/profile" 
+                    href="/settings/profile" 
                     class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-300 hover:bg-[#0B0B0B] hover:text-white transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -255,7 +255,7 @@
               </Link>
               
               <Link 
-                href="/profile" 
+                href="/settings/profile" 
                 @click="mobileMenuOpen = false"
                 class="block px-4 py-3 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-[#121212] transition-all duration-200"
               >
