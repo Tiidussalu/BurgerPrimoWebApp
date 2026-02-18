@@ -21,8 +21,14 @@ use Laravel\Fortify\Features;
 
 // Home / Welcome Route (from both files merged)
 Route::get('/', function () {
+    $featuredItems = \App\Models\MenuItem::with('category')
+        ->where('is_featured', true)
+        ->where('is_active', true)
+        ->get();
+    
     return Inertia::render('Welcome', [
         'canRegister' => Features::enabled(Features::registration()),
+        'featuredItems' => $featuredItems,
     ]);
 })->name('home');
 

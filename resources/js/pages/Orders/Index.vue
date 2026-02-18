@@ -168,13 +168,16 @@
         </Link>
       </div>
     </main>
+    
   </div>
+  <Footer />
 </template>
 
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Navbar from '@/components/Navbar.vue';
+import Footer from '@/components/Footer.vue';
 
 interface OrderItem {
   id: number;
