@@ -97,8 +97,16 @@ const cancel = () => {
                 </div>
               </div>
 
-              <button v-if="content.galleryImages.length > 1" @click="prevSlide" class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition hover:cursor-pointer z-10">‹</button>
-              <button v-if="content.galleryImages.length > 1" @click="nextSlide" class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition hover:cursor-pointer z-10">›</button>
+              <button v-if="content.galleryImages.length > 1" @click="prevSlide" class="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition hover:cursor-pointer z-10">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+              </button>
+              <button v-if="content.galleryImages.length > 1" @click="nextSlide" class="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition hover:cursor-pointer z-10">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+              </button>
 
               <div v-if="content.galleryImages.length > 1" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                 <button

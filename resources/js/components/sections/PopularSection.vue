@@ -92,8 +92,16 @@ const cancel = () => {
               </div>
             </div>
           </div>
-          <button v-if="popularCount > 1" @click="prevPopularSlide" class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition z-10">‹</button>
-          <button v-if="popularCount > 1" @click="nextPopularSlide" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition z-10">›</button>
+          <button v-if="popularCount > 1" @click="prevPopularSlide" class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button v-if="popularCount > 1" @click="nextPopularSlide" class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 bg-black/60 text-white w-9 h-9 rounded-full flex items-center justify-center text-2xl hover:bg-black/80 transition z-10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
           <div class="flex justify-center gap-2 mt-4">
             <button v-for="i in popularCount" :key="i" @click="popularSlide = i - 1" class="w-3 h-3 rounded-full transition-colors" :class="popularSlide === i - 1 ? 'bg-white' : 'bg-white/40'" />
           </div>
