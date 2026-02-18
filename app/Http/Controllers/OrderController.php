@@ -26,6 +26,18 @@ class OrderController extends Controller
         ]);
     }
 
+    public function bulkDelete(Request $request)
+{
+    $orderIds = $request->input('order_ids', []);
+
+    Order::where('user_id', auth()->id())
+        ->whereIn('id', $orderIds)
+        ->where('status', 'completed')
+        ->delete();
+
+    return redirect()->back();
+}
+
     public function store(Request $request)
     {
         $validated = $request->validate([

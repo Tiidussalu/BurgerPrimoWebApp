@@ -1,98 +1,118 @@
 <template>
-  <div class="min-h-screen bg-black text-white">
-    <!-- Header -->
-    <header class="border-b border-gray-800 px-6 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-orange-500">Burger Primo</h1>
-        <nav class="flex gap-6">
-          <Link href="/" class="text-gray-400 hover:text-white">Eriüd</Link>
-          <Link href="/menu" class="text-gray-400 hover:text-white">Menüükaart</Link>
-          <Link href="/burger-builder" class="text-gray-400 hover:text-white">Ehita</Link>
-          <Link href="/orders" class="text-white">Tellimus</Link>
-          <Link href="/cart" class="text-gray-400 hover:text-white">Korv</Link>
-        </nav>
-        <Link href="/profile" class="text-gray-400 hover:text-white">Logi sisse</Link>
-      </div>
-    </header>
+  <div class="min-h-screen bg-[#0B0B0B] text-white">
+    <Navbar />
 
-    <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-6 py-12">
-      <!-- Success Message -->
-      <div class="mb-8 bg-green-900/30 border border-green-700 rounded-lg p-6 text-center">
-        <div class="text-5xl mb-4">✅</div>
-        <h2 class="text-3xl font-bold mb-2">Tellimus esitatud!</h2>
-        <p class="text-gray-300">Tellimus number: <span class="font-mono text-orange-500">{{ order.order_number }}</span></p>
+    <main class="max-w-3xl mx-auto px-6 py-12">
+      <!-- Success Banner -->
+      <div class="mb-8 bg-green-900/20 border border-green-800/50 rounded-2xl p-8 text-center">
+        <div class="text-6xl mb-4">✅</div>
+        <h1 class="text-3xl font-bold mb-2">Tellimus esitatud!</h1>
+        <p class="text-gray-400">Tellimuse number:
+          <span class="font-mono font-bold text-[#D2691E]">{{ order.order_number }}</span>
+        </p>
       </div>
 
-      <!-- Order Details -->
-      <div class="bg-gray-900 rounded-lg p-8 border border-gray-800">
-        <h3 class="text-2xl font-bold mb-6">Tellimuse üksikasjad</h3>
+      <!-- Order Card -->
+      <div class="bg-[#121212] rounded-2xl overflow-hidden border border-[#1a1a1a]">
 
-        <!-- Status -->
-        <div class="mb-6 pb-6 border-b border-gray-800">
-          <div class="flex items-center justify-between">
-            <span class="text-gray-400">Olek:</span>
-            <span :class="getStatusClass(order.status)">
-              {{ getStatusLabel(order.status) }}
-            </span>
+        <!-- Status Bar -->
+        <div class="bg-[#0d0d0d] px-6 py-4 flex items-center justify-between border-b border-[#1a1a1a]">
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Olek</p>
+            <span :class="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
           </div>
-          <div class="mt-2 flex items-center justify-between">
-            <span class="text-gray-400">Esitatud:</span>
-            <span>{{ formatDate(order.created_at) }}</span>
+          <div class="text-right">
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Esitatud</p>
+            <p class="text-sm text-gray-300 font-medium">{{ formatDate(order.created_at) }}</p>
           </div>
         </div>
 
-        <!-- Items -->
-        <div class="mb-6">
-          <h4 class="font-bold mb-4">Burgerid:</h4>
-          <div class="space-y-4">
+        <div class="p-6 space-y-6">
+          <!-- Status progress indicator -->
+          <div class="flex items-center gap-2">
             <div
-              v-for="item in order.items"
-              :key="item.id"
-              class="bg-gray-800 rounded-lg p-4"
+              v-for="(step, i) in statusSteps"
+              :key="step.key"
+              class="flex items-center gap-2 flex-1"
             >
-              <div class="flex justify-between items-start mb-2">
-                <div>
-                  <p class="font-bold">{{ item.burger_name }}</p>
-                  <p class="text-sm text-gray-400">Kogus: {{ item.quantity }}x</p>
+              <div class="flex flex-col items-center flex-1">
+                <div
+                  class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                  :class="getStepClass(step.key)"
+                >
+                  <svg v-if="isStepDone(step.key)" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span v-else>{{ i + 1 }}</span>
                 </div>
-                <p class="font-bold text-orange-500">{{ Number(item.price * item.quantity).toFixed(2) }}€</p>
+                <p class="text-xs text-gray-500 mt-1 text-center">{{ step.label }}</p>
               </div>
-              <div class="text-sm text-gray-400 mt-2">
-                <p v-for="(ingredient, index) in item.ingredients" :key="index">
-                  {{ ingredient.quantity }}x {{ ingredient.name }}
-                </p>
+              <div
+                v-if="i < statusSteps.length - 1"
+                class="h-0.5 flex-1 mb-4 transition-all"
+                :class="isStepDone(step.key) ? 'bg-[#D2691E]' : 'bg-[#1a1a1a]'"
+              ></div>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-3">Tooted</p>
+            <div class="space-y-3">
+              <div
+                v-for="item in order.items"
+                :key="item.id"
+                class="bg-[#0d0d0d] rounded-xl px-4 py-3"
+              >
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="font-semibold">{{ item.burger_name }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ item.quantity }}x kogus</p>
+                    <div v-if="item.ingredients?.length" class="mt-2 space-y-0.5">
+                      <p v-for="(ingredient, index) in item.ingredients" :key="index" class="text-xs text-gray-500">
+                        {{ ingredient.quantity }}x {{ ingredient.name }}
+                      </p>
+                    </div>
+                  </div>
+                  <p class="font-bold text-[#D2691E]">{{ Number(item.price * item.quantity).toFixed(2) }}€</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Customer Notes -->
-        <div v-if="order.customer_notes" class="mb-6 pb-6 border-b border-gray-800">
-          <h4 class="font-bold mb-2">Sinu märkused:</h4>
-          <p class="text-gray-400">{{ order.customer_notes }}</p>
-        </div>
+          <!-- Customer Notes -->
+          <div v-if="order.customer_notes" class="bg-[#0d0d0d] rounded-xl px-4 py-3">
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Sinu märkused</p>
+            <p class="text-sm text-gray-300">{{ order.customer_notes }}</p>
+          </div>
 
-        <!-- Total -->
-        <div class="flex justify-between items-center text-2xl font-bold">
-          <span>Kokku:</span>
-          <span class="text-orange-500">{{ Number(order.total_amount).toFixed(2) }}€</span>
+          <!-- Total -->
+          <div class="flex items-center justify-between pt-4 border-t border-[#1a1a1a]">
+            <span class="text-gray-400 font-medium">Kokku</span>
+            <span class="text-3xl font-bold text-[#D2691E]">{{ Number(order.total_amount).toFixed(2) }}€</span>
+          </div>
         </div>
       </div>
 
+      <!-- Auto refresh notice -->
+      <p class="text-center text-xs text-gray-600 mt-4">
+        Staatus uuendatakse automaatselt iga 15 sekundi järel
+      </p>
+
       <!-- Actions -->
-      <div class="mt-8 flex gap-4">
+      <div class="mt-6 flex gap-4">
         <Link
-          href="/burger-builder"
-          class="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded font-semibold transition text-center"
+          href="/menu"
+          class="flex-1 text-white px-6 py-3.5 rounded-xl font-semibold transition hover:opacity-90 text-center"
+          style="background-color: #D2691E"
         >
-          Telli veel burgereid
+          Telli veel
         </Link>
         <Link
           href="/orders"
-          class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-6 py-3 rounded font-semibold transition text-center"
+          class="flex-1 bg-[#121212] hover:bg-[#1a1a1a] text-white px-6 py-3.5 rounded-xl font-semibold transition text-center border border-[#1a1a1a]"
         >
-          Vaata kõiki tellimusi
+          Kõik tellimused
         </Link>
       </div>
     </main>
@@ -100,7 +120,9 @@
 </template>
 
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted } from 'vue';
+import Navbar from '@/components/Navbar.vue';
 
 interface Ingredient {
   name: string;
@@ -129,39 +151,80 @@ interface Props {
   order: Order;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+// Status progress steps
+const statusSteps = [
+  { key: 'pending',   label: 'Ootel' },
+  { key: 'confirmed', label: 'Kinnitatud' },
+  { key: 'preparing', label: 'Valmistamisel' },
+  { key: 'ready',     label: 'Valmis' },
+  { key: 'completed', label: 'Täidetud' },
+];
+
+const statusOrder = statusSteps.map(s => s.key);
+
+const isStepDone = (stepKey: string): boolean => {
+  const currentIndex = statusOrder.indexOf(props.order.status);
+  const stepIndex = statusOrder.indexOf(stepKey);
+  return stepIndex <= currentIndex;
+};
+
+const getStepClass = (stepKey: string): string => {
+  if (props.order.status === stepKey) return 'bg-[#D2691E] text-white';
+  if (isStepDone(stepKey)) return 'bg-[#D2691E]/30 text-[#D2691E]';
+  return 'bg-[#1a1a1a] text-gray-600';
+};
+
+// Auto-refresh while order is active
+const isActive = computed(() =>
+  ['pending', 'confirmed', 'preparing', 'ready'].includes(props.order.status)
+);
+
+let refreshInterval: ReturnType<typeof setInterval> | null = null;
+
+onMounted(() => {
+  if (isActive.value) {
+    refreshInterval = setInterval(() => {
+      router.reload({ only: ['order'] });
+    }, 15000);
+  }
+});
+
+onUnmounted(() => {
+  if (refreshInterval) clearInterval(refreshInterval);
+});
 
 const getStatusClass = (status: string): string => {
   const classes: Record<string, string> = {
-    pending: 'px-3 py-1 rounded-full bg-yellow-900/30 text-yellow-400 text-sm font-semibold',
-    confirmed: 'px-3 py-1 rounded-full bg-blue-900/30 text-blue-400 text-sm font-semibold',
-    preparing: 'px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-sm font-semibold',
-    ready: 'px-3 py-1 rounded-full bg-orange-900/30 text-orange-400 text-sm font-semibold',
-    completed: 'px-3 py-1 rounded-full bg-green-900/30 text-green-400 text-sm font-semibold',
-    cancelled: 'px-3 py-1 rounded-full bg-red-900/30 text-red-400 text-sm font-semibold',
+    pending:   'px-3 py-1 rounded-full bg-yellow-900/30 text-yellow-400 text-xs font-semibold',
+    confirmed: 'px-3 py-1 rounded-full bg-blue-900/30 text-blue-400 text-xs font-semibold',
+    preparing: 'px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-xs font-semibold',
+    ready:     'px-3 py-1 rounded-full bg-[#D2691E]/20 text-[#D2691E] text-xs font-semibold',
+    completed: 'px-3 py-1 rounded-full bg-green-900/30 text-green-400 text-xs font-semibold',
+    cancelled: 'px-3 py-1 rounded-full bg-gray-800 text-gray-400 text-xs font-semibold',
+    rejected:  'px-3 py-1 rounded-full bg-red-900/30 text-red-400 text-xs font-semibold',
   };
   return classes[status] || classes.pending;
 };
 
 const getStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    pending: 'Ootel',
+    pending:   'Ootel',
     confirmed: 'Kinnitatud',
     preparing: 'Valmistamisel',
-    ready: 'Valmis',
+    ready:     'Valmis peale tulema',
     completed: 'Täidetud',
     cancelled: 'Tühistatud',
+    rejected:  'Tagasi lükatud',
   };
   return labels[status] || status;
 };
 
 const formatDate = (date: string): string => {
   return new Date(date).toLocaleString('et-EE', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
   });
 };
 </script>
