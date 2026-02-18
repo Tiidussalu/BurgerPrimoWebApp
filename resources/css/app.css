@@ -179,6 +179,8 @@ html {
     scrollbar-gutter: stable; /* Modern browsers - reserve space for scrollbar */
 }
 
+
+
 /* For browsers that support scrollbar-gutter */
 @supports (scrollbar-gutter: stable) {
     html {

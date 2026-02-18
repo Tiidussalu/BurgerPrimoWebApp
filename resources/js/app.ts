@@ -5,6 +5,20 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
+import Lenis from 'lenis'
+
+const lenis = new Lenis({
+  duration: 1.5,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smoothWheel: true,
+})
+
+function raf(time: number) {
+  lenis.raf(time)
+  requestAnimationFrame(raf)
+}
+
+requestAnimationFrame(raf)
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
