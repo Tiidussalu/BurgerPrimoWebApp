@@ -22,26 +22,23 @@
         </span>
       </div>
 
-      <!-- Favorite Button (Top Right) -->
+      <!-- Favorite Button -->
       <button
         @click.stop="toggleFavorite"
         class="absolute top-3 right-3 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-lg flex items-center justify-center transition-all duration-200 z-10"
       >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          :class="[
-            'h-6 w-6 transition-all',
-            item.is_favorited ? 'fill-red-500 text-red-500' : 'fill-none text-white'
-          ]"
-          viewBox="0 0 24 24" 
-          stroke="currentColor" 
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          :class="['h-6 w-6 transition-all', item.is_favorited ? 'fill-red-500 text-red-500' : 'fill-none text-white']"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
           stroke-width="2"
         >
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
       </button>
 
-      <!-- Plus Button (Bottom Right) -->
+      <!-- Plus Button -->
       <button
         @click="openAddonModal"
         class="absolute bottom-3 right-3 w-12 h-12 bg-[#D2691E] hover:bg-[#E07A2E] text-white rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-[#D2691E]/50 hover:scale-110"
@@ -54,15 +51,8 @@
 
     <!-- Content Section -->
     <div class="p-4">
-      <!-- Title -->
       <h3 class="text-lg font-bold text-white mb-2">{{ item.name }}</h3>
-
-      <!-- Description -->
-      <p class="text-sm text-gray-400 mb-4 line-clamp-2 min-h-[40px]">
-        {{ item.description }}
-      </p>
-
-      <!-- Price -->
+      <p class="text-sm text-gray-400 mb-4 line-clamp-2 min-h-[40px]">{{ item.description }}</p>
       <div class="flex items-center gap-2">
         <span class="text-2xl font-bold text-[#D2691E]">€{{ Number(item.price).toFixed(2) }}</span>
         <span v-if="item.original_price && item.original_price > item.price" class="text-sm text-gray-500 line-through">
@@ -96,10 +86,11 @@
           >
             <div
               v-if="showAddonModal"
-              class="bg-[#121212] rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#0B0B0B] shadow-2xl"
+              class="bg-[#121212] rounded-2xl max-w-2xl w-full flex flex-col border border-[#0B0B0B] shadow-2xl"
+              style="max-height: 90vh;"
             >
               <!-- Modal Header -->
-              <div class="sticky top-0 bg-[#0B0B0B] px-6 py-4 flex items-center justify-between border-b border-[#121212]">
+              <div class="flex-shrink-0 bg-[#0B0B0B] px-6 py-4 flex items-center justify-between border-b border-[#1a1a1a] rounded-t-2xl">
                 <div>
                   <h2 class="text-2xl font-bold text-white">{{ item.name }}</h2>
                   <p class="text-sm text-gray-400">Lisa lisandeid</p>
@@ -114,8 +105,8 @@
                 </button>
               </div>
 
-              <!-- Modal Content -->
-              <div class="p-6 space-y-6">
+              <!-- Modal Content (scrollable) -->
+              <div ref="scrollRef" class="modal-scroll p-6 space-y-6">
                 <!-- Size Selection -->
                 <div>
                   <h3 class="text-lg font-bold text-white mb-3">Suurus</h3>
@@ -233,7 +224,7 @@
               </div>
 
               <!-- Modal Footer -->
-              <div class="sticky bottom-0 bg-[#0B0B0B] px-6 py-4 border-t border-[#121212]">
+              <div class="flex-shrink-0 bg-[#0B0B0B] px-6 py-4 border-t border-[#1a1a1a] rounded-b-2xl">
                 <div class="flex items-center justify-between mb-4">
                   <span class="text-gray-400">Kokku:</span>
                   <span class="text-3xl font-bold text-[#D2691E]">€{{ totalPrice }}</span>
@@ -257,12 +248,6 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 
-const toggleFavorite = () => {
-  router.post(`/menu/${props.item.id}/favorite`, {}, {
-    preserveScroll: true,
-  });
-};
-
 interface MenuItemData {
   id: number;
   name: string;
@@ -283,9 +268,15 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const showAddonModal = ref(false);
+const toggleFavorite = () => {
+  router.post(`/menu/${props.item.id}/favorite`, {}, {
+    preserveScroll: true,
+  });
+};
 
-// Size options
+const showAddonModal = ref(false);
+const scrollRef = ref<HTMLElement | null>(null);
+
 const sizes = ref([
   { id: 'small', name: 'Väike', price: 0 },
   { id: 'medium', name: 'Keskmine', price: 1.50 },
@@ -293,7 +284,6 @@ const sizes = ref([
 ]);
 const selectedSize = ref('small');
 
-// Drinks
 const drinks = ref([
   { id: 1, name: 'Coca-Cola 0.5L', price: 2.50 },
   { id: 2, name: 'Coca-Cola Zero 0.5L', price: 2.50 },
@@ -303,7 +293,6 @@ const drinks = ref([
 ]);
 const selectedDrinks = ref<number[]>([]);
 
-// Sauces
 const sauces = ref([
   { id: 1, name: 'Ketchup', price: 0 },
   { id: 2, name: 'Majonees', price: 0 },
@@ -314,7 +303,6 @@ const sauces = ref([
 ]);
 const selectedSauces = ref<number[]>([]);
 
-// Fries
 const fries = ref([
   { id: 'none', name: 'Ei soovi', price: 0 },
   { id: 'small', name: 'Väike friikartul', price: 2.00 },
@@ -322,49 +310,54 @@ const fries = ref([
 ]);
 const selectedFries = ref('none');
 
-// Utensils
 const needsUtensils = ref(false);
-
-// Special instructions
 const specialInstructions = ref('');
 
-// Calculate total price
 const totalPrice = computed(() => {
   let total = Number(props.item.price) || 0;
 
-  // Add size price
   const size = sizes.value.find(s => s.id === selectedSize.value);
   if (size) total += Number(size.price) || 0;
 
-  // Add drinks
   selectedDrinks.value.forEach(drinkId => {
     const drink = drinks.value.find(d => d.id === drinkId);
     if (drink) total += Number(drink.price) || 0;
   });
 
-  // Add sauces
   selectedSauces.value.forEach(sauceId => {
     const sauce = sauces.value.find(s => s.id === sauceId);
     if (sauce) total += Number(sauce.price) || 0;
   });
 
-  // Add fries
   const friesOption = fries.value.find(f => f.id === selectedFries.value);
   if (friesOption) total += Number(friesOption.price) || 0;
 
   return total.toFixed(2);
 });
 
+// Manually handle wheel events to bypass Lenis completely
+const handleWheel = (e: WheelEvent) => {
+  e.stopPropagation();
+  e.preventDefault();
+  if (scrollRef.value) {
+    scrollRef.value.scrollTop += e.deltaY;
+  }
+};
+
 const openAddonModal = () => {
   showAddonModal.value = true;
-  // Prevent body scroll
-  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    if (scrollRef.value) {
+      scrollRef.value.addEventListener('wheel', handleWheel, { passive: false });
+    }
+  }, 50);
 };
 
 const closeAddonModal = () => {
+  if (scrollRef.value) {
+    scrollRef.value.removeEventListener('wheel', handleWheel);
+  }
   showAddonModal.value = false;
-  // Restore body scroll
-  document.body.style.overflow = 'auto';
 };
 
 const addToCart = () => {
@@ -382,15 +375,10 @@ const addToCart = () => {
     quantity: 1,
   };
 
-  console.log('Adding to cart:', cartItem);
-
-  // Send to menu item specific cart route
   router.post('/cart/add-menu-item', cartItem, {
     preserveScroll: true,
     onSuccess: () => {
-      console.log('✅ Successfully added to cart!');
       closeAddonModal();
-      // Reset selections
       selectedSize.value = 'small';
       selectedDrinks.value = [];
       selectedSauces.value = [];
@@ -399,18 +387,15 @@ const addToCart = () => {
       specialInstructions.value = '';
     },
     onError: (errors) => {
-      console.error('❌ Error adding to cart:', errors);
       alert('Viga: ' + (errors.message || 'Ei saanud toote korvi lisada'));
     },
-    onFinish: () => {
-      console.log('Request finished');
-    }
   });
 };
 
-// Cleanup on unmount
 onUnmounted(() => {
-  document.body.style.overflow = 'auto';
+  if (scrollRef.value) {
+    scrollRef.value.removeEventListener('wheel', handleWheel);
+  }
 });
 </script>
 
@@ -422,21 +407,23 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* Custom scrollbar for modal */
-.overflow-y-auto::-webkit-scrollbar {
+.modal-scroll {
+  overflow-y: scroll;
+  max-height: 60vh;
+  overscroll-behavior: contain;
+}
+
+.modal-scroll::-webkit-scrollbar {
   width: 8px;
 }
-
-.overflow-y-auto::-webkit-scrollbar-track {
+.modal-scroll::-webkit-scrollbar-track {
   background: #0B0B0B;
 }
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
+.modal-scroll::-webkit-scrollbar-thumb {
   background: #D2691E;
   border-radius: 4px;
 }
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+.modal-scroll::-webkit-scrollbar-thumb:hover {
   background: #E07A2E;
 }
 </style>

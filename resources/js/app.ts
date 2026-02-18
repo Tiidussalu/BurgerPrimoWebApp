@@ -11,7 +11,10 @@ const lenis = new Lenis({
   duration: 1.5,
   easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
   smoothWheel: true,
+  prevent: (node) => node.closest('[data-lenis-prevent]') !== null,
+
 })
+;(window as any).lenis = lenis
 
 function raf(time: number) {
   lenis.raf(time)
