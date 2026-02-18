@@ -1,113 +1,180 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
-import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { edit, update } from '@/routes/user-password';
-import { Form, Head } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
+import Navbar from '@/components/Navbar.vue';
 
-import HeadingSmall from '@/components/HeadingSmall.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { type BreadcrumbItem } from '@/types';
+const page = usePage();
+const user = computed(() => page.props.auth?.user as any);
 
-const breadcrumbItems: BreadcrumbItem[] = [
-    {
-        title: 'Password settings',
-        href: edit().url,
-    },
-];
+const form = useForm({
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+});
+
+const submit = () => {
+    form.put('/settings/password', {
+        preserveScroll: true,
+        onSuccess: () => form.reset(),
+        onError: () => {
+            if (form.errors.password) {
+                form.reset('password', 'password_confirmation');
+            }
+            if (form.errors.current_password) {
+                form.reset('current_password');
+            }
+        },
+    });
+};
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Password settings" />
+    <Head title="Parool" />
 
-        <SettingsLayout>
-            <div class="space-y-6">
-                <HeadingSmall
-                    title="Update password"
-                    description="Ensure your account is using a long, random password to stay secure"
-                />
+    <div class="min-h-screen bg-[#080808]">
+        <Navbar />
 
-                <Form
-                    v-bind="update.form()"
-                    :options="{
-                        preserveScroll: true,
-                    }"
-                    reset-on-success
-                    :reset-on-error="[
-                        'password',
-                        'password_confirmation',
-                        'current_password',
-                    ]"
-                    class="space-y-6"
-                    v-slot="{ errors, processing, recentlySuccessful }"
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+            <!-- Page Header -->
+            <div class="mb-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-[#D2691E] to-[#B8571A] rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-xl shadow-[#D2691E]/30">
+                        {{ user?.name?.charAt(0)?.toUpperCase() ?? '?' }}
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">{{ user?.name }}</h1>
+                        <p class="text-gray-500 text-sm">{{ user?.email }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-1 mb-8 bg-[#0E0E0E] border border-[#1A1A1A] rounded-xl p-1">
+                <Link
+                    href="/settings/profile"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-gray-500 hover:text-gray-300 hover:bg-[#141414]"
                 >
-                    <div class="grid gap-2">
-                        <Label for="current_password">Current password</Label>
-                        <Input
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span class="hidden sm:inline">Profiil</span>
+                </Link>
+                <Link
+                    href="/settings/password"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 bg-gradient-to-r from-[#D2691E] to-[#B8571A] text-white shadow-lg shadow-[#D2691E]/20"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <span class="hidden sm:inline">Parool</span>
+                </Link>
+                <Link
+                    href="/settings/profile#danger"
+                    class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-gray-500 hover:text-gray-300 hover:bg-[#141414]"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span class="hidden sm:inline">Konto kustutamine</span>
+                </Link>
+            </div>
+
+            <!-- Password Card -->
+            <div class="bg-[#0E0E0E] border border-[#1A1A1A] rounded-2xl overflow-hidden">
+                <div class="px-6 py-5 border-b border-[#1A1A1A] flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-[#D2691E]/10 border border-[#D2691E]/20 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#D2691E]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-semibold text-sm">Parool</h2>
+                        <p class="text-gray-500 text-xs">Kasuta tugevat ja unikaalset parooli</p>
+                    </div>
+                </div>
+
+                <form @submit.prevent="submit" class="p-6 space-y-5">
+                    <div>
+                        <label for="current_password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Praegune parool
+                        </label>
+                        <input
                             id="current_password"
-                            name="current_password"
+                            v-model="form.current_password"
                             type="password"
-                            class="mt-1 block w-full"
                             autocomplete="current-password"
-                            placeholder="Current password"
+                            placeholder="••••••••"
+                            class="w-full px-4 py-3 bg-[#141414] border border-[#1E1E1E] rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:border-[#D2691E]/60 focus:bg-[#161616] focus:ring-1 focus:ring-[#D2691E]/30 transition-all duration-200"
+                            :class="{ 'border-red-500/60': form.errors.current_password }"
                         />
-                        <InputError :message="errors.current_password" />
+                        <p v-if="form.errors.current_password" class="mt-1.5 text-xs text-red-400">
+                            {{ form.errors.current_password }}
+                        </p>
                     </div>
 
-                    <div class="grid gap-2">
-                        <Label for="password">New password</Label>
-                        <Input
+                    <div>
+                        <label for="password" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Uus parool
+                        </label>
+                        <input
                             id="password"
-                            name="password"
+                            v-model="form.password"
                             type="password"
-                            class="mt-1 block w-full"
                             autocomplete="new-password"
-                            placeholder="New password"
+                            placeholder="••••••••"
+                            class="w-full px-4 py-3 bg-[#141414] border border-[#1E1E1E] rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:border-[#D2691E]/60 focus:bg-[#161616] focus:ring-1 focus:ring-[#D2691E]/30 transition-all duration-200"
+                            :class="{ 'border-red-500/60': form.errors.password }"
                         />
-                        <InputError :message="errors.password" />
+                        <p v-if="form.errors.password" class="mt-1.5 text-xs text-red-400">
+                            {{ form.errors.password }}
+                        </p>
                     </div>
 
-                    <div class="grid gap-2">
-                        <Label for="password_confirmation"
-                            >Confirm password</Label
-                        >
-                        <Input
+                    <div>
+                        <label for="password_confirmation" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Kinnita uus parool
+                        </label>
+                        <input
                             id="password_confirmation"
-                            name="password_confirmation"
+                            v-model="form.password_confirmation"
                             type="password"
-                            class="mt-1 block w-full"
                             autocomplete="new-password"
-                            placeholder="Confirm password"
+                            placeholder="••••••••"
+                            class="w-full px-4 py-3 bg-[#141414] border border-[#1E1E1E] rounded-xl text-white placeholder-gray-600 text-sm focus:outline-none focus:border-[#D2691E]/60 focus:bg-[#161616] focus:ring-1 focus:ring-[#D2691E]/30 transition-all duration-200"
+                            :class="{ 'border-red-500/60': form.errors.password_confirmation }"
                         />
-                        <InputError :message="errors.password_confirmation" />
+                        <p v-if="form.errors.password_confirmation" class="mt-1.5 text-xs text-red-400">
+                            {{ form.errors.password_confirmation }}
+                        </p>
                     </div>
 
-                    <div class="flex items-center gap-4">
-                        <Button
-                            :disabled="processing"
-                            data-test="update-password-button"
-                            >Save password</Button
+                    <div class="flex items-center gap-4 pt-2">
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="px-6 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-[#D2691E] to-[#B8571A] text-white hover:from-[#E07A2E] hover:to-[#D2691E] shadow-lg shadow-[#D2691E]/25 hover:shadow-[#D2691E]/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
+                            {{ form.processing ? 'Uuendamine...' : 'Uuenda parool' }}
+                        </button>
 
                         <Transition
-                            enter-active-class="transition ease-in-out"
-                            enter-from-class="opacity-0"
-                            leave-active-class="transition ease-in-out"
+                            enter-active-class="transition ease-in-out duration-300"
+                            enter-from-class="opacity-0 translate-x-2"
+                            enter-to-class="opacity-100 translate-x-0"
+                            leave-active-class="transition ease-in-out duration-200"
                             leave-to-class="opacity-0"
                         >
-                            <p
-                                v-show="recentlySuccessful"
-                                class="text-sm text-neutral-600"
-                            >
-                                Saved.
-                            </p>
+                            <span v-if="form.recentlySuccessful" class="flex items-center gap-1.5 text-sm text-green-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Parool uuendatud!
+                            </span>
                         </Transition>
                     </div>
-                </Form>
+                </form>
             </div>
-        </SettingsLayout>
-    </AppLayout>
+        </div>
+    </div>
 </template>
