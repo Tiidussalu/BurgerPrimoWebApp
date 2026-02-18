@@ -5,7 +5,7 @@ import EditableSection from '@/components/EditableSection.vue'
 
 const content = ref({
   label: 'Nautige sõpradega piljardimängu, nautides samal ajal meie maitsvaid toite ja jooke.',
-  labelColor: '#fffff',
+  labelColor: '#ffffff',
   title: 'Mängi piljardit',
   sectionTitle: 'Piljardilaud',
   titleColor: '#D2691E',

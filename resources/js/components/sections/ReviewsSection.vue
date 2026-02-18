@@ -13,7 +13,7 @@ const content = ref({
   label: 'ARVUSTUSED',
   labelColor: '#D2691E',
   title: 'Klientide Kogemus',
-  titleColor: '#F5DEB3',
+  titleColor: '#D2691E',
 })
 
 const editContent = reactive(JSON.parse(JSON.stringify(content.value)))
@@ -44,17 +44,6 @@ const cancel = () => {
         </div>
 
         <div class="text-center mb-12">
-          <h2 v-if="!isEditing" class="text-sm uppercase mb-3 tracking-widest font-semibold" :style="{ color: content.labelColor }">
-            {{ content.label }}
-          </h2>
-          <div v-else class="mb-3 space-y-2">
-            <input v-model="editContent.label" type="text" placeholder="Label..." class="w-full max-w-md mx-auto p-2 bg-gray-800 text-white rounded border-2 border-white" />
-            <div class="flex gap-2 justify-center items-center">
-              <label class="text-sm">Label color:</label>
-              <input v-model="editContent.labelColor" type="color" class="p-1 bg-gray-800 rounded border-2 border-white" />
-            </div>
-          </div>
-
           <h3 v-if="!isEditing" class="text-4xl md:text-5xl font-bold mb-4" :style="{ color: content.titleColor }">
             {{ content.title }}
           </h3>
@@ -66,7 +55,7 @@ const cancel = () => {
             </div>
           </div>
 
-          <p v-if="!isEditing" class="text-gray-300 text-lg">
+          <p v-if="!isEditing" class="text-white text-lg">
             Mida meie kliendid Burger Primo kogemuse kohta ütlevad
           </p>
         </div>

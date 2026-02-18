@@ -349,12 +349,14 @@
       </div>
     </main>
   </div>
+  <Footer />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
+import Footer from '@/components/Footer.vue';
 
 interface CartItem {
   type: 'custom_burger' | 'menu_item';

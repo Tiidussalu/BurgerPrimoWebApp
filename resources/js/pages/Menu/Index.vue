@@ -121,6 +121,7 @@
       </div>
     </main>
   </div>
+  <Footer />
 </template>
 
 <script setup lang="ts">
@@ -129,6 +130,7 @@ import { Head, router } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
 import MenuItem from '@/components/Menu/MenuItem.vue';
 import { Star, ChevronDown, ChevronUp } from 'lucide-vue-next';
+import Footer from '@/components/Footer.vue';
 
 interface MenuItemData {
   id: number;

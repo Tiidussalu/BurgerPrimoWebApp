@@ -5,7 +5,7 @@ import EditableSection from '@/components/EditableSection.vue'
 
 const content = ref({
   label: 'Külasta Burger Primot Kuressaare südames',
-  labelColor: '#F5DEB3',
+  labelColor: '#ffffff',
   title: 'Külastage Meid',
   titleColor: '#D2691E',
   addressTitle: 'Meie Asukoht',
@@ -60,7 +60,7 @@ const cancel = () => {
 
           <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             <div>
-              <h4 v-if="!isEditing" class="text-xl font-bold mb-6 text-white">{{ content.addressTitle }}</h4>
+              <h4 v-if="!isEditing" class="text-xl font-bold mb-6 text-[#F5DEB3]">{{ content.addressTitle }}</h4>
               <input v-else v-model="editContent.addressTitle" type="text" placeholder="Address title..." class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white mb-6" />
 
               <div v-if="!isEditing" class="text-gray-300 text-base">
@@ -86,7 +86,7 @@ const cancel = () => {
             </div>
 
             <div>
-              <h4 v-if="!isEditing" class="text-xl font-bold mb-6 text-white">{{ content.hoursTitle }}</h4>
+              <h4 v-if="!isEditing" class="text-xl font-bold mb-6 text-[#F5DEB3]">{{ content.hoursTitle }}</h4>
               <input v-else v-model="editContent.hoursTitle" type="text" placeholder="Hours title..." class="w-full p-2 bg-gray-800 text-white rounded border-2 border-white mb-6" />
 
               <div v-if="!isEditing" class="space-y-4 text-base">
