@@ -1,240 +1,134 @@
 <template>
-  <div class="bg-[#121212] rounded-2xl overflow-hidden hover:ring-2 hover:ring-[#D2691E] transition-all duration-300 group">
-    <!-- Image Section -->
-    <div class="relative aspect-[4/3] bg-[#0B0B0B] overflow-hidden">
-      <img
-        v-if="item.image_url"
-        :src="item.image_url"
-        :alt="item.name"
-        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-      />
-      <div v-else class="w-full h-full flex items-center justify-center text-6xl">
-        🍔
+  <!-- ── Horizontal card (Wolt-style) ── -->
+  <div
+    v-if="horizontal"
+    class="group relative bg-[#121212] hover:bg-[#161616] border border-[#1a1a1a] hover:border-[#D2691E]/30 rounded-xl overflow-hidden transition-all duration-200 flex items-stretch min-h-[110px]"
+  >
+    <!-- Text -->
+    <div class="flex-1 p-4 flex flex-col justify-between min-w-0">
+      <div>
+        <div class="flex items-center gap-2 mb-1.5">
+          <span v-if="item.is_featured" class="text-xs bg-yellow-500/15 text-yellow-400 px-2 py-0.5 rounded-full font-semibold">⭐ Populaarne</span>
+          <span v-if="item.discount_percentage" class="text-xs bg-[#D2691E]/15 text-[#D2691E] px-2 py-0.5 rounded-full font-semibold">-{{ item.discount_percentage }}%</span>
+        </div>
+        <h3 class="font-bold text-white text-sm leading-snug">{{ item.name }}</h3>
+        <p class="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{{ item.description }}</p>
       </div>
-
-      <!-- Badges -->
-      <div class="absolute top-3 left-3 flex gap-2">
-        <span v-if="item.is_featured" class="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
-          ⭐ Populaarne
-        </span>
-        <span v-if="item.discount_percentage" class="bg-[#D2691E] text-white px-3 py-1 rounded-full text-xs font-bold">
-          -{{ item.discount_percentage }}%
+      <div class="flex items-center gap-2 mt-3">
+        <span class="font-bold text-white text-sm">€{{ Number(item.price).toFixed(2) }}</span>
+        <span v-if="item.original_price && Number(item.original_price) > Number(item.price)" class="text-xs text-gray-600 line-through">
+          €{{ Number(item.original_price).toFixed(2) }}
         </span>
       </div>
-
-      <!-- Favorite Button -->
+    </div>
+    <!-- Image -->
+    <div class="relative flex-shrink-0 w-28">
+      <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="w-full h-full object-cover" />
+      <div v-else class="w-full h-full bg-[#0d0d0d] flex items-center justify-center text-3xl">🍔</div>
+      <!-- Favorite -->
       <button
         @click.stop="toggleFavorite"
-        class="absolute top-3 right-3 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-lg flex items-center justify-center transition-all duration-200 z-10"
+        class="absolute top-2 left-2 w-7 h-7 bg-black/60 hover:bg-black/80 rounded-lg flex items-center justify-center transition-all z-10"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          :class="['h-6 w-6 transition-all', item.is_favorited ? 'fill-red-500 text-red-500' : 'fill-none text-white']"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-width="2"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" :class="['h-4 w-4', item.is_favorited ? 'fill-red-500 text-red-500' : 'fill-none text-white']" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </svg>
       </button>
-
-      <!-- Plus Button -->
+      <!-- Plus -->
       <button
-        @click="openAddonModal"
-        class="absolute bottom-3 right-3 w-12 h-12 bg-[#D2691E] hover:bg-[#E07A2E] text-white rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-[#D2691E]/50 hover:scale-110"
+        @click.stop="openAddonModal"
+        class="absolute bottom-2 right-2 w-8 h-8 bg-[#D2691E] hover:bg-[#E07A2E] text-white rounded-lg flex items-center justify-center shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>
       </button>
     </div>
 
-    <!-- Content Section -->
+    <!-- Modal (shared, teleported) -->
+    <Teleport to="body">
+      <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100" leave-to-class="opacity-0">
+        <div v-if="showAddonModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="closeAddonModal">
+          <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+            <div v-if="showAddonModal" class="bg-[#121212] rounded-2xl max-w-2xl w-full flex flex-col border border-[#0B0B0B] shadow-2xl" style="max-height: 90vh;">
+              <div class="flex-shrink-0 bg-[#0B0B0B] px-6 py-4 flex items-center justify-between border-b border-[#1a1a1a] rounded-t-2xl">
+                <div><h2 class="text-2xl font-bold text-white">{{ item.name }}</h2><p class="text-sm text-gray-400">Lisa lisandeid</p></div>
+                <button @click="closeAddonModal" class="w-10 h-10 rounded-lg bg-[#121212] hover:bg-[#D2691E] text-gray-400 hover:text-white transition-colors flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div ref="scrollRef" class="modal-scroll p-6 space-y-6">
+                <div><h3 class="text-lg font-bold text-white mb-3">Suurus</h3><div class="grid grid-cols-3 gap-3"><button v-for="size in sizes" :key="size.id" @click="selectedSize = size.id" :class="['px-4 py-3 rounded-xl border-2 transition-all', selectedSize === size.id ? 'border-[#D2691E] bg-[#D2691E]/10 text-white' : 'border-[#0B0B0B] bg-[#0B0B0B] text-gray-400 hover:border-[#D2691E]/50']"><div class="font-bold">{{ size.name }}</div><div class="text-sm">{{ size.price > 0 ? `+€${size.price.toFixed(2)}` : 'Standard' }}</div></button></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Joogid</h3><div class="space-y-2"><label v-for="drink in drinks" :key="drink.id" class="flex items-center justify-between p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"><div class="flex items-center gap-3"><input type="checkbox" :value="drink.id" v-model="selectedDrinks" class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><span class="text-white">{{ drink.name }}</span></div><span class="text-[#D2691E] font-bold">+€{{ drink.price.toFixed(2) }}</span></label></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Kastmed</h3><div class="grid grid-cols-2 gap-2"><label v-for="sauce in sauces" :key="sauce.id" class="flex items-center gap-2 p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"><input type="checkbox" :value="sauce.id" v-model="selectedSauces" class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><div class="flex-1"><div class="text-white text-sm">{{ sauce.name }}</div><div class="text-[#D2691E] text-xs font-bold">{{ sauce.price > 0 ? `+€${sauce.price.toFixed(2)}` : 'Tasuta' }}</div></div></label></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Friikartul</h3><div class="space-y-2"><label v-for="fry in fries" :key="fry.id" class="flex items-center justify-between p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"><div class="flex items-center gap-3"><input type="radio" name="fries" :value="fry.id" v-model="selectedFries" class="w-5 h-5 border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><span class="text-white">{{ fry.name }}</span></div><span class="text-[#D2691E] font-bold">{{ fry.price > 0 ? `+€${fry.price.toFixed(2)}` : 'Kaasas' }}</span></label></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Söögiriistad</h3><label class="flex items-center gap-3 p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors"><input type="checkbox" v-model="needsUtensils" class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><span class="text-white">Soovin söögiriistu</span></label></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Erisoovidused</h3><textarea v-model="specialInstructions" rows="3" class="w-full bg-[#0B0B0B] border-2 border-[#121212] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-[#D2691E] focus:ring-0 transition-colors" placeholder="Nt: ilma sibulata, ekstra juust..."></textarea></div>
+              </div>
+              <div class="flex-shrink-0 bg-[#0B0B0B] px-6 py-4 border-t border-[#1a1a1a] rounded-b-2xl">
+                <div class="flex items-center justify-between mb-4"><span class="text-gray-400">Kokku:</span><span class="text-3xl font-bold text-[#D2691E]">€{{ totalPrice }}</span></div>
+                <button @click="addToCart" class="w-full bg-gradient-to-r from-[#D2691E] to-[#B8571A] hover:from-[#E07A2E] hover:to-[#D2691E] text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-[#D2691E]/50">Lisa korvi</button>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </Transition>
+    </Teleport>
+  </div>
+
+  <!-- ── Vertical card (original) ── -->
+  <div
+    v-else
+    class="bg-[#121212] rounded-2xl overflow-hidden hover:ring-2 hover:ring-[#D2691E] transition-all duration-300 group"
+  >
+    <div class="relative aspect-[4/3] bg-[#0B0B0B] overflow-hidden">
+      <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+      <div v-else class="w-full h-full flex items-center justify-center text-6xl">🍔</div>
+      <div class="absolute top-3 left-3 flex gap-2">
+        <span v-if="item.is_featured" class="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">⭐ Populaarne</span>
+        <span v-if="item.discount_percentage" class="bg-[#D2691E] text-white px-3 py-1 rounded-full text-xs font-bold">-{{ item.discount_percentage }}%</span>
+      </div>
+      <button @click.stop="toggleFavorite" class="absolute top-3 right-3 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-lg flex items-center justify-center transition-all duration-200 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" :class="['h-6 w-6 transition-all', item.is_favorited ? 'fill-red-500 text-red-500' : 'fill-none text-white']" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      </button>
+      <button @click="openAddonModal" class="absolute bottom-3 right-3 w-12 h-12 bg-[#D2691E] hover:bg-[#E07A2E] text-white rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-[#D2691E]/50 hover:scale-110">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+      </button>
+    </div>
     <div class="p-4">
       <h3 class="text-lg font-bold text-white mb-2">{{ item.name }}</h3>
       <p class="text-sm text-gray-400 mb-4 line-clamp-2 min-h-[40px]">{{ item.description }}</p>
       <div class="flex items-center gap-2">
         <span class="text-2xl font-bold text-[#D2691E]">€{{ Number(item.price).toFixed(2) }}</span>
-        <span v-if="item.original_price && item.original_price > item.price" class="text-sm text-gray-500 line-through">
-          €{{ Number(item.original_price).toFixed(2) }}
-        </span>
+        <span v-if="item.original_price && Number(item.original_price) > Number(item.price)" class="text-sm text-gray-500 line-through">€{{ Number(item.original_price).toFixed(2) }}</span>
       </div>
     </div>
 
-    <!-- Addon Modal -->
+    <!-- Modal -->
     <Teleport to="body">
-      <Transition
-        enter-active-class="transition ease-out duration-200"
-        enter-from-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition ease-in duration-150"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-      >
-        <div
-          v-if="showAddonModal"
-          class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          @click.self="closeAddonModal"
-        >
-          <Transition
-            enter-active-class="transition ease-out duration-200"
-            enter-from-class="opacity-0 scale-95"
-            enter-to-class="opacity-100 scale-100"
-            leave-active-class="transition ease-in duration-150"
-            leave-from-class="opacity-100 scale-100"
-            leave-to-class="opacity-0 scale-95"
-          >
-            <div
-              v-if="showAddonModal"
-              class="bg-[#121212] rounded-2xl max-w-2xl w-full flex flex-col border border-[#0B0B0B] shadow-2xl"
-              style="max-height: 90vh;"
-            >
-              <!-- Modal Header -->
+      <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100" leave-to-class="opacity-0">
+        <div v-if="showAddonModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="closeAddonModal">
+          <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100" leave-active-class="transition ease-in duration-150" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
+            <div v-if="showAddonModal" class="bg-[#121212] rounded-2xl max-w-2xl w-full flex flex-col border border-[#0B0B0B] shadow-2xl" style="max-height: 90vh;">
               <div class="flex-shrink-0 bg-[#0B0B0B] px-6 py-4 flex items-center justify-between border-b border-[#1a1a1a] rounded-t-2xl">
-                <div>
-                  <h2 class="text-2xl font-bold text-white">{{ item.name }}</h2>
-                  <p class="text-sm text-gray-400">Lisa lisandeid</p>
-                </div>
-                <button
-                  @click="closeAddonModal"
-                  class="w-10 h-10 rounded-lg bg-[#121212] hover:bg-[#D2691E] text-gray-400 hover:text-white transition-colors flex items-center justify-center"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                <div><h2 class="text-2xl font-bold text-white">{{ item.name }}</h2><p class="text-sm text-gray-400">Lisa lisandeid</p></div>
+                <button @click="closeAddonModal" class="w-10 h-10 rounded-lg bg-[#121212] hover:bg-[#D2691E] text-gray-400 hover:text-white transition-colors flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
-
-              <!-- Modal Content (scrollable) -->
               <div ref="scrollRef" class="modal-scroll p-6 space-y-6">
-                <!-- Size Selection -->
-                <div>
-                  <h3 class="text-lg font-bold text-white mb-3">Suurus</h3>
-                  <div class="grid grid-cols-3 gap-3">
-                    <button
-                      v-for="size in sizes"
-                      :key="size.id"
-                      @click="selectedSize = size.id"
-                      :class="[
-                        'px-4 py-3 rounded-xl border-2 transition-all',
-                        selectedSize === size.id
-                          ? 'border-[#D2691E] bg-[#D2691E]/10 text-white'
-                          : 'border-[#0B0B0B] bg-[#0B0B0B] text-gray-400 hover:border-[#D2691E]/50'
-                      ]"
-                    >
-                      <div class="font-bold">{{ size.name }}</div>
-                      <div class="text-sm">{{ size.price > 0 ? `+€${size.price.toFixed(2)}` : 'Standard' }}</div>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Drinks -->
-                <div>
-                  <h3 class="text-lg font-bold text-white mb-3">Joogid</h3>
-                  <div class="space-y-2">
-                    <label
-                      v-for="drink in drinks"
-                      :key="drink.id"
-                      class="flex items-center justify-between p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"
-                    >
-                      <div class="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          :value="drink.id"
-                          v-model="selectedDrinks"
-                          class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]"
-                        />
-                        <span class="text-white">{{ drink.name }}</span>
-                      </div>
-                      <span class="text-[#D2691E] font-bold">+€{{ drink.price.toFixed(2) }}</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Sauces -->
-                <div>
-                  <h3 class="text-lg font-bold text-white mb-3">Kastmed</h3>
-                  <div class="grid grid-cols-2 gap-2">
-                    <label
-                      v-for="sauce in sauces"
-                      :key="sauce.id"
-                      class="flex items-center gap-2 p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"
-                    >
-                      <input
-                        type="checkbox"
-                        :value="sauce.id"
-                        v-model="selectedSauces"
-                        class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]"
-                      />
-                      <div class="flex-1">
-                        <div class="text-white text-sm">{{ sauce.name }}</div>
-                        <div class="text-[#D2691E] text-xs font-bold">{{ sauce.price > 0 ? `+€${sauce.price.toFixed(2)}` : 'Tasuta' }}</div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Fries -->
-                <div>
-                  <h3 class="text-lg font-bold text-white mb-3">Friikartul</h3>
-                  <div class="space-y-2">
-                    <label
-                      v-for="fry in fries"
-                      :key="fry.id"
-                      class="flex items-center justify-between p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"
-                    >
-                      <div class="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          name="fries"
-                          :value="fry.id"
-                          v-model="selectedFries"
-                          class="w-5 h-5 border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]"
-                        />
-                        <span class="text-white">{{ fry.name }}</span>
-                      </div>
-                      <span class="text-[#D2691E] font-bold">{{ fry.price > 0 ? `+€${fry.price.toFixed(2)}` : 'Kaasas' }}</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Eating Equipment -->
-                <div>
-                  <h3 class="text-lg font-bold text-white mb-3">Söögiriistad</h3>
-                  <label class="flex items-center gap-3 p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors">
-                    <input
-                      type="checkbox"
-                      v-model="needsUtensils"
-                      class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]"
-                    />
-                    <span class="text-white">Soovin söögiriistu</span>
-                  </label>
-                </div>
-
-                <!-- Special Instructions -->
-                <div>
-                  <h3 class="text-lg font-bold text-white mb-3">Erisoovidused</h3>
-                  <textarea
-                    v-model="specialInstructions"
-                    rows="3"
-                    class="w-full bg-[#0B0B0B] border-2 border-[#121212] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-[#D2691E] focus:ring-0 transition-colors"
-                    placeholder="Nt: ilma sibulata, ekstra juust..."
-                  ></textarea>
-                </div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Suurus</h3><div class="grid grid-cols-3 gap-3"><button v-for="size in sizes" :key="size.id" @click="selectedSize = size.id" :class="['px-4 py-3 rounded-xl border-2 transition-all', selectedSize === size.id ? 'border-[#D2691E] bg-[#D2691E]/10 text-white' : 'border-[#0B0B0B] bg-[#0B0B0B] text-gray-400 hover:border-[#D2691E]/50']"><div class="font-bold">{{ size.name }}</div><div class="text-sm">{{ size.price > 0 ? `+€${size.price.toFixed(2)}` : 'Standard' }}</div></button></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Joogid</h3><div class="space-y-2"><label v-for="drink in drinks" :key="drink.id" class="flex items-center justify-between p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"><div class="flex items-center gap-3"><input type="checkbox" :value="drink.id" v-model="selectedDrinks" class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><span class="text-white">{{ drink.name }}</span></div><span class="text-[#D2691E] font-bold">+€{{ drink.price.toFixed(2) }}</span></label></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Kastmed</h3><div class="grid grid-cols-2 gap-2"><label v-for="sauce in sauces" :key="sauce.id" class="flex items-center gap-2 p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"><input type="checkbox" :value="sauce.id" v-model="selectedSauces" class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><div class="flex-1"><div class="text-white text-sm">{{ sauce.name }}</div><div class="text-[#D2691E] text-xs font-bold">{{ sauce.price > 0 ? `+€${sauce.price.toFixed(2)}` : 'Tasuta' }}</div></div></label></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Friikartul</h3><div class="space-y-2"><label v-for="fry in fries" :key="fry.id" class="flex items-center justify-between p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors border-2 border-transparent hover:border-[#D2691E]/30"><div class="flex items-center gap-3"><input type="radio" name="fries" :value="fry.id" v-model="selectedFries" class="w-5 h-5 border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><span class="text-white">{{ fry.name }}</span></div><span class="text-[#D2691E] font-bold">{{ fry.price > 0 ? `+€${fry.price.toFixed(2)}` : 'Kaasas' }}</span></label></div></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Söögiriistad</h3><label class="flex items-center gap-3 p-3 rounded-xl bg-[#0B0B0B] hover:bg-[#D2691E]/10 cursor-pointer transition-colors"><input type="checkbox" v-model="needsUtensils" class="w-5 h-5 rounded border-gray-600 bg-[#121212] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#0B0B0B]" /><span class="text-white">Soovin söögiriistu</span></label></div>
+                <div><h3 class="text-lg font-bold text-white mb-3">Erisoovidused</h3><textarea v-model="specialInstructions" rows="3" class="w-full bg-[#0B0B0B] border-2 border-[#121212] rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-[#D2691E] focus:ring-0 transition-colors" placeholder="Nt: ilma sibulata, ekstra juust..."></textarea></div>
               </div>
-
-              <!-- Modal Footer -->
               <div class="flex-shrink-0 bg-[#0B0B0B] px-6 py-4 border-t border-[#1a1a1a] rounded-b-2xl">
-                <div class="flex items-center justify-between mb-4">
-                  <span class="text-gray-400">Kokku:</span>
-                  <span class="text-3xl font-bold text-[#D2691E]">€{{ totalPrice }}</span>
-                </div>
-                <button
-                  @click="addToCart"
-                  class="w-full bg-gradient-to-r from-[#D2691E] to-[#B8571A] hover:from-[#E07A2E] hover:to-[#D2691E] text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-[#D2691E]/50"
-                >
-                  Lisa korvi
-                </button>
+                <div class="flex items-center justify-between mb-4"><span class="text-gray-400">Kokku:</span><span class="text-3xl font-bold text-[#D2691E]">€{{ totalPrice }}</span></div>
+                <button @click="addToCart" class="w-full bg-gradient-to-r from-[#D2691E] to-[#B8571A] hover:from-[#E07A2E] hover:to-[#D2691E] text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-[#D2691E]/50">Lisa korvi</button>
               </div>
             </div>
           </Transition>
@@ -262,16 +156,13 @@ interface MenuItemData {
   is_favorited?: boolean;
 }
 
-interface Props {
+const props = defineProps<{
   item: MenuItemData;
-}
-
-const props = defineProps<Props>();
+  horizontal?: boolean;
+}>();
 
 const toggleFavorite = () => {
-  router.post(`/menu/${props.item.id}/favorite`, {}, {
-    preserveScroll: true,
-  });
+  router.post(`/menu/${props.item.id}/favorite`, {}, { preserveScroll: true });
 };
 
 const showAddonModal = ref(false);
@@ -315,48 +206,36 @@ const specialInstructions = ref('');
 
 const totalPrice = computed(() => {
   let total = Number(props.item.price) || 0;
-
   const size = sizes.value.find(s => s.id === selectedSize.value);
   if (size) total += Number(size.price) || 0;
-
-  selectedDrinks.value.forEach(drinkId => {
-    const drink = drinks.value.find(d => d.id === drinkId);
-    if (drink) total += Number(drink.price) || 0;
+  selectedDrinks.value.forEach(id => {
+    const d = drinks.value.find(d => d.id === id);
+    if (d) total += Number(d.price) || 0;
   });
-
-  selectedSauces.value.forEach(sauceId => {
-    const sauce = sauces.value.find(s => s.id === sauceId);
-    if (sauce) total += Number(sauce.price) || 0;
+  selectedSauces.value.forEach(id => {
+    const s = sauces.value.find(s => s.id === id);
+    if (s) total += Number(s.price) || 0;
   });
-
   const friesOption = fries.value.find(f => f.id === selectedFries.value);
   if (friesOption) total += Number(friesOption.price) || 0;
-
   return total.toFixed(2);
 });
 
-// Manually handle wheel events to bypass Lenis completely
 const handleWheel = (e: WheelEvent) => {
   e.stopPropagation();
   e.preventDefault();
-  if (scrollRef.value) {
-    scrollRef.value.scrollTop += e.deltaY;
-  }
+  if (scrollRef.value) scrollRef.value.scrollTop += e.deltaY;
 };
 
 const openAddonModal = () => {
   showAddonModal.value = true;
   setTimeout(() => {
-    if (scrollRef.value) {
-      scrollRef.value.addEventListener('wheel', handleWheel, { passive: false });
-    }
+    if (scrollRef.value) scrollRef.value.addEventListener('wheel', handleWheel, { passive: false });
   }, 50);
 };
 
 const closeAddonModal = () => {
-  if (scrollRef.value) {
-    scrollRef.value.removeEventListener('wheel', handleWheel);
-  }
+  if (scrollRef.value) scrollRef.value.removeEventListener('wheel', handleWheel);
   showAddonModal.value = false;
 };
 
@@ -374,7 +253,6 @@ const addToCart = () => {
     total_price: parseFloat(totalPrice.value),
     quantity: 1,
   };
-
   router.post('/cart/add-menu-item', cartItem, {
     preserveScroll: true,
     onSuccess: () => {
@@ -393,9 +271,7 @@ const addToCart = () => {
 };
 
 onUnmounted(() => {
-  if (scrollRef.value) {
-    scrollRef.value.removeEventListener('wheel', handleWheel);
-  }
+  if (scrollRef.value) scrollRef.value.removeEventListener('wheel', handleWheel);
 });
 </script>
 
@@ -406,24 +282,13 @@ onUnmounted(() => {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .modal-scroll {
   overflow-y: scroll;
   max-height: 60vh;
   overscroll-behavior: contain;
 }
-
-.modal-scroll::-webkit-scrollbar {
-  width: 8px;
-}
-.modal-scroll::-webkit-scrollbar-track {
-  background: #0B0B0B;
-}
-.modal-scroll::-webkit-scrollbar-thumb {
-  background: #D2691E;
-  border-radius: 4px;
-}
-.modal-scroll::-webkit-scrollbar-thumb:hover {
-  background: #E07A2E;
-}
+.modal-scroll::-webkit-scrollbar { width: 8px; }
+.modal-scroll::-webkit-scrollbar-track { background: #0B0B0B; }
+.modal-scroll::-webkit-scrollbar-thumb { background: #D2691E; border-radius: 4px; }
+.modal-scroll::-webkit-scrollbar-thumb:hover { background: #E07A2E; }
 </style>
