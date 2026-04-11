@@ -11,7 +11,7 @@
         </div>
       </div>
 
-      <!-- ═══════════ BUILDER ═══════════ -->
+            <!-- ═══════════ BUILDER ═══════════ -->
       <section id="bb-builder" class="bb-builder">
 
         <!-- Vasakul: sticky burger preview -->
@@ -218,6 +218,7 @@
               <button @click="saveAndSubmit()" :disabled="!canSave" class="bb-btn-review">
                 Saada adminile ↗
               </button>
+
             </div>
           </div>
 
@@ -274,13 +275,10 @@
 
 <script setup lang="ts">
 import MainLayout from '@/layouts/MainLayout.vue';
-import { useToast } from '@/composables/useToast';
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { router } from '@inertiajs/vue3';
 import CustomBurgerCard from '@/components/CustomBurgerCard.vue';
 import type { Ingredient, SelectedIngredient, CustomBurger } from '@/types/burger-types';
-
-const { success, error, warning } = useToast();
 
 interface Props {
   ingredients: Record<string, Ingredient[]> | any;
@@ -314,6 +312,14 @@ const selectedIngredients = ref<Record<string, SelectedIngredient[]>>({
 // Toggle helpers
 const isSelected = (cat: string, id: number) =>
   selectedIngredients.value[cat]?.some(i => i.id === id) ?? false;
+
+const toggleOne = (cat: string, id: number) => {
+  if (isSelected(cat, id)) {
+    selectedIngredients.value[cat] = [];
+  } else {
+    selectedIngredients.value[cat] = [{ id, quantity: 1 }];
+  }
+};
 
 const togglePatty = (id: number) => {
   const arr = selectedIngredients.value['pitav'] ?? [];
@@ -365,32 +371,27 @@ const juustCount = computed(() => selectedIngredients.value['juust']?.length ?? 
 const pitavCount = computed(() => selectedIngredients.value['pitav']?.length ?? 0);
 const lisandCount = computed(() => selectedIngredients.value['lisand']?.length ?? 0);
 
-const topPattyTop = computed(() => 46);
-
-const fillingStart = computed(() => pitavCount.value > 1 ? 74 : 46);
-
-const fillingHeight = computed(() =>
-  salatCount.value * 11 + juustCount.value * 8 + lisandCount.value * 8
-);
+// 2 pihvi: ülemine pihv kohe saia all (46px)
+// 1 pihv: täidised ülal, pihv all
+const BUNTOP_H = 58;
+const topPattyTop    = computed(() => BUNTOP_H);
+const fillingStart   = computed(() => pitavCount.value > 1 ? BUNTOP_H + 32 : BUNTOP_H);
+const fillingHeight  = computed(() => salatCount.value * 12 + juustCount.value * 9 + lisandCount.value * 9);
 
 const layerStyle = (cat: string, idx: number) => {
   let top = fillingStart.value;
-  if (cat === 'salat') {
-    top = fillingStart.value + idx * 11;
-  } else if (cat === 'juust') {
-    top = fillingStart.value + salatCount.value * 11 + idx * 8;
-  } else if (cat === 'lisand') {
-    top = fillingStart.value + salatCount.value * 11 + juustCount.value * 8 + idx * 8;
-  }
+  if (cat === 'salat')       top = fillingStart.value + idx * 12;
+  else if (cat === 'juust')  top = fillingStart.value + salatCount.value * 12 + idx * 9;
+  else if (cat === 'lisand') top = fillingStart.value + salatCount.value * 12 + juustCount.value * 9 + idx * 9;
   return { top: top + 'px' };
 };
 
-const bottomPattyTop = computed(() => fillingStart.value + fillingHeight.value + 4);
+const bottomPattyTop = computed(() => fillingStart.value + fillingHeight.value + 6);
 
 const burgerScale = computed(() => {
-  const totalH = bottomBunTop.value + 38;
-  if (totalH > 220) {
-    const scale = Math.max(0.5, 220 / totalH);
+  const totalH = bottomBunTop.value + 36;
+  if (totalH > 248) {
+    const scale = Math.max(0.48, 248 / totalH);
     return `scale(${scale.toFixed(2)})`;
   }
   return 'scale(1)';
@@ -398,63 +399,22 @@ const burgerScale = computed(() => {
 
 const bottomBunTop = computed(() => {
   if (pitavCount.value === 0) return fillingStart.value + fillingHeight.value + 4;
-  return bottomPattyTop.value + 28;
+  return bottomPattyTop.value + 32;
 });
 
-// Router helpers
+// Router
 const getAllSelected = (): SelectedIngredient[] => {
   const all: SelectedIngredient[] = [];
   Object.values(selectedIngredients.value).forEach(i => all.push(...i));
   return all;
 };
-
-const saveBurger = (isFavorite: boolean) => {
-  if (!props.canCreateMore) {
-    warning(`Oled jõudnud maksimaalse burgeri limiidini (${props.maxBurgers}). Kustuta mõni olemasolev burger.`);
-    return;
-  }
-  router.post('/burger-builder', {
-    name: burgerName.value,
-    ingredients: getAllSelected(),
-    is_favorite: isFavorite,
-  } as any, {
-    onSuccess: () => { success('Burger salvestatud! 🍔'); burgerName.value = ''; },
-    onError: () => error('Salvestamine ebaõnnestus'),
-  });
+const saveBurger = (fav: boolean) => {
+  if (!props.canCreateMore) { alert(`Limit: ${props.maxBurgers}`); return; }
+  router.post('/burger-builder', { name: burgerName.value, ingredients: getAllSelected(), is_favorite: fav } as any);
 };
-
-const orderBurger = () => {
-  router.post('/cart/add-new', {
-    name: burgerName.value,
-    ingredients: getAllSelected(),
-  } as any, {
-    onSuccess: () => { success('Burger lisatud ostukorvi! 🛒'); router.visit('/cart'); },
-    onError: () => error('Korvi lisamine ebaõnnestus'),
-  });
-};
-
-const saveAndSubmit = () => {
-  if (!canSave.value) return;
-  if (!props.canCreateMore) {
-    warning(`Oled jõudnud maksimaalse burgeri limiidini (${props.maxBurgers}). Kustuta mõni olemasolev burger.`);
-    return;
-  }
-  router.post('/burger-builder', {
-    name: burgerName.value,
-    ingredients: getAllSelected(),
-    is_favorite: false,
-    submit_for_review: true,
-  } as any, {
-    preserveScroll: true,
-    onSuccess: () => {
-      success('Burger saadetud adminile! 🍔');
-      burgerName.value = '';
-      selectedIngredients.value = { 'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [] };
-    },
-    onError: () => error('Saatmine ebaõnnestus'),
-  });
-};
-
+const orderBurger = () => router.post('/cart/add-new', { name: burgerName.value, ingredients: getAllSelected() } as any, {
+  onSuccess: () => router.visit('/cart'),
+});
 const submitForReviewById = (id: number) => {
   router.post(`/burger-builder/${id}/submit`, {}, { preserveScroll: true });
 };
@@ -467,12 +427,62 @@ const statusLabel = (status: string) => {
   return map[status] ?? status;
 };
 
+const saveAndSubmit = () => {
+  if (!canSave.value) return;
+  if (!props.canCreateMore) { alert(`Limit: ${props.maxBurgers}`); return; }
+  // Salvesta ja saada kohe adminile — üks POST
+  router.post('/burger-builder', {
+    name: burgerName.value,
+    ingredients: getAllSelected(),
+    is_favorite: false,
+    submit_for_review: true,
+  } as any, {
+    preserveScroll: true,
+    onSuccess: () => {
+      burgerName.value = '';
+      selectedIngredients.value = { 'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [] };
+    }
+  });
+};
+
+const submitForReview = () => {
+  if (!props.canCreateMore && !burgerName.value.trim()) return;
+  // Salvesta ja saada kohe adminile
+  router.post('/burger-builder', {
+    name: burgerName.value,
+    ingredients: getAllSelected(),
+    is_favorite: false,
+    submit_for_review: true,
+  } as any, {
+    onSuccess: () => {
+      burgerName.value = '';
+      selectedIngredients.value = { 'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [] };
+    }
+  });
+};
+
+// Kiirtellimus — lisab salvestatud burgeri otse korvi ilma admin kinnituseta
+const quickOrder = (burger: CustomBurger) => {
+  router.post('/cart/add-new', {
+    name: burger.name,
+    ingredients: burger.ingredients.map(ing => ({ id: ing.id, quantity: ing.pivot?.quantity ?? 1 })),
+  } as any, {
+    onSuccess: () => { success('Burger lisatud korvi! 🛒'); router.visit('/cart'); },
+    onError: () => error('Korvi lisamine ebaõnnestus'),
+  });
+};
+
+const toggleBurgerFavorite = (id: number, current: boolean) => {
+  router.post(`/burger-builder/${id}/favorite`, {}, {
+    preserveScroll: true,
+    onSuccess: () => success(current ? 'Eemaldatud lemmikutest' : '♥ Lisatud lemmikusse'),
+  });
+};
+
 const orderSavedBurger = (id: number) => router.post('/cart/add', { burger_id: id, quantity: 1 } as any, {
   onSuccess: () => router.visit('/cart'),
 });
-
 const deleteBurger = (id: number) => router.delete(`/burger-builder/${id}`, { preserveScroll: true });
-
 const loadBurger = (burger: CustomBurger) => {
   burgerName.value = burger.name;
   selectedIngredients.value = { 'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [] };
@@ -502,32 +512,52 @@ function rnd(a: number, b: number) { return a + Math.random() * (b - a); }
 function drawTopBun(cv: HTMLCanvasElement) {
   const c = cv.getContext('2d')!; const w = cv.width, h = cv.height, cx = w / 2;
   c.clearRect(0, 0, w, h);
-  c.beginPath(); c.ellipse(cx, h - 5, 132, 10, 0, 0, Math.PI * 2);
-  c.fillStyle = 'rgba(0,0,0,0.5)'; c.fill();
-  c.beginPath(); c.ellipse(cx, h - 18, 130, 16, 0, 0, Math.PI * 2);
+  const by = h - 14; // bottom of bun ellipse
+
+  // Shadow
+  c.beginPath(); c.ellipse(cx, h - 3, w/2 - 4, 7, 0, 0, Math.PI * 2);
+  c.fillStyle = 'rgba(0,0,0,0.45)'; c.fill();
+
+  // Bottom flat part (thickness)
+  c.beginPath(); c.ellipse(cx, by, w/2 - 6, 11, 0, 0, Math.PI * 2);
   c.fillStyle = '#7A3D0A'; c.fill();
+
+  // Dome shape - nice rounded top
   c.beginPath();
-  c.moveTo(10, h - 18);
-  c.bezierCurveTo(cx - 110, 6, cx + 110, 6, w - 10, h - 18);
-  c.ellipse(cx, h - 18, 130, 16, 0, 0, Math.PI);
+  c.moveTo(8, by);
+  c.bezierCurveTo(8, 6, w - 8, 6, w - 8, by);
+  c.ellipse(cx, by, w/2 - 6, 11, 0, 0, Math.PI);
   c.closePath();
-  const g = c.createRadialGradient(cx - 20, 20, 4, cx, 36, 92);
-  g.addColorStop(0, '#F0A040'); g.addColorStop(0.4, '#D07020'); g.addColorStop(1, '#8A3E08');
+  const g = c.createRadialGradient(cx - 24, 18, 2, cx, 34, 100);
+  g.addColorStop(0, '#F5A840');
+  g.addColorStop(0.35, '#D97020');
+  g.addColorStop(0.75, '#B05018');
+  g.addColorStop(1, '#7A3008');
   c.fillStyle = g; c.fill();
-  const sg = c.createRadialGradient(cx - 18, 16, 2, cx - 8, 24, 46);
-  sg.addColorStop(0, 'rgba(255,230,160,0.4)'); sg.addColorStop(1, 'rgba(255,180,80,0)');
-  c.beginPath(); c.ellipse(cx - 8, 24, 48, 16, -.2, 0, Math.PI * 2); c.fillStyle = sg; c.fill();
+
+  // Shine
+  const sg = c.createRadialGradient(cx - 20, 14, 1, cx - 10, 22, 50);
+  sg.addColorStop(0, 'rgba(255,235,160,0.45)');
+  sg.addColorStop(1, 'rgba(255,180,80,0)');
+  c.beginPath(); c.ellipse(cx - 10, 22, 52, 18, -.15, 0, Math.PI * 2);
+  c.fillStyle = sg; c.fill();
+
+  // Seeds - positioned on dome
   const seeds: [number, number, number][] = [
-    [cx - 58, h - 38, -.32], [cx - 16, h - 50, .05], [cx + 26, h - 48, .2],
-    [cx + 60, h - 36, .28], [cx - 34, h - 32, -.16], [cx + 40, h - 32, .14], [cx + 4, h - 44, -.06],
+    [cx - 52, by - 20, -.3],
+    [cx - 18, by - 30, .04],
+    [cx + 20, by - 28, .18],
+    [cx + 54, by - 18, .26],
+    [cx - 28, by - 14, -.12],
+    [cx + 34, by - 14, .1],
+    [cx + 2, by - 26, -.05],
   ];
   seeds.forEach(([sx, sy, rot]) => {
     c.save(); c.translate(sx, sy); c.rotate(rot);
-    const s = c.createRadialGradient(-1, -1.5, 1, 0, 0, 8);
-    s.addColorStop(0, '#F8E8B0'); s.addColorStop(1, '#B08828');
-    c.beginPath(); c.ellipse(0, 0, 8.5, 5, 0, 0, Math.PI * 2); c.fillStyle = s; c.fill();
-    c.beginPath(); c.moveTo(-6, 0); c.lineTo(6, 0);
-    c.strokeStyle = 'rgba(100,60,8,0.3)'; c.lineWidth = 0.7; c.stroke();
+    const s = c.createRadialGradient(-1, -1.5, 1, 0, 0, 7);
+    s.addColorStop(0, '#F8E8B0'); s.addColorStop(1, '#A07820');
+    c.beginPath(); c.ellipse(0, 0, 7.5, 4.5, 0, 0, Math.PI * 2);
+    c.fillStyle = s; c.fill();
     c.restore();
   });
 }
@@ -595,6 +625,7 @@ function drawVeg(cv: HTMLCanvasElement, id: number) {
       c.beginPath(); c.ellipse(cx - 8, cy - 3, 15, 6, -.2, 0, Math.PI * 2); c.fillStyle = 'rgba(230,255,170,0.28)'; c.fill();
     });
   } else {
+    // Default: salat
     const pts: [number, number][] = [];
     for (let x = 0; x <= w; x += 10) pts.push([x, 8 + Math.sin(x * .09) * 7 + Math.sin(x * .17) * 4]);
     c.beginPath(); c.moveTo(-2, h + 2); c.lineTo(pts[0][0], pts[0][1]);
@@ -699,11 +730,43 @@ watch(selectedIngredients, async () => {
   lisand.forEach((item, idx) => { if (sauceCanvases.value[idx]) drawSauce(sauceCanvases.value[idx], item.id); });
 }, { deep: true });
 
+
+
+// Watch & redraw
+watch(selectedIngredients, async () => {
+  await nextTick(); await nextTick();
+  if (cvTopBun.value) drawTopBun(cvTopBun.value);
+  if (cvBotBun.value) drawBotBun(cvBotBun.value);
+  const salat = selectedIngredients.value['salat'] ?? [];
+  salat.forEach((item, idx) => { if (vegCanvases.value[idx]) drawVeg(vegCanvases.value[idx], item.id); });
+  const juust = selectedIngredients.value['juust'] ?? [];
+  juust.forEach((item, idx) => { if (cheeseCanvases.value[idx]) drawCheese(cheeseCanvases.value[idx], item.id); });
+  await nextTick();
+  const pitav = selectedIngredients.value['pitav'] ?? [];
+  pitav.forEach((item, idx) => { if (pattyCanvases.value[idx]) drawPatty(pattyCanvases.value[idx], item.id); });
+  const lisand = selectedIngredients.value['lisand'] ?? [];
+  lisand.forEach((item, idx) => { if (sauceCanvases.value[idx]) drawSauce(sauceCanvases.value[idx], item.id); });
+}, { deep: true });
+
+
+// Assembly canvas drawing functions (scroll animatsioon)
+function rndA(a:number,b:number){return a+Math.random()*(b-a);}
+function drawAsmTopBun(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height,cx=w/2;c.clearRect(0,0,w,h);c.beginPath();c.ellipse(cx,78,148,14,0,0,Math.PI*2);c.fillStyle='rgba(0,0,0,0.45)';c.fill();c.beginPath();c.ellipse(cx,62,144,18,0,0,Math.PI*2);c.fillStyle='#6B3608';c.fill();c.beginPath();c.moveTo(8,62);c.bezierCurveTo(cx-100,8,cx+100,8,w-8,62);c.ellipse(cx,62,144,18,0,0,Math.PI);c.closePath();c.fillStyle='#B86018';c.fill();const g=c.createRadialGradient(cx-18,22,4,cx+10,38,90);g.addColorStop(0,'#F5A848');g.addColorStop(0.3,'#DC8028');g.addColorStop(0.7,'#B86018');g.addColorStop(1,'#8A4010');c.beginPath();c.moveTo(8,62);c.bezierCurveTo(cx-100,8,cx+100,8,w-8,62);c.ellipse(cx,62,144,18,0,0,Math.PI);c.closePath();c.fillStyle=g;c.fill();const sg=c.createRadialGradient(cx-22,20,2,cx-10,28,48);sg.addColorStop(0,'rgba(255,230,170,0.38)');sg.addColorStop(1,'rgba(255,180,80,0)');c.beginPath();c.ellipse(cx-14,26,52,18,-.25,0,Math.PI*2);c.fillStyle=sg;c.fill();[[cx-60,30,-.35],[cx-18,18,.05],[cx+28,20,.22],[cx+62,32,.3],[cx-38,44,-.18],[cx+44,44,.15],[cx+8,38,-.08]].forEach(([sx,sy,rot])=>{c.save();c.translate(sx,sy);c.rotate(rot);const s=c.createRadialGradient(-1,-1.5,1,0,0,9);s.addColorStop(0,'#F8E8B8');s.addColorStop(1,'#A88030');c.beginPath();c.ellipse(0,0,9.5,5.5,0,0,Math.PI*2);c.fillStyle=s;c.fill();c.restore();});}
+function drawAsmLettuce(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height;c.clearRect(0,0,w,h);for(let l=0;l<3;l++){const pts:number[][]=[];for(let x=0;x<=w;x+=8)pts.push([x,10+l*3+Math.sin(x*(.07+l*.02)+l)*(12-l*2)+Math.sin(x*(.14+l*.01)+l*2)*5]);c.beginPath();c.moveTo(-2,h+2);c.lineTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.quadraticCurveTo(pts[i-1][0],pts[i-1][1],(pts[i-1][0]+pts[i][0])/2,(pts[i-1][1]+pts[i][1])/2);c.lineTo(w+2,h+2);c.closePath();const cols=[['#6DD458','#3A9828'],['#58C840','#2E8818'],['#80E060','#4AB830']];const lg=c.createLinearGradient(0,0,0,h);lg.addColorStop(0,cols[l][0]);lg.addColorStop(1,cols[l][1]);c.fillStyle=lg;c.fill();}}
+function drawAsmCheese(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height;c.clearRect(0,0,w,h);const g=c.createLinearGradient(0,0,0,h);g.addColorStop(0,'#FFD030');g.addColorStop(1,'#D89E00');c.fillStyle=g;c.beginPath();(c as any).roundRect(2,2,w-4,16,3);c.fill();[8,42,90,148,210,268,w-10].forEach(dx=>{const dh=8+Math.random()*10;c.beginPath();c.moveTo(dx-4,16);c.bezierCurveTo(dx-6,16+dh*.4,dx+8,16+dh*.6,dx+4,16+dh);c.bezierCurveTo(dx+6,16+dh*.6,dx-2,16+dh*.3,dx-4,16);c.fillStyle='#D89E00';c.fill();});}
+function drawAsmPatty(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height,cx=w/2;c.clearRect(0,0,w,h);c.beginPath();c.ellipse(cx,42,138,18,0,0,Math.PI*2);c.fillStyle='#1A0800';c.fill();c.beginPath();c.ellipse(cx,36,136,18,0,0,Math.PI*2);c.fillStyle='#3A1C08';c.fill();const g=c.createRadialGradient(cx-25,18,6,cx,26,90);g.addColorStop(0,'#A06030');g.addColorStop(0.35,'#7A3E18');g.addColorStop(0.7,'#5A2A0A');g.addColorStop(1,'#3A1408');c.beginPath();c.ellipse(cx,26,134,19,0,0,Math.PI*2);c.fillStyle=g;c.fill();c.fillStyle='rgba(180,100,30,0.1)';for(let i=0;i<18;i++){c.beginPath();c.ellipse(rndA(30,w-30),rndA(14,36),rndA(8,20),rndA(5,10),rndA(-.5,.5),0,Math.PI*2);c.fill();}[[52,12,86,40],[98,10,132,38],[144,12,178,40]].forEach(([x1,y1,x2,y2])=>{c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.strokeStyle='rgba(10,2,0,0.85)';c.lineWidth=4.5;c.lineCap='round';c.stroke();});}
+function drawAsmTomato(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height;c.clearRect(0,0,w,h);[[65,15,60],[215,15,60]].forEach(([cx,cy,rx])=>{const g=c.createRadialGradient(cx-12,cy-5,4,cx,cy,rx);g.addColorStop(0,'#FF7060');g.addColorStop(0.45,'#E83030');g.addColorStop(1,'#901010');c.beginPath();c.ellipse(cx,cy,rx,12,0,0,Math.PI*2);c.fillStyle=g;c.fill();});}
+function drawAsmSauce(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height;c.clearRect(0,0,w,h);const pts:number[][]=[];for(let x=0;x<=w;x+=12)pts.push([x,7+Math.sin(x*.1)*4]);c.beginPath();c.moveTo(-2,h+2);c.lineTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)c.quadraticCurveTo(pts[i-1][0],pts[i-1][1],(pts[i-1][0]+pts[i][0])/2,(pts[i-1][1]+pts[i][1])/2);c.lineTo(w+2,h+2);c.closePath();const mg=c.createLinearGradient(0,0,0,h);mg.addColorStop(0,'#F8D840');mg.addColorStop(1,'#D4A800');c.fillStyle=mg;c.fill();}
+function drawAsmOnion(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height;c.clearRect(0,0,w,h);[[55,16],[210,16]].forEach(([cx,cy])=>{[50,34,20].forEach((rx,i)=>{c.beginPath();c.ellipse(cx,cy,rx,12-i*2,0,0,Math.PI*2);c.strokeStyle=['rgba(210,120,220,0.85)','rgba(185,95,200,0.7)','rgba(165,80,185,0.5)'][i];c.lineWidth=i===0?5.5:3.5;c.stroke();});});const pcx=130,pcy=16;const pg=c.createRadialGradient(pcx-6,pcy-5,2,pcx,pcy,24);pg.addColorStop(0,'#B8E060');pg.addColorStop(1,'#407810');c.beginPath();c.ellipse(pcx,pcy,24,13,0,0,Math.PI*2);c.fillStyle=pg;c.fill();}
+function drawAsmBotBun(cv:HTMLCanvasElement){const c=cv.getContext('2d')!;const w=cv.width,h=cv.height,cx=w/2;c.clearRect(0,0,w,h);c.beginPath();c.ellipse(cx,h-4,148,9,0,0,Math.PI*2);c.fillStyle='rgba(0,0,0,0.5)';c.fill();const g=c.createRadialGradient(cx-20,12,3,cx,22,95);g.addColorStop(0,'#E8A040');g.addColorStop(0.45,'#C07828');g.addColorStop(0.8,'#9A5010');g.addColorStop(1,'#6A3008');c.beginPath();c.ellipse(cx,22,146,22,0,0,Math.PI*2);c.fillStyle=g;c.fill();const rim=c.createLinearGradient(0,30,0,h-6);rim.addColorStop(0,'rgba(0,0,0,0)');rim.addColorStop(1,'rgba(0,0,0,0.38)');c.beginPath();c.ellipse(cx,22,146,22,0,0,Math.PI*2);c.fillStyle=rim;c.fill();}
+
 onMounted(async () => {
   await nextTick();
   if (cvTopBun.value) drawTopBun(cvTopBun.value);
   if (cvBotBun.value) drawBotBun(cvBotBun.value);
 });
+
+
 </script>
 
 <style scoped>
@@ -790,17 +853,17 @@ onMounted(async () => {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  height: 240px;
+  height: 260px;
   overflow: hidden;
-  background: radial-gradient(ellipse at 50% 100%, rgba(200,100,20,0.08) 0%, transparent 70%);
-  border-radius: 10px;
+  background: radial-gradient(ellipse at 50% 110%, rgba(200,100,20,0.1) 0%, transparent 65%);
+  border-radius: 12px;
 }
 .bb-burger-glow { display: none; }
 .bb-burger-stack {
   position: relative;
-  width: 240px;
-  margin: 8px auto 0;
-  filter: drop-shadow(0 12px 24px rgba(180,90,10,0.25));
+  width: 248px;
+  margin: 4px auto 0;
+  filter: drop-shadow(0 16px 32px rgba(180,90,10,0.35));
   transform-origin: top center;
 }
 .bb-burger-shadow {
@@ -816,8 +879,8 @@ onMounted(async () => {
   left: 50%;
   transform: translateX(-50%);
 }
-.bb-layer-topbun { top: 4px; width: 240px; }
-.bb-layer-botbun { width: 240px; transition: top .3s ease; }
+.bb-layer-topbun { top: 2px; width: 248px; }
+.bb-layer-botbun { width: 248px; transition: top .3s ease; }
 .bb-layer-animate {
   transition: top .25s ease;
   animation: layerIn .35s cubic-bezier(.22,1,.36,1);
@@ -1034,10 +1097,6 @@ onMounted(async () => {
 .bb-saved-btn:hover { border-color:#444; color:#ccc; }
 .bb-saved-btn-orange { border-color:#D2691E !important; color:#D2691E !important; }
 .bb-saved-btn-orange:hover { background:rgba(210,105,30,.1) !important; }
-.bb-saved-btn-green { border-color:#22c55e !important; color:#22c55e !important; }
-.bb-saved-btn-green:hover { background:rgba(34,197,94,.1) !important; }
-.bb-saved-btn-red { border-color:#ef4444 !important; color:#ef4444 !important; }
-.bb-saved-btn-red:hover { background:rgba(239,68,68,.1) !important; }
 .bb-saved-inner { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
 .bb-saved-title { font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; color: #fff; margin: .4rem 0 .3rem; letter-spacing: -.02em; }
 .bb-saved-count { font-size: .8rem; color: #333; margin-bottom: 2.5rem; }
