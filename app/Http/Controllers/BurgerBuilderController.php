@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class BurgerBuilderController extends Controller
 {
     use AuthorizesRequests;
-    const MAX_BURGERS_PER_USER = 3;
+    const MAX_BURGERS_PER_USER = 1;
 
     public function index(): Response
     {
@@ -134,5 +134,17 @@ class BurgerBuilderController extends Controller
         ]);
 
         return redirect()->back();
+    }
+
+    public function submitForReview(CustomBurger $burger)
+    {
+        $this->authorize('update', $burger);
+
+        if (!in_array($burger->status, ['draft', 'rejected', null])) {
+            return redirect()->back()->with('error', 'See burger on juba ülevaatamisel.');
+        }
+
+        $burger->update(['status' => 'pending', 'admin_note' => null]);
+        return redirect()->back()->with('success', 'Burger saadetud adminile ülevaatamiseks!');
     }
 }

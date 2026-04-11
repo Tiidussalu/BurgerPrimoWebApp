@@ -20,6 +20,8 @@ class IngredientSeeder extends Seeder
             ['name' => 'Kana', 'category' => 'pitav', 'price' => 2.00],
             ['name' => 'Sealiha', 'category' => 'pitav', 'price' => 2.30],
             ['name' => 'Vegan pihv', 'category' => 'pitav', 'price' => 2.20],
+            ['name' => 'Grill pihv', 'category' => 'pitav', 'price' => 2.80],
+            ['name' => 'Tavaline pihv', 'category' => 'pitav', 'price' => 2.40],
             
             // Juust (Cheese)
             ['name' => 'Cheddar', 'category' => 'juust', 'price' => 0.50],

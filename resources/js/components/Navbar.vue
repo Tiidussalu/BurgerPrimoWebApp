@@ -18,7 +18,6 @@ const mobileMenuOpen = ref(false)
 const scrolled       = ref(false)
 const mounted        = ref(false)
 
-// Which anchor section is currently scrolled into view
 const activeAnchor = ref<string | null>(null)
 
 const isHomePage = computed(() => page.url === '/')
@@ -28,19 +27,16 @@ const navItems = [
   { label: 'Populaarsed',  href: '/#popular',        anchor: 'popular',       isMenuPage: false },
   { label: 'Meelelahutus', href: '/#entertainment',  anchor: 'entertainment', isMenuPage: false },
   { label: 'Kontakt',      href: '/#contact',        anchor: 'contact',       isMenuPage: false },
-  { label: 'Menüü',        href: '/menu',            anchor: null,            isMenuPage: true  },
+  { label: 'Ehita burger', href: '/burger-builder',  anchor: null,            isMenuPage: true  },
 ]
 
-// Returns true if this nav item should be highlighted
 function isActive(item: typeof navItems[0]): boolean {
-  if (item.isMenuPage) return page.url.startsWith('/menu')
+  if (item.isMenuPage) return page.url === item.href || page.url.startsWith(item.href + '/')
 
   if (!isHomePage.value) return false
 
-  // Anchor items: highlight based on scroll position
   if (item.anchor) return activeAnchor.value === item.anchor
 
-  // "Avaleht" — active when no anchor section is in view
   if (item.href === '/') return activeAnchor.value === null
 
   return false
@@ -56,7 +52,6 @@ function handleNavClick(item: typeof navItems[0], e: MouseEvent) {
   }
 }
 
-// Track which section is in view using IntersectionObserver
 let sectionObserver: IntersectionObserver | null = null
 
 function setupSectionObserver() {
@@ -69,7 +64,6 @@ function setupSectionObserver() {
 
   if (!elements.length) return
 
-  // Use a map to track which sections are visible and pick the topmost one
   const visibleSections = new Map<string, number>()
 
   sectionObserver = new IntersectionObserver(
@@ -84,10 +78,8 @@ function setupSectionObserver() {
       })
 
       if (visibleSections.size === 0) {
-        // Nothing in view — check if we're near the top
         activeAnchor.value = window.scrollY < 100 ? null : activeAnchor.value
       } else {
-        // Pick the section closest to the top of the viewport
         let topmost: string | null = null
         let topmostY = Infinity
         visibleSections.forEach((y, id) => {
@@ -97,7 +89,6 @@ function setupSectionObserver() {
       }
     },
     {
-      // Trigger when section crosses the upper 30% of viewport
       rootMargin: '-5% 0px -65% 0px',
       threshold: 0,
     }
@@ -108,7 +99,6 @@ function setupSectionObserver() {
 
 function onScroll() {
   scrolled.value = window.scrollY > 20
-  // When scrolled back to very top, clear active anchor
   if (window.scrollY < 80) activeAnchor.value = null
 }
 
@@ -151,10 +141,10 @@ const vClickOutside = {
     style="transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.6s ease, background 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;"
   >
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
-      <div class="relative flex items-center justify-between h-16 lg:h-20">
+      <div class="flex items-center justify-between h-16 lg:h-20 gap-4">
 
         <!-- Logo -->
-        <Link href="/" class="group flex items-center gap-2.5 z-10">
+        <Link href="/" class="group flex items-center gap-2.5 flex-shrink-0">
           <img
             src="/img/Logo45.png"
             alt="Burger Primo"
@@ -166,14 +156,13 @@ const vClickOutside = {
         </Link>
 
         <!-- Desktop nav -->
-        <nav class="hidden lg:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
+        <nav class="hidden lg:flex items-center gap-0">
           <template v-for="item in navItems" :key="item.href">
 
-            <!-- Menu page — full Inertia navigation -->
             <Link
               v-if="item.isMenuPage"
               :href="item.href"
-              class="relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group"
+              class="relative px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 group"
               :class="isActive(item) ? 'text-white' : 'text-gray-500 hover:text-white'"
             >
               <span class="relative z-10">{{ item.label }}</span>
@@ -187,12 +176,11 @@ const vClickOutside = {
               />
             </Link>
 
-            <!-- Anchor / home items -->
             <a
               v-else
               :href="item.href"
               @click="handleNavClick(item, $event)"
-              class="relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group cursor-pointer"
+              class="relative px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 group cursor-pointer"
               :class="isActive(item) ? 'text-white' : 'text-gray-500 hover:text-white'"
             >
               <span class="relative z-10">{{ item.label }}</span>
@@ -200,7 +188,6 @@ const vClickOutside = {
                 class="absolute inset-0 rounded-xl transition-all duration-200"
                 :class="isActive(item) ? 'bg-[#D2691E]/12' : 'bg-transparent group-hover:bg-white/5'"
               />
-              <!-- Active indicator dot -->
               <span
                 v-if="isActive(item)"
                 class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D2691E]"
@@ -211,18 +198,16 @@ const vClickOutside = {
         </nav>
 
         <!-- Right side -->
-        <div class="hidden lg:flex items-center gap-2 z-10">
-          <a
-            href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger"
-            target="_blank" rel="noopener"
-            class="btn-magnetic px-3 py-1.5 bg-[#00c2e0]/8 border border-[#00c2e0]/18 text-[#00c2e0] rounded-full text-xs font-bold hover:bg-[#00c2e0]/18 transition-all duration-200"
-          >Wolt</a>
-          <a
-            href="https://food.bolt.eu/en-US/164/p/90859-primo-burger"
-            target="_blank" rel="noopener"
-            class="btn-magnetic px-3 py-1.5 bg-[#21c93d]/8 border border-[#21c93d]/18 text-[#21c93d] rounded-full text-xs font-bold hover:bg-[#21c93d]/18 transition-all duration-200"
-          >Bolt Food</a>
-
+        <div class="hidden lg:flex items-center gap-2 flex-shrink-0">
+          <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger" target="_blank" rel="noopener"
+            class="px-2.5 py-1 bg-[#00c2e0]/8 border border-[#00c2e0]/18 text-[#00c2e0] rounded-full text-xs font-bold hover:bg-[#00c2e0]/18 transition-all duration-200">Wolt</a>
+          <a href="https://food.bolt.eu/en-US/164/p/90859-primo-burger" target="_blank" rel="noopener"
+            class="px-2.5 py-1 bg-[#21c93d]/8 border border-[#21c93d]/18 text-[#21c93d] rounded-full text-xs font-bold hover:bg-[#21c93d]/18 transition-all duration-200">Bolt</a>
+          <div class="w-px h-5 bg-white/8 mx-1" />
+          <Link href="/menu"
+            class="px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200"
+            :class="page.url.startsWith('/menu') ? 'text-white bg-white/8' : 'text-gray-500 hover:text-white hover:bg-white/5'"
+          >Menüü</Link>
           <div class="w-px h-5 bg-white/8 mx-1" />
 
           <template v-if="user">

@@ -1,205 +1,169 @@
 <script setup lang="ts">
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import { Link } from '@inertiajs/vue3';
 import { ref, onMounted } from 'vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import { Chart, registerables } from 'chart.js';
 
-interface RecentItem {
-  id: number;
-  name: string;
-  price: number;
-  is_active: boolean;
-  is_featured: boolean;
-  is_available: boolean;
-  category?: { name: string };
-  image_url?: string | null;
-}
+Chart.register(...registerables);
 
-interface DailySale  { day: number; date: string; total: number }
-interface MonthlyOrder { month: number; year: number; count: number }
-interface PopularProduct { name: string; orders: number; sold: number; price: number }
+interface DailySale { day: number; date: string; total: number; }
+interface MonthlyOrder { month: number; year: number; count: number; }
+interface PopularProduct { name: string; orders: number; sold: number; price: number; }
 
 interface Props {
-  stats: {
-    totalItems: number;
-    totalCategories: number;
-    featuredItems: number;
-    unavailableItems: number;
-    totalRevenue: number;
-    totalOrders: number;
-    growthPercentage: number;
-    pendingOrders: number;
-  };
-  recentItems: RecentItem[];
+  stats: { totalRevenue: number; totalOrders: number; growthPercentage: number; };
   dailySales: DailySale[];
   monthlyOrders: MonthlyOrder[];
   popularProducts: PopularProduct[];
 }
 
 const props = defineProps<Props>();
-const fmt = (n: number) => `€${Number(n).toFixed(2)}`;
+const weeklySalesChart = ref<HTMLCanvasElement | null>(null);
+const monthlyOrdersChart = ref<HTMLCanvasElement | null>(null);
 
-const monthNames = ['Jan','Veb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dets'];
-const dayNames   = ['E','T','K','N','R','L','P'];
+const formatCurrency = (amount: number) => `€${amount.toFixed(2)}`;
+const getMonthName  = (m: number) => ['Jaanuar','Veebruar','Märts','Aprill','Mai','Juuni','Juuli','August','September','Oktoober','November','Detsember'][m-1]||'';
+const getMonthShort = (m: number) => ['Jan','Veb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dets'][m-1]||'';
+const getDayName    = (d: number) => ['Esmaspäev','Teisipäev','Kolmapäev','Neljapäev','Reede','Laupäev','Pühapäev'][d-1]||'';
+const getDayShort   = (d: number) => ['E','T','K','N','R','L','P'][d-1]||'';
 
-// Chart bar heights
-const maxDaily   = Math.max(...(props.dailySales?.map(d => d.total) ?? [1]), 1);
-const maxMonthly = Math.max(...(props.monthlyOrders?.map(m => m.count) ?? [1]), 1);
+onMounted(() => {
+  if (weeklySalesChart.value) {
+    new Chart(weeklySalesChart.value, {
+      type: 'bar',
+      data: {
+        labels: props.dailySales.map(i => getDayShort(i.day)),
+        datasets: [{ data: props.dailySales.map(i => i.total), backgroundColor: '#ea580c', borderRadius: 6, borderSkipped: false }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: {
+          backgroundColor:'#1a1a1a', titleColor:'#fff', bodyColor:'#fff', borderColor:'#374151', borderWidth:1, padding:12, displayColors:false,
+          callbacks: {
+            title: (ctx) => getDayName(props.dailySales[ctx[0].dataIndex].day),
+            label: (ctx) => `Müük: €${(ctx.parsed.y??0).toFixed(2)}`
+          }
+        }},
+        scales: {
+          y: { beginAtZero:true, grid:{color:'#1f1f1f'}, ticks:{color:'#9ca3af', callback:(v)=>'€'+v} },
+          x: { grid:{display:false}, ticks:{color:'#9ca3af'} }
+        }
+      }
+    });
+  }
+  if (monthlyOrdersChart.value) {
+    new Chart(monthlyOrdersChart.value, {
+      type: 'line',
+      data: {
+        labels: props.monthlyOrders.map(i => getMonthShort(i.month)),
+        datasets: [{ data: props.monthlyOrders.map(i => i.count), borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.4, pointBackgroundColor:'#10b981', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:5, pointHoverRadius:7 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{display:false}, tooltip: {
+          backgroundColor:'#1a1a1a', titleColor:'#fff', bodyColor:'#fff', borderColor:'#374151', borderWidth:1, padding:12, displayColors:false,
+          callbacks: {
+            title: (ctx) => { const i = props.monthlyOrders[ctx[0].dataIndex]; return `${getMonthName(i.month)} ${i.year}`; },
+            label: (ctx) => `Tellimused: ${ctx.parsed.y}`
+          }
+        }},
+        scales: {
+          y: { beginAtZero:true, grid:{color:'#1f1f1f'}, ticks:{color:'#9ca3af', stepSize:1} },
+          x: { grid:{display:false}, ticks:{color:'#9ca3af'} }
+        }
+      }
+    });
+  }
+});
 </script>
 
 <template>
   <AdminLayout>
-    <div class="p-4 lg:p-6 space-y-6">
-      <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-white">Armatuurlaud</h1>
-        <Link
-          v-if="stats.pendingOrders > 0"
-          href="/admin/orders"
-          class="flex items-center gap-2 px-4 py-2 bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 rounded-xl text-sm font-semibold hover:bg-yellow-500/25 transition-all"
-        >
-          <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
-          {{ stats.pendingOrders }} ootel tellimust
-        </Link>
+    <template #header>
+      <h2 class="text-xl lg:text-2xl font-bold">Dashboard</h2>
+    </template>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      <div class="bg-[#111111] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition-colors">
+        <div class="flex items-start justify-between mb-4">
+          <p class="text-sm text-gray-400 font-medium">Kogu tulu</p>
+          <div class="w-10 h-10 rounded-lg bg-green-600/10 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <p class="text-3xl font-bold text-green-500 mb-1">{{ formatCurrency(stats.totalRevenue) }}</p>
+        <p class="text-xs text-gray-500">Sellel kuul</p>
       </div>
 
-      <!-- Revenue + menu stats -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="bg-[#121212] border border-[#1a1a1a] rounded-xl p-5 col-span-2 lg:col-span-1">
-          <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Kuu tulu</p>
-          <p class="text-3xl font-bold text-[#D2691E]">{{ fmt(stats.totalRevenue) }}</p>
-          <p class="text-xs mt-1" :class="stats.growthPercentage >= 0 ? 'text-green-400' : 'text-red-400'">
-            {{ stats.growthPercentage >= 0 ? '▲' : '▼' }} {{ Math.abs(stats.growthPercentage) }}% eelmisest kuust
-          </p>
+      <div class="bg-[#111111] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition-colors">
+        <div class="flex items-start justify-between mb-4">
+          <p class="text-sm text-gray-400 font-medium">Täidetud tellimused</p>
+          <div class="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+            </svg>
+          </div>
         </div>
-        <div class="bg-[#121212] border border-[#1a1a1a] rounded-xl p-5">
-          <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Kuu tellimused</p>
-          <p class="text-3xl font-bold text-white">{{ stats.totalOrders }}</p>
-        </div>
-        <div class="bg-[#121212] border border-[#1a1a1a] rounded-xl p-5">
-          <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Menüü tooteid</p>
-          <p class="text-3xl font-bold text-white">{{ stats.totalItems }}</p>
-          <p class="text-xs text-gray-600 mt-1">{{ stats.totalCategories }} kategooriat</p>
-        </div>
-        <div class="bg-[#121212] border border-[#1a1a1a] rounded-xl p-5">
-          <p class="text-gray-500 text-xs uppercase tracking-wide mb-1">Populaarsed</p>
-          <p class="text-3xl font-bold text-yellow-400">{{ stats.featuredItems }}</p>
-          <p class="text-xs text-red-400 mt-1">{{ stats.unavailableItems }} pole saadaval</p>
-        </div>
+        <p class="text-3xl font-bold mb-1">{{ stats.totalOrders }}</p>
+        <p class="text-xs text-gray-500">Sellel kuul</p>
       </div>
 
-      <!-- Charts row -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        <!-- Daily sales bar chart -->
-        <div class="bg-[#121212] border border-[#1a1a1a] rounded-xl p-5">
-          <h2 class="text-sm font-bold text-white mb-4 uppercase tracking-wide">Viimased 7 päeva müük</h2>
-          <div class="flex items-end gap-2 h-32">
-            <div
-              v-for="day in dailySales"
-              :key="day.date"
-              class="flex-1 flex flex-col items-center gap-1"
-            >
-              <span class="text-[10px] text-gray-600">{{ day.total > 0 ? fmt(day.total) : '' }}</span>
-              <div
-                class="w-full rounded-t-md bg-gradient-to-t from-[#B8571A] to-[#D2691E] transition-all min-h-[4px]"
-                :style="{ height: `${Math.max((day.total / maxDaily) * 96, 4)}px` }"
-              ></div>
-              <span class="text-[10px] text-gray-500">{{ dayNames[(day.day - 1) % 7] }}</span>
-            </div>
+      <div class="bg-[#111111] rounded-xl p-6 border border-gray-800 hover:border-gray-700 transition-colors">
+        <div class="flex items-start justify-between mb-4">
+          <p class="text-sm text-gray-400 font-medium">Kasvumäär</p>
+          <div :class="['w-10 h-10 rounded-lg flex items-center justify-center', stats.growthPercentage >= 0 ? 'bg-green-600/10' : 'bg-red-600/10']">
+            <svg v-if="stats.growthPercentage >= 0" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M12 13a1 1 0 100 2h5a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 9.414 14.586 13H12z" clip-rule="evenodd" />
+            </svg>
           </div>
         </div>
-
-        <!-- Monthly orders line-ish chart -->
-        <div class="bg-[#121212] border border-[#1a1a1a] rounded-xl p-5">
-          <h2 class="text-sm font-bold text-white mb-4 uppercase tracking-wide">Viimased 7 kuud tellimused</h2>
-          <div class="flex items-end gap-2 h-32">
-            <div
-              v-for="m in monthlyOrders"
-              :key="`${m.year}-${m.month}`"
-              class="flex-1 flex flex-col items-center gap-1"
-            >
-              <span class="text-[10px] text-gray-600">{{ m.count > 0 ? m.count : '' }}</span>
-              <div
-                class="w-full rounded-t-md bg-gradient-to-t from-blue-900 to-blue-500 transition-all min-h-[4px]"
-                :style="{ height: `${Math.max((m.count / maxMonthly) * 96, 4)}px` }"
-              ></div>
-              <span class="text-[10px] text-gray-500">{{ monthNames[m.month - 1] }}</span>
-            </div>
-          </div>
-        </div>
+        <p class="text-3xl font-bold mb-1" :class="stats.growthPercentage >= 0 ? 'text-green-500' : 'text-red-500'">
+          {{ stats.growthPercentage >= 0 ? '+' : '' }}{{ stats.growthPercentage }}%
+        </p>
+        <p class="text-xs text-gray-500">Võrreldes eelmise kuuga</p>
       </div>
-
-      <!-- Quick actions -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Link href="/admin/menu/items/create" class="bg-[#D2691E] hover:bg-[#E07A2E] text-white rounded-xl p-4 flex items-center gap-3 transition-colors">
-          <span class="text-2xl">➕</span>
-          <div>
-            <p class="font-bold">Lisa menüü toode</p>
-            <p class="text-xs text-orange-200">Loo uus toode</p>
-          </div>
-        </Link>
-        <Link href="/admin/orders" class="bg-[#121212] border border-[#1a1a1a] hover:border-[#D2691E]/40 text-white rounded-xl p-4 flex items-center gap-3 transition-colors">
-          <span class="text-2xl">📋</span>
-          <div>
-            <p class="font-bold">Tellimused</p>
-            <p class="text-xs text-gray-400">Halda tellimusi</p>
-          </div>
-        </Link>
-        <Link href="/admin/addons" class="bg-[#121212] border border-[#1a1a1a] hover:border-[#D2691E]/40 text-white rounded-xl p-4 flex items-center gap-3 transition-colors">
-          <span class="text-2xl">🥤</span>
-          <div>
-            <p class="font-bold">Lisandid</p>
-            <p class="text-xs text-gray-400">Joogid, kastmed, suurused</p>
-          </div>
-        </Link>
-      </div>
-
-      <!-- Popular products -->
-      <div v-if="popularProducts?.length > 0" class="bg-[#121212] border border-[#1a1a1a] rounded-xl overflow-hidden">
-        <div class="px-6 py-4 border-b border-[#1a1a1a]">
-          <h2 class="text-sm font-bold text-white uppercase tracking-wide">Populaarsemad tooted</h2>
-        </div>
-        <div class="divide-y divide-[#1a1a1a]">
-          <div v-for="(product, i) in popularProducts" :key="product.name" class="px-6 py-3 flex items-center gap-4">
-            <span class="text-gray-700 font-mono text-sm w-5">{{ i + 1 }}</span>
-            <div class="flex-1 min-w-0">
-              <p class="text-white text-sm font-medium truncate">{{ product.name }}</p>
-              <p class="text-gray-600 text-xs">{{ product.sold }} müüdud · {{ product.orders }} tellimust</p>
-            </div>
-            <span class="text-[#D2691E] font-bold text-sm">{{ fmt(product.price) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent items -->
-      <div class="bg-[#121212] border border-[#1a1a1a] rounded-xl overflow-hidden">
-        <div class="px-6 py-4 border-b border-[#1a1a1a] flex items-center justify-between">
-          <h2 class="text-sm font-bold text-white uppercase tracking-wide">Viimati lisatud tooted</h2>
-          <Link href="/admin/menu/items" class="text-sm text-[#D2691E] hover:underline">Vaata kõiki</Link>
-        </div>
-        <div class="divide-y divide-[#1a1a1a]">
-          <div v-for="item in recentItems" :key="item.id" class="px-6 py-4 flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg bg-[#0B0B0B] flex items-center justify-center flex-shrink-0 overflow-hidden">
-              <img v-if="item.image_url" :src="item.image_url" :alt="item.name" class="w-full h-full object-cover" />
-              <span v-else class="text-xl">🍔</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-white font-medium truncate text-sm">{{ item.name }}</p>
-              <p class="text-gray-500 text-xs">{{ item.category?.name ?? '—' }}</p>
-            </div>
-            <div class="flex items-center gap-3">
-              <span :class="['text-xs px-2 py-0.5 rounded-full font-semibold', item.is_available ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400']">
-                {{ item.is_available ? 'Saadaval' : 'Pole' }}
-              </span>
-              <span class="text-white font-bold text-sm">{{ fmt(item.price) }}</span>
-              <Link :href="`/admin/menu/items/${item.id}/edit`" class="text-gray-500 hover:text-[#D2691E] transition-colors text-sm">Muuda</Link>
-            </div>
-          </div>
-          <div v-if="!recentItems?.length" class="px-6 py-10 text-center text-gray-500 text-sm">
-            Ühtegi toodet pole veel lisatud.
-          </div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+      <div class="bg-[#111111] rounded-xl p-6 border border-gray-800">
+        <div class="mb-6"><h3 class="text-lg font-bold mb-1">Nädala müük</h3><p class="text-sm text-gray-400">Viimase 7 päeva müügitulemused</p></div>
+        <div class="h-64"><canvas ref="weeklySalesChart"></canvas></div>
+      </div>
+      <div class="bg-[#111111] rounded-xl p-6 border border-gray-800">
+        <div class="mb-6"><h3 class="text-lg font-bold mb-1">Tellimused</h3><p class="text-sm text-gray-400">Kuu tellimuste arv</p></div>
+        <div class="h-64"><canvas ref="monthlyOrdersChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Popular products -->
+    <div class="bg-[#111111] rounded-xl p-6 border border-gray-800">
+      <div class="mb-6"><h3 class="text-lg font-bold mb-1">Populaarsed tooted</h3><p class="text-sm text-gray-400">Enim müüdud tooted</p></div>
+      <div v-if="popularProducts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="product in popularProducts" :key="product.name"
+          class="bg-[#0a0a0a] rounded-lg p-4 flex items-center gap-4 border border-gray-800 hover:border-gray-700 transition-colors">
+          <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold truncate text-white">{{ product.name }}</p>
+            <p class="text-sm text-gray-400">{{ product.sold }} tükki müüdud</p>
+          </div>
+          <div class="text-right"><p class="font-bold text-orange-500">{{ formatCurrency(product.price) }}</p></div>
+        </div>
+      </div>
+      <div v-else class="text-center py-12">
+        <p class="text-gray-400 mb-1">Andmeid pole veel</p>
+        <p class="text-sm text-gray-500">Populaarsed tooted kuvatakse pärast tellimusi</p>
+      </div>
+    </div>
+
   </AdminLayout>
 </template>
