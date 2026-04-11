@@ -11,49 +11,55 @@ interface User {
 }
 
 const page = usePage()
-const user = computed(() => page.props.auth?.user as User | null)
+const user      = computed(() => page.props.auth?.user as User | null)
+const cartCount = computed(() => (page.props as any).cartCount as number ?? 0)
 
-const dropdownOpen   = ref(false)
-const mobileMenuOpen = ref(false)
-const scrolled       = ref(false)
-const mounted        = ref(false)
+const dropdownOpen     = ref(false)
+const homeDropOpen     = ref(false)
+const mobileMenuOpen   = ref(false)
+const mobileHomeOpen   = ref(false)
+const scrolled         = ref(false)
+const mounted          = ref(false)
 
-// Which anchor section is currently scrolled into view
 const activeAnchor = ref<string | null>(null)
-
 const isHomePage = computed(() => page.url === '/')
 
-const navItems = [
-  { label: 'Avaleht',      href: '/',               anchor: null,            isMenuPage: false },
-  { label: 'Populaarsed',  href: '/#popular',        anchor: 'popular',       isMenuPage: false },
-  { label: 'Meelelahutus', href: '/#entertainment',  anchor: 'entertainment', isMenuPage: false },
-  { label: 'Kontakt',      href: '/#contact',        anchor: 'contact',       isMenuPage: false },
-  { label: 'Menüü',        href: '/menu',            anchor: null,            isMenuPage: true  },
+// Anchor sub-items shown in the Avaleht dropdown
+const homeDropdownItems = [
+  { label: 'Populaarsed',  href: '/#popular',       anchor: 'popular'       },
+  { label: 'Meelelahutus', href: '/#entertainment', anchor: 'entertainment' },
+  { label: 'Kontakt',      href: '/#contact',       anchor: 'contact'       },
 ]
 
-// Returns true if this nav item should be highlighted
-function isActive(item: typeof navItems[0]): boolean {
-  if (item.isMenuPage) return page.url.startsWith('/menu')
+// Main nav items (Korv & Tellimused are icon buttons on the right side)
+const navItems = [
+  { label: 'Menüü',        href: '/menu',           isMenuPage: true },
+  { label: 'Ehita burger', href: '/burger-builder', isMenuPage: true },
+]
 
-  if (!isHomePage.value) return false
+type NavItem = typeof navItems[0]
+type DropItem = typeof homeDropdownItems[0]
 
-  // Anchor items: highlight based on scroll position
-  if (item.anchor) return activeAnchor.value === item.anchor
-
-  // "Avaleht" — active when no anchor section is in view
-  if (item.href === '/') return activeAnchor.value === null
-
-  return false
+function isActive(item: NavItem): boolean {
+  if (item.href === '/menu') return page.url.startsWith('/menu')
+  return page.url.startsWith(item.href)
 }
 
-function handleNavClick(item: typeof navItems[0], e: MouseEvent) {
-  if (item.anchor && isHomePage.value) {
-    e.preventDefault()
+function isDropActive(item: DropItem): boolean {
+  if (!isHomePage.value) return false
+  return activeAnchor.value === item.anchor
+}
+
+function handleDropClick(item: DropItem, e: MouseEvent) {
+  e.preventDefault()
+  if (isHomePage.value) {
     document.getElementById(item.anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    mobileMenuOpen.value = false
   } else {
-    mobileMenuOpen.value = false
+    window.location.href = item.href
   }
+  homeDropOpen.value   = false
+  mobileMenuOpen.value = false
+  mobileHomeOpen.value = false
 }
 
 // Track which section is in view using IntersectionObserver
@@ -64,7 +70,7 @@ function setupSectionObserver() {
 
   sectionObserver?.disconnect()
 
-  const anchors = navItems.map(i => i.anchor).filter(Boolean) as string[]
+  const anchors  = homeDropdownItems.map(i => i.anchor)
   const elements = anchors.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[]
 
   if (!elements.length) return
@@ -150,11 +156,12 @@ const vClickOutside = {
     ]"
     style="transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.6s ease, background 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
-      <div class="relative flex items-center justify-between h-16 lg:h-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-[1fr_auto_1fr] items-center h-16 lg:h-20">
 
-        <!-- Logo -->
-        <Link href="/" class="group flex items-center gap-2.5 z-10">
+        <!-- Logo + delivery links -->
+        <div class="hidden lg:flex items-center gap-2.5">
+        <Link href="/" class="group flex items-center gap-2.5 shrink-0">
           <img
             src="/img/Logo45.png"
             alt="Burger Primo"
@@ -164,66 +171,97 @@ const vClickOutside = {
             Burger <span class="text-[#D2691E] transition-all duration-300 group-hover:text-[#E87E32]">Primo</span>
           </span>
         </Link>
+        <div class="w-px h-5 bg-white/8" />
+        <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger" target="_blank" rel="noopener"
+          class="btn-magnetic px-3 py-1.5 bg-[#00c2e0]/8 border border-[#00c2e0]/18 text-[#00c2e0] rounded-full text-xs font-bold hover:bg-[#00c2e0]/18 transition-all duration-200">Wolt</a>
+        <a href="https://food.bolt.eu/en-US/164/p/90859-primo-burger" target="_blank" rel="noopener"
+          class="btn-magnetic px-3 py-1.5 bg-[#21c93d]/8 border border-[#21c93d]/18 text-[#21c93d] rounded-full text-xs font-bold hover:bg-[#21c93d]/18 transition-all duration-200">Bolt Food</a>
+        </div>
 
         <!-- Desktop nav -->
-        <nav class="hidden lg:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
-          <template v-for="item in navItems" :key="item.href">
+        <nav class="hidden lg:flex justify-center items-center gap-0.5">
 
-            <!-- Menu page — full Inertia navigation -->
+          <!-- Avaleht dropdown -->
+          <div class="relative" @mouseenter="homeDropOpen = true" @mouseleave="homeDropOpen = false">
             <Link
-              v-if="item.isMenuPage"
-              :href="item.href"
-              class="relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group"
-              :class="isActive(item) ? 'text-white' : 'text-gray-500 hover:text-white'"
+              href="/"
+              class="relative px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group flex items-center gap-1"
+              :class="isHomePage ? 'text-white' : 'text-gray-500 hover:text-white'"
             >
-              <span class="relative z-10">{{ item.label }}</span>
-              <span
-                class="absolute inset-0 rounded-xl transition-all duration-200"
-                :class="isActive(item) ? 'bg-[#D2691E]/12' : 'bg-transparent group-hover:bg-white/5'"
-              />
-              <span
-                v-if="isActive(item)"
-                class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D2691E]"
-              />
+              <span class="relative z-10">Avaleht</span>
+              <svg class="w-3 h-3 transition-transform duration-200 relative z-10" :class="{ 'rotate-180': homeDropOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+              <span class="absolute inset-0 rounded-xl transition-all duration-200" :class="isHomePage ? 'bg-[#D2691E]/12' : 'bg-transparent group-hover:bg-white/5'" />
+              <span v-if="isHomePage && !activeAnchor" class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D2691E]" />
             </Link>
-
-            <!-- Anchor / home items -->
-            <a
-              v-else
-              :href="item.href"
-              @click="handleNavClick(item, $event)"
-              class="relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 group cursor-pointer"
-              :class="isActive(item) ? 'text-white' : 'text-gray-500 hover:text-white'"
+            <Transition
+              enter-active-class="transition ease-out duration-150"
+              enter-from-class="opacity-0 scale-95 translate-y-1"
+              enter-to-class="opacity-100 scale-100 translate-y-0"
+              leave-active-class="transition ease-in duration-100"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
             >
-              <span class="relative z-10">{{ item.label }}</span>
-              <span
-                class="absolute inset-0 rounded-xl transition-all duration-200"
-                :class="isActive(item) ? 'bg-[#D2691E]/12' : 'bg-transparent group-hover:bg-white/5'"
-              />
-              <!-- Active indicator dot -->
-              <span
-                v-if="isActive(item)"
-                class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D2691E]"
-              />
-            </a>
+              <div v-if="homeDropOpen" class="absolute left-0 top-full mt-1 w-44 bg-[#0d0d0d] border border-white/8 rounded-2xl shadow-2xl shadow-black/70 py-1.5 overflow-hidden z-50">
+                <div class="h-0.5 bg-gradient-to-r from-transparent via-[#D2691E]/40 to-transparent mb-1" />
+                <a
+                  v-for="sub in homeDropdownItems"
+                  :key="sub.href"
+                  :href="sub.href"
+                  @click="handleDropClick(sub, $event)"
+                  class="flex items-center px-4 py-2.5 text-sm transition-colors cursor-pointer"
+                  :class="isDropActive(sub) ? 'text-white bg-[#D2691E]/10' : 'text-gray-400 hover:bg-white/5 hover:text-white'"
+                >{{ sub.label }}</a>
+              </div>
+            </Transition>
+          </div>
 
-          </template>
+          <!-- Page nav items (Menüü, Ehita burger) -->
+          <Link
+            v-for="item in navItems"
+            :key="item.href"
+            :href="item.href"
+            class="relative px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group"
+            :class="isActive(item) ? 'text-white' : 'text-gray-500 hover:text-white'"
+          >
+            <span class="relative z-10">{{ item.label }}</span>
+            <span class="absolute inset-0 rounded-xl transition-all duration-200" :class="isActive(item) ? 'bg-[#D2691E]/12' : 'bg-transparent group-hover:bg-white/5'" />
+            <span v-if="isActive(item)" class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D2691E]" />
+          </Link>
+
         </nav>
 
         <!-- Right side -->
-        <div class="hidden lg:flex items-center gap-2 z-10">
-          <a
-            href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger"
-            target="_blank" rel="noopener"
-            class="btn-magnetic px-3 py-1.5 bg-[#00c2e0]/8 border border-[#00c2e0]/18 text-[#00c2e0] rounded-full text-xs font-bold hover:bg-[#00c2e0]/18 transition-all duration-200"
-          >Wolt</a>
-          <a
-            href="https://food.bolt.eu/en-US/164/p/90859-primo-burger"
-            target="_blank" rel="noopener"
-            class="btn-magnetic px-3 py-1.5 bg-[#21c93d]/8 border border-[#21c93d]/18 text-[#21c93d] rounded-full text-xs font-bold hover:bg-[#21c93d]/18 transition-all duration-200"
-          >Bolt Food</a>
+        <div class="hidden lg:flex items-center gap-1.5 justify-end">
 
-          <div class="w-px h-5 bg-white/8 mx-1" />
+          <!-- Korv & Tellimused icon buttons -->
+          <Link
+            href="/cart"
+            class="relative p-2 rounded-xl hover:text-white hover:bg-white/5 transition-all duration-200"
+            :class="page.url.startsWith('/cart') ? 'text-white bg-white/5' : (cartCount > 0 ? 'text-[#D2691E]' : 'text-gray-500')"
+            title="Korv"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6h11" />
+            </svg>
+            <span
+              v-if="cartCount > 0"
+              class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#D2691E] text-white text-[9px] font-black flex items-center justify-center leading-none"
+            >{{ cartCount > 9 ? '9+' : cartCount }}</span>
+          </Link>
+          <Link
+            href="/orders"
+            class="relative p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition-all duration-200"
+            :class="page.url.startsWith('/orders') ? 'text-white bg-white/5' : ''"
+            title="Tellimused"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </Link>
+
+          <div class="w-px h-5 bg-white/8 mx-0.5" />
 
           <template v-if="user">
             <Link
@@ -311,26 +349,38 @@ const vClickOutside = {
     >
       <div v-if="mobileMenuOpen" class="lg:hidden border-t border-white/6 bg-[#080808]/98 backdrop-blur-xl w-full overflow-hidden">
         <div class="px-4 py-5 space-y-1">
-          <template v-for="item in navItems" :key="item.href">
-            <Link
-              v-if="item.isMenuPage"
-              :href="item.href"
-              @click="mobileMenuOpen = false"
-              class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
-              :class="isActive(item) ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'"
-            >
-              {{ item.label }}
-            </Link>
+
+          <!-- Avaleht expandable -->
+          <button
+            @click="mobileHomeOpen = !mobileHomeOpen"
+            class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+            :class="isHomePage ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'"
+          >
+            Avaleht
+            <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': mobileHomeOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div v-if="mobileHomeOpen" class="pl-4 space-y-0.5">
             <a
-              v-else
-              :href="item.href"
-              @click="handleNavClick(item, $event)"
-              class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer"
-              :class="isActive(item) ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'"
-            >
-              {{ item.label }}
-            </a>
-          </template>
+              v-for="sub in homeDropdownItems"
+              :key="sub.href"
+              :href="sub.href"
+              @click="handleDropClick(sub, $event)"
+              class="flex items-center px-4 py-2.5 rounded-xl text-sm transition-all cursor-pointer"
+              :class="isDropActive(sub) ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'"
+            >{{ sub.label }}</a>
+          </div>
+
+          <!-- Other nav items -->
+          <Link
+            v-for="item in navItems"
+            :key="item.href"
+            :href="item.href"
+            @click="mobileMenuOpen = false"
+            class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+            :class="isActive(item) ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'"
+          >{{ item.label }}</Link>
 
           <div class="flex gap-2 px-4 pt-3 pb-1">
             <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger" target="_blank" class="px-3 py-1.5 bg-[#00c2e0]/8 border border-[#00c2e0]/15 text-[#00c2e0] rounded-full text-xs font-bold">Wolt</a>
