@@ -1,7 +1,6 @@
 <template>
   <MainLayout>
     <div class="bb-root">
-
       <div class="bb-page-header">
         <div class="bb-page-header-inner">
           <p class="bb-eyebrow">Burger Primo</p>
@@ -9,6 +8,27 @@
           <p class="bb-page-sub">Vali koostisosad ja loo oma unistuste burger</p>
         </div>
       </div>
+
+      <!-- KIIRTELLIMUS RIBA -->
+      <section v-if="favoriteBurgers.length > 0" class="bb-quick">
+        <div class="bb-quick-inner">
+          <p class="bb-quick-label">⚡ Kiirtellimus</p>
+          <div class="bb-quick-scroll">
+            <div v-for="burger in favoriteBurgers" :key="burger.id" class="bb-quick-card">
+              <div class="bb-quick-card-info">
+                <span class="bb-quick-card-name">{{ burger.name }}</span>
+                <span class="bb-quick-card-price">{{ Number(burger.total_price).toFixed(2) }}€</span>
+              </div>
+              <button
+                v-if="burger.status === 'approved'"
+                @click="quickOrder(burger)"
+                class="bb-quick-btn"
+              >🛒 Telli</button>
+              <span v-else class="bb-quick-pending">{{ statusLabel(burger.status) }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section id="bb-builder" class="bb-builder">
         <div class="bb-left">
@@ -84,13 +104,11 @@
                   <g v-else-if="L.t==='t'">
                     <rect x="18" :y="L.y+L.h*0.58" width="224" :height="L.h*0.46" rx="3" :fill="L.s"/>
                     <rect x="18" :y="L.y" width="224" :height="L.h" rx="5" :fill="L.c"/>
-                    <line v-for="x in [70,112,154,196]" :key="x" :x1="x" :y1="L.y+1" :x2="x" :y2="L.y+L.h-1" stroke="rgba(255,158,140,0.28)" stroke-width="1.2"/>
                     <ellipse v-for="x in [56,98,136,175]" :key="x" :cx="x" :cy="L.y+L.h/2" rx="4.5" ry="2" fill="rgba(255,242,220,0.28)"/>
                   </g>
                   <g v-else-if="L.t==='k'">
                     <rect x="16" :y="L.y+L.h*0.58" width="228" :height="L.h*0.46" rx="3" fill="#1E5808"/>
                     <rect x="16" :y="L.y" width="228" :height="L.h" rx="4" :fill="L.c"/>
-                    <line v-for="n in 6" :key="n" :x1="20+n*32" :y1="L.y+1" :x2="19+n*32" :y2="L.y+L.h-1" stroke="rgba(15,65,5,0.28)" stroke-width="1"/>
                   </g>
                   <g v-else-if="L.t==='o'">
                     <ellipse cx="70"  :cy="L.y+L.h/2" rx="50" :ry="L.h/2+1" fill="rgba(185,65,205,0.1)" stroke="#CC68E0" stroke-width="3.5"/>
@@ -114,7 +132,6 @@
                   <rect x="28" :y="svgBotY+18" width="204" height="8" rx="3" fill="#361002"/>
                   <rect x="28" :y="svgBotY"    width="204" height="22" rx="9" fill="url(#gBB)"/>
                   <ellipse cx="102" :cy="svgBotY+8" rx="46" ry="6" fill="rgba(255,208,115,0.17)"/>
-                  <ellipse v-for="s in bseeds" :key="s.x" :cx="s.x" :cy="svgBotY+s.d" :rx="s.w" :ry="s.h" :transform="`rotate(${s.r},${s.x},${svgBotY+s.d})`" fill="url(#gSd)"/>
                 </g>
               </svg>
             </div>
@@ -133,6 +150,12 @@
               <span>Kokku</span>
               <span class="bb-price-total">{{ totalPrice.toFixed(2) }}€</span>
             </div>
+
+            <button v-if="customBurgers?.length > 0" @click="scrollToSaved" class="bb-my-burgers-btn">
+              <span>🍔</span>
+              <span>Minu burgerid</span>
+              <span class="bb-my-burgers-count">{{ customBurgers.length }}</span>
+            </button>
           </div>
         </div>
 
@@ -145,60 +168,40 @@
             <input v-model="burgerName" type="text" placeholder="nt. Robby's Special..." class="bb-name-input"/>
           </div>
           <div class="bb-section" v-if="normalizedIngredients['pitav']?.length">
-            <div class="bb-section-header">
-              <span class="bb-section-num">02</span>
-              <h2 class="bb-section-title">Pihvid</h2>
-              <span class="bb-section-hint">vali kuni 2</span>
-            </div>
+            <div class="bb-section-header"><span class="bb-section-num">02</span><h2 class="bb-section-title">Pihvid</h2><span class="bb-section-hint">vali kuni 2</span></div>
             <div class="bb-grid">
               <div v-for="ing in normalizedIngredients['pitav']" :key="ing.id" class="bb-card" :class="{ 'bb-card--active': isSelected('pitav', ing.id) }" @click="togglePatty(ing.id)">
-                <div class="bb-card-icon">🥩</div>
-                <div class="bb-card-name">{{ ing.name }}</div>
+                <div class="bb-card-icon">🥩</div><div class="bb-card-name">{{ ing.name }}</div>
                 <div class="bb-card-price">{{ Number(ing.price).toFixed(2) }}€</div>
                 <div class="bb-card-check" v-if="isSelected('pitav', ing.id)">✓</div>
               </div>
             </div>
           </div>
           <div class="bb-section" v-if="normalizedIngredients['salat']?.length">
-            <div class="bb-section-header">
-              <span class="bb-section-num">03</span>
-              <h2 class="bb-section-title">Köögiviljad</h2>
-              <span class="bb-section-hint">vali mitu</span>
-            </div>
+            <div class="bb-section-header"><span class="bb-section-num">03</span><h2 class="bb-section-title">Köögiviljad</h2><span class="bb-section-hint">vali mitu</span></div>
             <div class="bb-grid">
               <div v-for="ing in normalizedIngredients['salat']" :key="ing.id" class="bb-card" :class="{ 'bb-card--active': isSelected('salat', ing.id) }" @click="toggleMulti('salat', ing.id)">
-                <div class="bb-card-icon">🥬</div>
-                <div class="bb-card-name">{{ ing.name }}</div>
+                <div class="bb-card-icon">🥬</div><div class="bb-card-name">{{ ing.name }}</div>
                 <div class="bb-card-price">{{ Number(ing.price).toFixed(2) }}€</div>
                 <div class="bb-card-check" v-if="isSelected('salat', ing.id)">✓</div>
               </div>
             </div>
           </div>
           <div class="bb-section" v-if="normalizedIngredients['lisand']?.length">
-            <div class="bb-section-header">
-              <span class="bb-section-num">04</span>
-              <h2 class="bb-section-title">Kastmed & lisandid</h2>
-              <span class="bb-section-hint">vali mitu</span>
-            </div>
+            <div class="bb-section-header"><span class="bb-section-num">04</span><h2 class="bb-section-title">Kastmed & lisandid</h2><span class="bb-section-hint">vali mitu</span></div>
             <div class="bb-grid">
               <div v-for="ing in normalizedIngredients['lisand']" :key="ing.id" class="bb-card" :class="{ 'bb-card--active': isSelected('lisand', ing.id) }" @click="toggleMulti('lisand', ing.id)">
-                <div class="bb-card-icon">🫙</div>
-                <div class="bb-card-name">{{ ing.name }}</div>
+                <div class="bb-card-icon">🫙</div><div class="bb-card-name">{{ ing.name }}</div>
                 <div class="bb-card-price">{{ Number(ing.price).toFixed(2) }}€</div>
                 <div class="bb-card-check" v-if="isSelected('lisand', ing.id)">✓</div>
               </div>
             </div>
           </div>
           <div class="bb-section" v-if="normalizedIngredients['juust']?.length">
-            <div class="bb-section-header">
-              <span class="bb-section-num">05</span>
-              <h2 class="bb-section-title">Juust</h2>
-              <span class="bb-section-hint">vali mitu</span>
-            </div>
+            <div class="bb-section-header"><span class="bb-section-num">05</span><h2 class="bb-section-title">Juust</h2><span class="bb-section-hint">vali mitu</span></div>
             <div class="bb-grid">
               <div v-for="ing in normalizedIngredients['juust']" :key="ing.id" class="bb-card" :class="{ 'bb-card--active': isSelected('juust', ing.id) }" @click="toggleMulti('juust', ing.id)">
-                <div class="bb-card-icon">🧀</div>
-                <div class="bb-card-name">{{ ing.name }}</div>
+                <div class="bb-card-icon">🧀</div><div class="bb-card-name">{{ ing.name }}</div>
                 <div class="bb-card-price">{{ Number(ing.price).toFixed(2) }}€</div>
                 <div class="bb-card-check" v-if="isSelected('juust', ing.id)">✓</div>
               </div>
@@ -211,15 +214,16 @@
             </div>
             <div class="bb-actions-btns">
               <button @click="saveBurger(false)" :disabled="!canSave" class="bb-btn-secondary">Salvesta</button>
-              <button @click="saveBurger(true)"  :disabled="!canSave" class="bb-btn-secondary">♥ Lemmik</button>
               <button @click="saveAndSubmit()"   :disabled="!canSave" class="bb-btn-review">Saada adminile ↗</button>
             </div>
           </div>
         </div>
       </section>
 
-      <section v-if="customBurgers?.length > 0" class="bb-saved">
+      <section v-if="customBurgers?.length > 0" class="bb-saved" id="my-burgers">
         <div class="bb-saved-inner">
+          <h2 class="bb-saved-title">Minu burgerid</h2>
+          <p class="bb-saved-count">{{ customBurgers.length }} burger{{ customBurgers.length !== 1 ? "it" : "" }} salvestatud</p>
           <div class="bb-saved-grid">
             <div v-for="burger in customBurgers" :key="burger.id" class="bb-saved-card">
               <div class="bb-saved-card-header">
@@ -229,9 +233,9 @@
               <p class="bb-saved-card-price">{{ Number(burger.total_price).toFixed(2) }}€</p>
               <div v-if="burger.status === 'rejected' && burger.admin_note" class="bb-rejected-note">💬 {{ burger.admin_note }}</div>
               <div class="bb-saved-card-btns">
-                <button @click="toggleBurgerFavorite(burger.id, burger.is_favorite)" class="bb-saved-btn bb-saved-btn-fav" :class="{ 'bb-saved-btn-fav--active': burger.is_favorite }">{{ burger.is_favorite ? '♥' : '♡' }}</button>
+                <button @click="toggleBurgerFavorite(burger.id, burger.is_favorite)" class="bb-saved-btn bb-saved-btn-fav" :class="{ 'bb-saved-btn-fav--active': burger.is_favorite }" :title="burger.is_favorite ? 'Eemalda lemmikutest' : 'Lisa kiirtellimusse'">{{ burger.is_favorite ? '♥' : '♡' }}</button>
                 <button @click="loadBurger(burger)" class="bb-saved-btn">Muuda</button>
-                <button @click="quickOrder(burger)" class="bb-saved-btn bb-saved-btn-green">🛒 Telli</button>
+                <button v-if="burger.status === 'approved'" @click="quickOrder(burger)" class="bb-saved-btn bb-saved-btn-green">🛒 Telli</button>
                 <button v-if="burger.status === 'draft' || burger.status === 'rejected'" @click="submitForReviewById(burger.id)" class="bb-saved-btn bb-saved-btn-orange">Saada adminile ↗</button>
                 <span v-if="burger.status === 'pending'" class="bb-saved-pending-hint">Ootab kinnitust...</span>
                 <button @click="deleteBurger(burger.id)" class="bb-saved-btn bb-saved-btn-red">✕</button>
@@ -240,16 +244,14 @@
           </div>
         </div>
       </section>
-
     </div>
   </MainLayout>
 </template>
 
 <script setup lang="ts">
 import MainLayout from '@/layouts/MainLayout.vue';
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
-import CustomBurgerCard from '@/components/CustomBurgerCard.vue';
 import type { Ingredient, SelectedIngredient, CustomBurger } from '@/types/burger-types';
 
 interface Props {
@@ -259,8 +261,9 @@ interface Props {
   maxBurgers: number;
 }
 const props = defineProps<Props>();
+const success = (msg: string) => console.log('✅', msg);
+const error   = (msg: string) => console.error('❌', msg);
 
-// Normaliseeri ingredients
 const normalizedIngredients = computed(() => {
   const raw = props.ingredients as any;
   if (!raw) return {};
@@ -272,48 +275,29 @@ const normalizedIngredients = computed(() => {
   });
   return result;
 });
-
 const getAllIngredients = () => Object.values(normalizedIngredients.value).flat() as Ingredient[];
 
-// State
 const burgerName = ref('');
 const selectedIngredients = ref<Record<string, SelectedIngredient[]>>({
   'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [],
 });
 
-// Toggle helpers
 const isSelected = (cat: string, id: number) =>
   selectedIngredients.value[cat]?.some(i => i.id === id) ?? false;
-
-const toggleOne = (cat: string, id: number) => {
-  if (isSelected(cat, id)) {
-    selectedIngredients.value[cat] = [];
-  } else {
-    selectedIngredients.value[cat] = [{ id, quantity: 1 }];
-  }
-};
 
 const togglePatty = (id: number) => {
   const arr = selectedIngredients.value['pitav'] ?? [];
   const idx = arr.findIndex(i => i.id === id);
-  if (idx >= 0) {
-    selectedIngredients.value['pitav'] = arr.filter(i => i.id !== id);
-  } else if (arr.length < 2) {
-    selectedIngredients.value['pitav'] = [...arr, { id, quantity: 1 }];
-  }
+  if (idx >= 0) selectedIngredients.value['pitav'] = arr.filter(i => i.id !== id);
+  else if (arr.length < 2) selectedIngredients.value['pitav'] = [...arr, { id, quantity: 1 }];
 };
-
 const toggleMulti = (cat: string, id: number) => {
   const arr = selectedIngredients.value[cat] ?? [];
   const idx = arr.findIndex(i => i.id === id);
-  if (idx >= 0) {
-    selectedIngredients.value[cat] = arr.filter(i => i.id !== id);
-  } else {
-    selectedIngredients.value[cat] = [...arr, { id, quantity: 1 }];
-  }
+  if (idx >= 0) selectedIngredients.value[cat] = arr.filter(i => i.id !== id);
+  else selectedIngredients.value[cat] = [...arr, { id, quantity: 1 }];
 };
 
-// Computed
 const allSelectedFlat = computed(() => {
   const result: { id: number; name: string; price: number; quantity: number; category: string }[] = [];
   Object.entries(selectedIngredients.value).forEach(([cat, items]) => {
@@ -324,62 +308,43 @@ const allSelectedFlat = computed(() => {
   });
   return result;
 });
-
 const totalLayers = computed(() => allSelectedFlat.value.length);
-const totalPrice = computed(() => allSelectedFlat.value.reduce((t, i) => t + i.price * i.quantity, 0));
-const canSave = computed(() => burgerName.value.trim() !== '' && totalLayers.value > 0);
+const totalPrice  = computed(() => allSelectedFlat.value.reduce((t, i) => t + i.price * i.quantity, 0));
+const favoriteBurgers = computed(() => (props.customBurgers ?? []).filter(b => b.is_favorite));
+const canSave     = computed(() => burgerName.value.trim() !== '' && totalLayers.value > 0);
 
 const categoryColor = (cat: string) => {
   const map: Record<string, string> = {
-    'vöi': '#D4822E', 'pitav': '#8B4513', 'salat': '#4CAF50',
-    'lisand': '#FDD835', 'juust': '#F9A825',
+    'vöi': '#D4822E', 'pitav': '#8B4513', 'salat': '#4CAF50', 'lisand': '#FDD835', 'juust': '#F9A825',
   };
   return map[cat] ?? '#666';
 };
 
-// Layer positioning
-const salatCount = computed(() => selectedIngredients.value['salat']?.length ?? 0);
-const juustCount = computed(() => selectedIngredients.value['juust']?.length ?? 0);
-const pitavCount = computed(() => selectedIngredients.value['pitav']?.length ?? 0);
-const lisandCount = computed(() => selectedIngredients.value['lisand']?.length ?? 0);
-
-
-
-
-// Router
 const getAllSelected = (): SelectedIngredient[] => {
   const all: SelectedIngredient[] = [];
   Object.values(selectedIngredients.value).forEach(i => all.push(...i));
   return all;
 };
+
 const saveBurger = (fav: boolean) => {
   if (!props.canCreateMore) { alert(`Limit: ${props.maxBurgers}`); return; }
-  router.post('/burger-builder', { name: burgerName.value, ingredients: getAllSelected(), is_favorite: fav } as any);
-};
-const orderBurger = () => router.post('/cart/add-new', { name: burgerName.value, ingredients: getAllSelected() } as any, {
-  onSuccess: () => router.visit('/cart'),
-});
-const submitForReviewById = (id: number) => {
-  router.post(`/burger-builder/${id}/submit`, {}, { preserveScroll: true });
-};
-
-const statusLabel = (status: string) => {
-  const map: Record<string, string> = {
-    draft: 'Mustand', pending: 'Ootab kinnitust',
-    approved: 'Kinnitatud', rejected: 'Tagasi lükatud',
-  };
-  return map[status] ?? status;
+  router.post('/burger-builder', { name: burgerName.value, ingredients: getAllSelected(), is_favorite: fav } as any, {
+    preserveScroll: true,
+    onSuccess: () => {
+      success('Burger salvestatud! 🍔');
+      burgerName.value = '';
+      selectedIngredients.value = { 'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [] };
+      setTimeout(() => scrollToSaved(), 400);
+    },
+    onError: () => error('Salvestamine ebaõnnestus'),
+  });
 };
 
 const saveAndSubmit = () => {
   if (!canSave.value) return;
   if (!props.canCreateMore) { alert(`Limit: ${props.maxBurgers}`); return; }
-  // Salvesta ja saada kohe adminile — üks POST
   router.post('/burger-builder', {
-    name: burgerName.value,
-    ingredients: getAllSelected(),
-    is_favorite: false,
-    submit_for_review: true,
+    name: burgerName.value, ingredients: getAllSelected(), is_favorite: false, submit_for_review: true,
   } as any, {
     preserveScroll: true,
     onSuccess: () => {
@@ -389,23 +354,9 @@ const saveAndSubmit = () => {
   });
 };
 
-const submitForReview = () => {
-  if (!props.canCreateMore && !burgerName.value.trim()) return;
-  // Salvesta ja saada kohe adminile
-  router.post('/burger-builder', {
-    name: burgerName.value,
-    ingredients: getAllSelected(),
-    is_favorite: false,
-    submit_for_review: true,
-  } as any, {
-    onSuccess: () => {
-      burgerName.value = '';
-      selectedIngredients.value = { 'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [] };
-    }
-  });
-};
+const submitForReviewById = (id: number) => router.post(`/burger-builder/${id}/submit`, {}, { preserveScroll: true });
+const statusLabel = (status: string) => ({ draft:'Mustand', pending:'Ootab kinnitust', approved:'Kinnitatud', rejected:'Tagasi lükatud' }[status] ?? status);
 
-// Kiirtellimus — lisab salvestatud burgeri otse korvi ilma admin kinnituseta
 const quickOrder = (burger: CustomBurger) => {
   router.post('/cart/add-new', {
     name: burger.name,
@@ -415,38 +366,30 @@ const quickOrder = (burger: CustomBurger) => {
     onError: () => error('Korvi lisamine ebaõnnestus'),
   });
 };
-
 const toggleBurgerFavorite = (id: number, current: boolean) => {
   router.post(`/burger-builder/${id}/favorite`, {}, {
     preserveScroll: true,
     onSuccess: () => success(current ? 'Eemaldatud lemmikutest' : '♥ Lisatud lemmikusse'),
   });
 };
-
-const orderSavedBurger = (id: number) => router.post('/cart/add', { burger_id: id, quantity: 1 } as any, {
-  onSuccess: () => router.visit('/cart'),
-});
 const deleteBurger = (id: number) => router.delete(`/burger-builder/${id}`, { preserveScroll: true });
 const loadBurger = (burger: CustomBurger) => {
   burgerName.value = burger.name;
   selectedIngredients.value = { 'vöi': [], 'pitav': [], 'salat': [], 'lisand': [], 'juust': [] };
   burger.ingredients.forEach(ing => {
     const cat = ing.category;
-    if (selectedIngredients.value[cat])
-      selectedIngredients.value[cat].push({ id: ing.id, quantity: ing.pivot.quantity });
+    if (selectedIngredients.value[cat]) selectedIngredients.value[cat].push({ id: ing.id, quantity: ing.pivot.quantity });
   });
 };
-
-// Canvas refs
-
-
-
+const scrollToSaved = () => {
+  document.getElementById('my-burgers')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
 
 // ═══ SVG BURGER ═══
-const BUN_DOME = 62  // top bun dome height
-const BOT_H    = 22  // bottom bun height
-const RIM_H    = 10  // top bun rim thickness
-const START_Y  = 8   // top of SVG content
+const BUN_DOME = 62
+const BOT_H    = 22
+const RIM_H    = 10
+const START_Y  = 8
 const GAP      = 2
 
 interface SL { t:string; y:number; h:number; c:string; s:string; }
@@ -458,7 +401,6 @@ function mkL(): SL[] {
   const ju = selectedIngredients.value['juust']??[]
   const pi = selectedIngredients.value['pitav']??[]
   const push = (t:string,h:number,c:string,s:string) => out.push({t,y:0,h,c,s})
-
   if(pi.length>=2){
     push('p',20,pC(pi[0]),pS())
     ju.forEach(x=>{const n=gn(x.id);push('c',7,cC(n),cS(n))})
@@ -475,66 +417,56 @@ function mkL(): SL[] {
     sa.forEach(x=>{const n=gn(x.id);const[t,h,c,s]=vD(n);push(t,h,c,s)})
     li.forEach(x=>{const n=gn(x.id);push('s',6,sC(n),sS(n))})
   }
-
-  // Y: start just below top bun rim
   let y = START_Y + BUN_DOME + RIM_H + GAP
   for(const l of out){ l.y=y; y+=l.h+GAP }
   return out
 }
-
-function gn(id:number):string{
-  return getAllIngredients().find(i=>i.id===id)?.name?.toLowerCase()??''
-}
+function gn(id:number):string{ return getAllIngredients().find(i=>i.id===id)?.name?.toLowerCase()??'' }
 function pC(item:{id:number}):string{
   const n=gn(item.id)
   if(n.includes('kana'))  return '#A87040'
   if(n.includes('vegan')) return '#607830'
-  if(n.includes('grill')) return '#602010'
+  if(n.includes('grill')) return '#5E1E08'
   if(n.includes('veise')) return '#8A3418'
-  return '#904018'
+  return '#8C3C16'
 }
-function pS():string{return '#2A0802'}
-function cC(n:string):string{if(n.includes('mozzarella'))return '#F5EEE0';if(n.includes('blue'))return '#A8B8C8';return '#EDB015'}
-function cS(n:string):string{if(n.includes('mozzarella'))return '#CCBCA0';if(n.includes('blue'))return '#6878900';return '#A87808'}
+function pS():string{return '#1C0402'}
+function cC(n:string):string{if(n.includes('mozzarella'))return '#F5EEE0';if(n.includes('blue'))return '#A8B8C8';return '#E8A40E'}
+function cS(n:string):string{if(n.includes('mozzarella'))return '#CCBCA0';if(n.includes('blue'))return '#687899';return '#A07208'}
 function vD(n:string):[string,number,string,string]{
-  if(n.includes('tomat'))return ['t',13,'#CC2818','#801010']
-  if(n.includes('kurk')) return ['k',9, '#5A9820','#1E5808']
+  if(n.includes('tomat'))return ['t',13,'#C01008','#700404']
+  if(n.includes('kurk')) return ['k',9,'#559018','#185808']
   if(n.includes('sibul')||n.includes('kastrull'))return ['o',11,'transparent','transparent']
-  if(n.includes('avocado'))return ['a',10,'#6A9E20','#305008']
-  return ['l',13,'#3A9818','#1A4E08']
+  if(n.includes('avocado'))return ['a',10,'#6A9818','#2E4E08']
+  return ['l',13,'#389A0C','#145C08']
 }
 function sC(n:string):string{
-  if(n.includes('ketšup'))  return '#C02018'
-  if(n.includes('majonees'))return '#F5F5E5'
-  if(n.includes('bbq'))     return '#601408'
-  if(n.includes('chipotle'))return '#A02808'
-  if(n.includes('peekon'))  return '#A81E1E'
-  if(n.includes('muna'))    return '#DCB818'
-  return '#C89808'
+  if(n.includes('ketšup'))  return '#BE1808'
+  if(n.includes('majonees'))return '#F2F2E4'
+  if(n.includes('bbq'))     return '#5C1208'
+  if(n.includes('chipotle'))return '#9C2608'
+  if(n.includes('peekon'))  return '#A41C1C'
+  if(n.includes('muna'))    return '#D8B218'
+  return '#C49008'
 }
 function sS(n:string):string{
-  if(n.includes('ketšup'))  return '#720808'
+  if(n.includes('ketšup'))  return '#600606'
   if(n.includes('majonees'))return '#C0C098'
-  return '#907008'
+  return '#8C6808'
 }
-
-// lettuce wavy path
 function lp(y:number, back:boolean):string{
-  const b = back ? y+6 : y+1
+  const b = back ? y+5 : y
   return `M14,${b+8} Q34,${b} 54,${b+7} Q74,${b+15} 94,${b+3} Q114,${b-8} 134,${b+3} Q154,${b+14} 174,${b+1} Q194,${b-9} 214,${b-1} Q234,${b+9} 254,${b+1} L254,${b+13} Q234,${b+21} 214,${b+11} Q194,${b+23} 174,${b+13} Q154,${b+26} 134,${b+13} Q114,${b+1} 94,${b+15} Q74,${b+27} 54,${b+15} Q34,${b+5} 14,${b+16} Z`
 }
 
-const layers3 = computed(()=>mkL())
-
+const layers3   = computed(()=>mkL())
 const svgTopRim = computed(()=> START_Y + BUN_DOME)
-
-const svgBotY = computed(()=>{
-  const ls = layers3.value
+const svgBotY   = computed(()=>{
+  const ls=layers3.value
   if(!ls.length) return svgTopRim.value + RIM_H + GAP + 4
-  const last = ls[ls.length-1]
+  const last=ls[ls.length-1]
   return last.y + last.h + GAP + 4
 })
-
 const svgH = computed(()=> svgBotY.value + BOT_H + 14)
 
 const seeds = [
@@ -546,332 +478,82 @@ const seeds = [
   {x:130,d:46, w:6.5,h:3.1,r:-14},
   {x:161,d:44, w:6.5,h:3.1,r:16},
 ]
-const bseeds = [
-  {x:94, d:8, w:6.5,h:3.1,r:-18},
-  {x:125,d:4, w:6.5,h:3.1,r:5},
-  {x:154,d:3, w:6.5,h:3.1,r:0},
-  {x:182,d:4, w:6.5,h:3.1,r:-5},
-  {x:206,d:7, w:6.5,h:3.1,r:15},
-]
 
 onMounted(async () => {});
-
-
-
 </script>
 
 <style scoped>
 * { box-sizing: border-box; }
 .bb-root { background: #0B0B0B; color: #fff; min-height: 100vh; }
-
-/* ── PAGE HEADER ── */
-.bb-page-header {
-  background: #0B0B0B;
-  border-bottom: 1px solid #141414;
-  padding: 4rem 3rem 3rem;
-}
-.bb-page-header-inner {
-  max-width: 1300px;
-  margin: 0 auto;
-}
-.bb-eyebrow {
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: #D2691E;
-  margin-bottom: .75rem;
-  display: block;
-}
-.bb-page-title {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: -.02em;
-  margin-bottom: .5rem;
-}
-.bb-page-sub {
-  font-size: 1rem;
-  color: #555;
-}
-
-/* ── BUILDER ── */
-.bb-builder {
-  display: grid;
-  grid-template-columns: 420px 1fr;
-  align-items: start;
-  border-bottom: 1px solid #141414;
-}
-@media (max-width: 960px) { .bb-builder { grid-template-columns: 1fr; } }
-
-/* LEFT */
-.bb-left {
-  border-right: 1px solid #141414;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: hidden;
-}
-.bb-burger-panel {
-  height: 100%;
-  overflow-y: auto;
-  padding: 2.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  scrollbar-width: none;
-}
-.bb-burger-panel::-webkit-scrollbar { display: none; }
-.bb-burger-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.bb-burger-name-display {
-  font-size: .8rem;
-  color: #D2691E;
-  font-weight: 600;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Burger visuaal */
-.bb-burger-visual {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  padding: 12px 0;
-  background: radial-gradient(ellipse at 50% 78%, rgba(180,80,10,0.1) 0%, transparent 62%);
-  border-radius: 12px;
-}
-
-.bb-burger-glow { display: none; }
-.bb-burger-stack {
-  position: relative;
-  width: 248px;
-  margin: 4px auto 0;
-  filter: drop-shadow(0 16px 32px rgba(180,90,10,0.35));
-  transform-origin: top center;
-}
-.bb-burger-shadow {
-  position: absolute;
-  bottom: -8px; left: 50%;
-  width: 260px; height: 16px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(150,70,8,0.55) 0%, transparent 70%);
-  transition: opacity .3s, transform .3s;
-}
-.bb-layer {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-.bb-layer-topbun { top: 2px; width: 248px; }
-.bb-layer-botbun { width: 248px; transition: top .3s ease; }
-.bb-layer-animate {
-  transition: top .25s ease;
-  animation: layerIn .35s cubic-bezier(.22,1,.36,1);
-}
-@keyframes layerIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(-18px) scaleX(.88); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0) scaleX(1); }
-}
-
-/* Ingredient list */
-.bb-ingredient-list {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  border-top: 1px solid #161616;
-  padding-top: 1rem;
-}
-.bb-ing-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 0;
-  border-bottom: 1px solid #0e0e0e;
-}
-.bb-ing-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.bb-ing-name { flex: 1; font-size: .85rem; color: #aaa; }
-.bb-ing-qty  { font-size: .75rem; color: #444; }
-.bb-ing-price { font-size: .85rem; color: #D2691E; font-weight: 600; min-width: 46px; text-align: right; }
-.bb-ing-empty { font-size: .85rem; color: #333; padding: .5rem 0; }
-
-.bb-price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: .75rem 0 0;
-  border-top: 1px solid #1a1a1a;
-  font-size: .75rem;
-  color: #555;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-}
-.bb-price-total { font-size: 1.8rem; font-weight: 900; color: #D2691E; }
-
-/* RIGHT */
-.bb-right {
-  padding: 3rem 3rem 6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-}
-@media (max-width: 960px) { .bb-right { padding: 2rem 1.5rem 4rem; } }
-
-.bb-section {}
-.bb-section-header {
-  display: flex;
-  align-items: baseline;
-  gap: 1rem;
-  margin-bottom: 1.2rem;
-  padding-bottom: .8rem;
-  border-bottom: 1px solid #141414;
-}
-.bb-section-num {
-  font-size: .72rem;
-  font-weight: 700;
-  color: #D2691E;
-  letter-spacing: .1em;
-}
-.bb-section-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #fff;
-  flex: 1;
-}
-.bb-section-hint {
-  font-size: .7rem;
-  color: #333;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.bb-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
-}
-
-/* Cards */
-.bb-card {
-  background: #111;
-  border: 1px solid #1c1c1c;
-  border-radius: 8px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: border-color .18s, background .18s, transform .14s;
-  position: relative;
-  user-select: none;
-}
-.bb-card:hover {
-  border-color: #2a2a2a;
-  background: #161616;
-  transform: translateY(-2px);
-}
-.bb-card--active {
-  border-color: #D2691E !important;
-  background: rgba(210,105,30,.07) !important;
-}
-.bb-card-icon { font-size: 1.1rem; margin-bottom: .4rem; }
-.bb-card-name { font-size: .88rem; font-weight: 500; color: #ccc; margin-bottom: .3rem; line-height: 1.3; }
-.bb-card-price { font-size: .8rem; color: #D2691E; font-weight: 600; }
-.bb-card-check {
-  position: absolute;
-  top: 6px; right: 6px;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: #D2691E;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .62rem; color: #fff; font-weight: 800;
-}
-
-.bb-name-input {
-  width: 100%;
-  background: #111;
-  border: 1px solid #1c1c1c;
-  border-radius: 6px;
-  padding: .85rem 1.1rem;
-  color: #fff;
-  font-size: .95rem;
-  outline: none;
-  transition: border-color .18s;
-}
-.bb-name-input:focus { border-color: #D2691E; }
-
-/* Actions */
-.bb-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #141414;
-}
-.bb-actions-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-.bb-actions-price-label { font-size: .72rem; color: #444; text-transform: uppercase; letter-spacing: .1em; }
-.bb-actions-price-val { font-size: 2rem; font-weight: 900; color: #D2691E; }
-.bb-actions-btns { display: flex; gap: .6rem; flex-wrap: wrap; }
-
-.bb-btn-primary {
-  background: #D2691E;
-  color: #fff;
-  border: none;
-  padding: .85rem 1.6rem;
-  border-radius: 6px;
-  font-size: .9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .18s, opacity .18s;
-  flex: 1;
-}
-.bb-btn-primary:hover { background: #E07A2E; }
-.bb-btn-primary:disabled { opacity: .28; cursor: not-allowed; }
-
-.bb-btn-review {
-  background: transparent;
-  color: #D2691E;
-  border: 1px solid #D2691E;
-  padding: .85rem 1.6rem;
-  border-radius: 6px;
-  font-size: .9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .18s, opacity .18s;
-  white-space: nowrap;
-}
-.bb-btn-review:hover { background: rgba(210,105,30,.1); }
-.bb-btn-review:disabled { opacity: .28; cursor: not-allowed; }
-
-.bb-btn-secondary {
-  background: transparent;
-  color: #888;
-  border: 1px solid #222;
-  padding: .85rem 1.2rem;
-  border-radius: 6px;
-  font-size: .85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color .18s, color .18s;
-}
-.bb-btn-secondary:hover { border-color: #444; color: #ccc; }
-.bb-btn-secondary:disabled { opacity: .28; cursor: not-allowed; }
-
-/* SAVED */
-.bb-saved { padding: 3rem 0 5rem; border-top: 1px solid #141414; }
+.bb-page-header { background: #0B0B0B; border-bottom: 1px solid #141414; padding: 4rem 3rem 3rem; }
+.bb-page-header-inner { max-width: 1300px; margin: 0 auto; }
+.bb-eyebrow { font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#D2691E; margin-bottom:.75rem; display:block; }
+.bb-page-title { font-size:clamp(2rem,5vw,3.5rem); font-weight:900; color:#fff; letter-spacing:-.02em; margin-bottom:.5rem; }
+.bb-page-sub { font-size:1rem; color:#555; }
+.bb-builder { display:grid; grid-template-columns:420px 1fr; align-items:start; border-bottom:1px solid #141414; }
+@media (max-width:960px) { .bb-builder { grid-template-columns:1fr; } }
+.bb-left { border-right:1px solid #141414; position:sticky; top:0; height:100vh; overflow:hidden; }
+.bb-burger-panel { height:100%; overflow-y:auto; padding:2.5rem 2rem; display:flex; flex-direction:column; gap:1.5rem; scrollbar-width:none; }
+.bb-burger-panel::-webkit-scrollbar { display:none; }
+.bb-burger-title { display:flex; align-items:center; justify-content:space-between; }
+.bb-burger-name-display { font-size:.8rem; color:#D2691E; font-weight:600; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bb-burger-visual { position:relative; width:100%; display:flex; align-items:center; justify-content:center; min-height:200px; padding:12px 0; background:radial-gradient(ellipse at 50% 78%, rgba(180,80,10,0.1) 0%, transparent 62%); border-radius:12px; }
+.bb-ingredient-list { display:flex; flex-direction:column; gap:2px; border-top:1px solid #161616; padding-top:1rem; }
+.bb-ing-row { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid #0e0e0e; }
+.bb-ing-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.bb-ing-name { flex:1; font-size:.85rem; color:#aaa; }
+.bb-ing-qty { font-size:.75rem; color:#444; }
+.bb-ing-price { font-size:.85rem; color:#D2691E; font-weight:600; min-width:46px; text-align:right; }
+.bb-ing-empty { font-size:.85rem; color:#333; padding:.5rem 0; }
+.bb-price-row { display:flex; justify-content:space-between; align-items:baseline; padding:.75rem 0 0; border-top:1px solid #1a1a1a; font-size:.75rem; color:#555; letter-spacing:.1em; text-transform:uppercase; }
+.bb-price-total { font-size:1.8rem; font-weight:900; color:#D2691E; }
+.bb-my-burgers-btn { display:flex; align-items:center; gap:.6rem; background:rgba(210,105,30,.08); border:1px solid rgba(210,105,30,.25); color:#D2691E; padding:.75rem 1.1rem; border-radius:8px; cursor:pointer; font-size:.85rem; font-weight:600; transition:all .18s; width:100%; justify-content:center; }
+.bb-my-burgers-btn:hover { background:rgba(210,105,30,.14); border-color:rgba(210,105,30,.5); }
+.bb-my-burgers-count { background:#D2691E; color:#fff; border-radius:99px; padding:1px 8px; font-size:.72rem; font-weight:800; margin-left:auto; }
+.bb-right { padding:3rem 3rem 6rem; display:flex; flex-direction:column; gap:3rem; }
+@media (max-width:960px) { .bb-right { padding:2rem 1.5rem 4rem; } }
+.bb-section-header { display:flex; align-items:baseline; gap:1rem; margin-bottom:1.2rem; padding-bottom:.8rem; border-bottom:1px solid #141414; }
+.bb-section-num { font-size:.72rem; font-weight:700; color:#D2691E; letter-spacing:.1em; }
+.bb-section-title { font-size:1.1rem; font-weight:700; color:#fff; flex:1; }
+.bb-section-hint { font-size:.7rem; color:#333; letter-spacing:.08em; text-transform:uppercase; }
+.bb-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; }
+.bb-card { background:#111; border:1px solid #1c1c1c; border-radius:8px; padding:1rem; cursor:pointer; transition:border-color .18s,background .18s,transform .14s; position:relative; user-select:none; }
+.bb-card:hover { border-color:#2a2a2a; background:#161616; transform:translateY(-2px); }
+.bb-card--active { border-color:#D2691E !important; background:rgba(210,105,30,.07) !important; }
+.bb-card-icon { font-size:1.1rem; margin-bottom:.4rem; }
+.bb-card-name { font-size:.88rem; font-weight:500; color:#ccc; margin-bottom:.3rem; line-height:1.3; }
+.bb-card-price { font-size:.8rem; color:#D2691E; font-weight:600; }
+.bb-card-check { position:absolute; top:6px; right:6px; width:18px; height:18px; border-radius:50%; background:#D2691E; display:flex; align-items:center; justify-content:center; font-size:.62rem; color:#fff; font-weight:800; }
+.bb-name-input { width:100%; background:#111; border:1px solid #1c1c1c; border-radius:6px; padding:.85rem 1.1rem; color:#fff; font-size:.95rem; outline:none; transition:border-color .18s; }
+.bb-name-input:focus { border-color:#D2691E; }
+.bb-actions { display:flex; flex-direction:column; gap:1rem; padding-top:1.5rem; border-top:1px solid #141414; }
+.bb-actions-price { display:flex; justify-content:space-between; align-items:baseline; }
+.bb-actions-price-label { font-size:.72rem; color:#444; text-transform:uppercase; letter-spacing:.1em; }
+.bb-actions-price-val { font-size:2rem; font-weight:900; color:#D2691E; }
+.bb-actions-btns { display:flex; gap:.6rem; flex-wrap:wrap; }
+.bb-btn-secondary { background:transparent; color:#888; border:1px solid #222; padding:.85rem 1.2rem; border-radius:6px; font-size:.85rem; font-weight:600; cursor:pointer; transition:border-color .18s,color .18s; }
+.bb-btn-secondary:hover { border-color:#444; color:#ccc; }
+.bb-btn-secondary:disabled { opacity:.28; cursor:not-allowed; }
+.bb-btn-review { background:transparent; color:#D2691E; border:1px solid #D2691E; padding:.85rem 1.6rem; border-radius:6px; font-size:.9rem; font-weight:700; cursor:pointer; transition:background .18s,opacity .18s; white-space:nowrap; }
+.bb-btn-review:hover { background:rgba(210,105,30,.1); }
+.bb-btn-review:disabled { opacity:.28; cursor:not-allowed; }
+.bb-saved { padding:4rem 0 6rem; border-top:1px solid #141414; }
+.bb-saved-inner { max-width:1200px; margin:0 auto; padding:0 2rem; }
+.bb-saved-title { font-size:clamp(2rem,6vw,4rem); font-weight:900; color:#fff; margin:.4rem 0 .3rem; letter-spacing:-.02em; }
+.bb-saved-count { font-size:.8rem; color:#333; margin-bottom:2.5rem; }
+.bb-saved-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.2rem; }
+.bb-quick { background: #0e0e0e; border-bottom: 1px solid #1a1a1a; padding: .85rem 3rem; }
+.bb-quick-inner { max-width: 1300px; margin: 0 auto; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+.bb-quick-label { font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #D2691E; white-space: nowrap; flex-shrink: 0; }
+.bb-quick-scroll { display: flex; gap: .75rem; flex-wrap: wrap; flex: 1; }
+.bb-quick-card { display: flex; align-items: center; gap: .6rem; background: #161616; border: 1px solid #222; border-radius: 8px; padding: .45rem .75rem; transition: border-color .15s; }
+.bb-quick-card:hover { border-color: #333; }
+.bb-quick-card-info { display: flex; align-items: center; gap: .5rem; }
+.bb-quick-card-name { font-size: .85rem; font-weight: 600; color: #ccc; }
+.bb-quick-card-price { font-size: .78rem; color: #D2691E; font-weight: 600; }
+.bb-quick-btn { background: #D2691E; color: #fff; border: none; padding: .3rem .75rem; border-radius: 5px; font-size: .78rem; font-weight: 700; cursor: pointer; transition: background .15s; white-space: nowrap; }
+.bb-quick-btn:hover { background: #E07A2E; }
+.bb-quick-pending { font-size: .72rem; color: #555; font-style: italic; }
 .bb-saved-card { background:#111; border:1px solid #1c1c1c; border-radius:12px; padding:1.2rem; display:flex; flex-direction:column; gap:.75rem; }
 .bb-saved-card-header { display:flex; align-items:center; justify-content:space-between; gap:.5rem; flex-wrap:wrap; }
 .bb-saved-card-name { font-size:1rem; font-weight:700; color:#fff; }
@@ -884,13 +566,14 @@ onMounted(async () => {});
 .bb-rejected-note { font-size:.8rem; color:#888; background:#0e0e0e; border:1px solid #1a1a1a; border-radius:6px; padding:.5rem .75rem; }
 .bb-saved-card-btns { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
 .bb-saved-pending-hint { font-size:.78rem; color:#F0B800; font-style:italic; }
-.bb-saved-approved-hint { font-size:.78rem; color:#22c55e; font-weight:600; }
 .bb-saved-btn { background:transparent; border:1px solid #222; color:#888; padding:.5rem .9rem; border-radius:6px; font-size:.8rem; font-weight:600; cursor:pointer; transition:all .15s; }
 .bb-saved-btn:hover { border-color:#444; color:#ccc; }
+.bb-saved-btn-fav { min-width:36px; font-size:1rem; }
+.bb-saved-btn-fav--active { border-color:#D2691E !important; color:#D2691E !important; }
+.bb-saved-btn-green  { border-color:#22c55e !important; color:#22c55e !important; }
+.bb-saved-btn-green:hover  { background:rgba(34,197,94,.08) !important; }
 .bb-saved-btn-orange { border-color:#D2691E !important; color:#D2691E !important; }
 .bb-saved-btn-orange:hover { background:rgba(210,105,30,.1) !important; }
-.bb-saved-inner { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
-.bb-saved-title { font-size: clamp(2rem, 6vw, 4rem); font-weight: 900; color: #fff; margin: .4rem 0 .3rem; letter-spacing: -.02em; }
-.bb-saved-count { font-size: .8rem; color: #333; margin-bottom: 2.5rem; }
-.bb-saved-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
+.bb-saved-btn-red    { border-color:#ef4444 !important; color:#ef4444 !important; }
+.bb-saved-btn-red:hover    { background:rgba(239,68,68,.1) !important; }
 </style>

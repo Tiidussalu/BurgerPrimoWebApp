@@ -22,12 +22,16 @@ export interface BurgerIngredient extends Ingredient {
   pivot: IngredientPivot;
 }
 
+export type BurgerStatus = 'draft' | 'pending' | 'approved' | 'rejected';
+
 export interface CustomBurger {
   id: number;
   name: string;
   description?: string | null;
   total_price: number;
   is_favorite: boolean;
+  status: BurgerStatus;
+  admin_note?: string | null;
   ingredients: BurgerIngredient[];
 }
 
