@@ -121,6 +121,18 @@
           </div>
         </div>
 
+        <!-- ETA riba -->
+        <div v-if="etaLabel" class="flex items-center justify-between bg-cyan-950/40 border border-cyan-900/40 rounded-xl px-4 py-3">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
+            <span class="text-sm text-cyan-300 font-medium">Sihtkohani</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span v-if="etaDistance" class="text-xs text-gray-400">{{ etaDistance }}</span>
+            <span class="text-lg font-bold text-cyan-400">{{ etaLabel }}</span>
+          </div>
+        </div>
+
         <!-- Tellimus + sihtkoht -->
         <div class="flex items-start justify-between gap-3">
           <div class="flex-1 min-w-0">
@@ -230,10 +242,61 @@ const lastUpdate = ref<{ lat: number; lng: number; accuracy: number } | null>(nu
 
 let map: any = null;
 let courierMarker: any = null;
+let routeLayer: any = null;
 let L: any = null;
 let watchId: number | null = null;
 let gpsTimeout: ReturnType<typeof setTimeout> | null = null;
 let manualInterval: ReturnType<typeof setInterval> | null = null;
+
+const etaMinutes = ref<number | null>(null);
+const etaDistance = ref<string | null>(null);
+let lastRouteFetchLat = 0;
+let lastRouteFetchLng = 0;
+let lastRouteFetchTime = 0;
+
+const etaLabel = computed(() => {
+  if (etaMinutes.value === null) return null;
+  if (etaMinutes.value < 60) return `~${etaMinutes.value} min`;
+  const h = Math.floor(etaMinutes.value / 60);
+  const m = etaMinutes.value % 60;
+  return m > 0 ? `~${h}h ${m}min` : `~${h}h`;
+});
+
+const fetchRoute = async (lat: number, lng: number) => {
+  const destLat = props.order.delivery_lat;
+  const destLng = props.order.delivery_lng;
+  if (!destLat || !destLng || !map || !L) return;
+
+  // Ainult kui liigutud >100m või >60s möödunud
+  const now = Date.now();
+  const R = 6371000;
+  const dLat = (lat - lastRouteFetchLat) * Math.PI / 180;
+  const dLng = (lng - lastRouteFetchLng) * Math.PI / 180;
+  const moved = R * Math.sqrt(dLat ** 2 + (Math.cos(lat * Math.PI / 180) * dLng) ** 2);
+  if (now - lastRouteFetchTime < 60000 && moved < 100) return;
+  lastRouteFetchLat = lat;
+  lastRouteFetchLng = lng;
+  lastRouteFetchTime = now;
+
+  try {
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${lng},${lat};${destLng},${destLat}?geometries=geojson&overview=full`,
+    );
+    const data = await res.json();
+    if (!data.routes?.[0]) return;
+    const route = data.routes[0];
+
+    if (routeLayer) { map.removeLayer(routeLayer); routeLayer = null; }
+    routeLayer = L.geoJSON(route.geometry, {
+      style: { color: '#0ea5e9', weight: 5, opacity: 0.85, lineCap: 'round', lineJoin: 'round' },
+    }).addTo(map);
+
+    etaMinutes.value = Math.max(1, Math.ceil(route.duration / 60));
+    etaDistance.value = route.distance >= 1000
+      ? `${(route.distance / 1000).toFixed(1)} km`
+      : `${Math.round(route.distance)} m`;
+  } catch { /* vaikne */ }
+};
 
 const RESTAURANT_LAT = 58.2517;
 const RESTAURANT_LNG = 22.4935;
@@ -366,6 +429,7 @@ const startTracking = () => {
       if (!map) await initMap(lat, lng, false);
       else updateMapPosition(lat, lng);
       sendLocation(lat, lng);
+      fetchRoute(lat, lng);
     },
     () => {
       if (gpsTimeout) { clearTimeout(gpsTimeout); gpsTimeout = null; }
@@ -479,6 +543,7 @@ onUnmounted(() => {
   if (watchId !== null) navigator.geolocation.clearWatch(watchId);
   if (gpsTimeout) clearTimeout(gpsTimeout);
   if (manualInterval) clearInterval(manualInterval);
+  if (routeLayer) { routeLayer = null; }
   if (map) { map.remove(); map = null; }
   if (previewMap) { previewMap.remove(); previewMap = null; }
 });

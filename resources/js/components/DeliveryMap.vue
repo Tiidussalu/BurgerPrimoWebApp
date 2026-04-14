@@ -12,6 +12,10 @@
             Uuendatud {{ formatTime(courierUpdatedAt) }}
           </p>
         </div>
+        <div v-if="etaLabel" class="shrink-0 text-right">
+          <p class="text-[10px] text-gray-500 uppercase tracking-wider">ETA</p>
+          <p class="text-base font-bold text-cyan-400 leading-tight">{{ etaLabel }}</p>
+        </div>
       </div>
       <div v-else class="bg-black/80 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3">
         <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse flex-shrink-0"></div>
@@ -30,8 +34,17 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch } from 'vue';
+import { onMounted, onUnmounted, watch, computed } from 'vue';
 import { ref } from 'vue';
+
+const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+};
 
 const props = withDefaults(
   defineProps<{
@@ -55,6 +68,21 @@ const mapContainer = ref<HTMLElement | null>(null);
 let map: any = null;
 let courierMarker: any = null;
 let L: any = null;
+
+// ETA — Haversine kaugus * 1.35 (tee tegur) / 25 km/h
+const etaMinutes = computed(() => {
+  if (!props.courierLat || !props.courierLng || !props.deliveryLat || !props.deliveryLng) return null;
+  const dist = haversineKm(props.courierLat, props.courierLng, props.deliveryLat, props.deliveryLng);
+  return Math.max(1, Math.ceil(dist * 1.35 / 25 * 60));
+});
+
+const etaLabel = computed(() => {
+  if (etaMinutes.value === null) return null;
+  if (etaMinutes.value < 60) return `~${etaMinutes.value} min`;
+  const h = Math.floor(etaMinutes.value / 60);
+  const m = etaMinutes.value % 60;
+  return m > 0 ? `~${h}h ${m}min` : `~${h}h`;
+});
 
 const formatTime = (d: string) =>
   new Date(d).toLocaleTimeString('et-EE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });

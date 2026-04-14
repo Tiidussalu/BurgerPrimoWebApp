@@ -31,7 +31,13 @@
                 toimetatakse kohale
               </p>
             </div>
-            <span :class="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+            <div class="text-right shrink-0">
+              <span :class="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+              <div v-if="deliveryEta" class="mt-1">
+                <p class="text-[10px] text-gray-500 uppercase tracking-wider">ETA</p>
+                <p class="text-xl font-bold text-cyan-400 leading-tight">{{ deliveryEta }}</p>
+              </div>
+            </div>
           </div>
           <div class="px-6 py-4 flex items-center gap-3">
             <span class="text-xl">🏠</span>
@@ -230,6 +236,15 @@ import DeliveryMap from '@/components/DeliveryMap.vue';
 import AddressPickerMap from '@/components/AddressPickerMap.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+
+const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+};
 import Navbar from '@/components/Navbar.vue';
 
 interface Ingredient {
@@ -272,6 +287,17 @@ const pickLat = ref<number | null>(null);
 const pickLng = ref<number | null>(null);
 const pickAddress = ref('');
 const savingLocation = ref(false);
+
+const deliveryEta = computed(() => {
+  const { courier_lat, courier_lng, delivery_lat, delivery_lng } = props.order;
+  if (!courier_lat || !courier_lng || !delivery_lat || !delivery_lng) return null;
+  const dist = haversineKm(courier_lat, courier_lng, delivery_lat, delivery_lng);
+  const mins = Math.max(1, Math.ceil(dist * 1.35 / 25 * 60));
+  if (mins < 60) return `~${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m > 0 ? `~${h}h ${m}min` : `~${h}h`;
+});
 
 const canSetLocation = computed(() =>
   !props.order.delivery_address &&
