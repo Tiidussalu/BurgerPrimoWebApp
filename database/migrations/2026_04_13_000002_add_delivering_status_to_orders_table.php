@@ -10,9 +10,8 @@ return new class extends Migration
     public function up(): void
     {
         // Puhasta eelmisest katkisest katsest (SQLite jätab indeksid alles)
+        // SQLite: indeksid kuuluvad tabelile, DROP TABLE kustutab ka indeksid
         DB::statement('DROP TABLE IF EXISTS "orders_new"');
-        DB::statement('DROP INDEX IF EXISTS "orders_new_order_number_unique"');
-        DB::statement('DROP INDEX IF EXISTS "orders_new_courier_token_unique"');
 
         // SQLite ei toeta MODIFY COLUMN — loome tabeli uuesti koos 'delivering' staatusega
         Schema::create('orders_new', function (Blueprint $table) {
