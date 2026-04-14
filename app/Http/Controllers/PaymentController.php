@@ -139,6 +139,9 @@ class PaymentController extends Controller
             'payment_intent_id' => 'required|string',
             'delivery_method' => 'required|in:dine_in,takeaway',
             'customer_notes' => 'nullable|string|max:500',
+            'delivery_lat'     => 'required_if:delivery_method,takeaway|nullable|numeric|between:57.85,58.75',
+            'delivery_lng'     => 'required_if:delivery_method,takeaway|nullable|numeric|between:21.50,23.20',
+            'delivery_address' => 'required_if:delivery_method,takeaway|nullable|string|max:500',
         ]);
 
         try {
@@ -169,6 +172,9 @@ class PaymentController extends Controller
                 'payment_status' => 'succeeded',
                 'payment_method' => 'card',
                 'paid_at' => now(),
+                'delivery_lat' => $validated['delivery_lat'] ?? null,
+                'delivery_lng' => $validated['delivery_lng'] ?? null,
+                'delivery_address' => $validated['delivery_address'] ?? null,
             ]);
 
             $totalAmount = 0;

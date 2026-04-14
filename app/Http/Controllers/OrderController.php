@@ -19,7 +19,8 @@ class OrderController extends Controller
             ->orders()
             ->with('items')
             ->latest()
-            ->get();
+            ->get()
+            ->makeHidden(['courier_token']);
 
         return Inertia::render('Orders/Index', [
             'orders' => $orders,
@@ -103,8 +104,29 @@ class OrderController extends Controller
         $order->load(['items', 'confirmedBy']);
 
         return Inertia::render('Orders/Show', [
-            'order' => $order,
+            'order' => $order->makeHidden(['courier_token']),
         ]);
+    }
+
+    public function updateDeliveryLocation(Request $request, Order $order)
+    {
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        if (!in_array($order->status, ['pending', 'confirmed', 'preparing', 'ready', 'delivering'])) {
+            return redirect()->back()->with('error', 'Selle tellimuse sihtkohta ei saa enam muuta.');
+        }
+
+        $validated = $request->validate([
+            'delivery_lat'     => 'required|numeric|between:57.85,58.75',
+            'delivery_lng'     => 'required|numeric|between:21.50,23.20',
+            'delivery_address' => 'required|string|max:500',
+        ]);
+
+        $order->update($validated);
+
+        return redirect()->back();
     }
 
     public function cancel(Order $order)

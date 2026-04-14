@@ -208,6 +208,10 @@ const vClickOutside = {
             class="px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200"
             :class="page.url.startsWith('/menu') ? 'text-white bg-white/8' : 'text-gray-500 hover:text-white hover:bg-white/5'"
           >Menüü</Link>
+          <Link v-if="user" href="/orders"
+            class="px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200"
+            :class="page.url.startsWith('/orders') ? 'text-white bg-white/8' : 'text-gray-500 hover:text-white hover:bg-white/5'"
+          >Tellimused</Link>
           <div class="w-px h-5 bg-white/8 mx-1" />
 
           <template v-if="user">
@@ -326,6 +330,7 @@ const vClickOutside = {
             <template v-if="user">
               <p class="px-4 py-1 text-[10px] text-gray-700 uppercase tracking-wider font-bold">Konto</p>
               <Link v-if="user.is_admin" href="/admin/dashboard" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm font-medium text-yellow-400 bg-yellow-500/6 hover:bg-yellow-500/12 transition-all">⚙️ Admin Dashboard</Link>
+              <Link href="/orders" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all" :class="page.url.startsWith('/orders') ? 'text-white bg-white/8' : ''">📦 Tellimused</Link>
               <Link href="/settings/profile" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">👤 Profiil</Link>
               <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="block w-full text-left px-4 py-3 rounded-xl text-sm text-red-500 hover:bg-red-500/8 transition-all">🚪 Logi välja</Link>
             </template>

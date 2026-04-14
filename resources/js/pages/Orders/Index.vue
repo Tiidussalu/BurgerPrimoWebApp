@@ -8,7 +8,7 @@
         <div v-if="modal.show" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="modal.show = false">
           <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
           <div class="relative bg-[#161616] border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
-            <div class="h-1 w-full bg-gradient-to-r from-[#D2691E] to-[#B8571A]" />
+            <div class="h-1 w-full bg-linear-to-r from-[#D2691E] to-[#B8571A]" />
             <div class="p-6">
               <div class="flex items-center gap-4 mb-4">
                 <div :class="modal.type === 'danger' ? 'bg-red-500/15 text-red-400' : 'bg-[#D2691E]/15 text-[#D2691E]'" class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -21,7 +21,7 @@
               </div>
               <div class="flex gap-3 mt-6">
                 <button @click="modal.show = false" class="flex-1 py-3 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition font-semibold text-sm">Tühista</button>
-                <button @click="modal.onConfirm(); modal.show = false" :class="modal.type === 'danger' ? 'bg-red-600 hover:bg-red-500' : 'bg-gradient-to-r from-[#D2691E] to-[#B8571A]'" class="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all shadow-lg">{{ modal.confirmLabel }}</button>
+                <button @click="modal.onConfirm(); modal.show = false" :class="modal.type === 'danger' ? 'bg-red-600 hover:bg-red-500' : 'bg-linear-to-r from-[#D2691E] to-[#B8571A]'" class="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all shadow-lg">{{ modal.confirmLabel }}</button>
               </div>
             </div>
           </div>
@@ -30,6 +30,24 @@
     </Teleport>
 
     <main class="max-w-7xl mx-auto px-6 py-12">
+
+      <!-- Kohaletoimetamise bänner — nähtav kui kuller on teel -->
+      <Link v-if="deliveringOrder" :href="`/orders/${deliveringOrder.id}`"
+        class="block mb-8 rounded-2xl overflow-hidden border border-cyan-700/50 hover:border-cyan-500 transition-all group">
+        <div class="bg-linear-to-r from-cyan-950/80 to-[#0d1f2d] px-6 py-5 flex items-center gap-5">
+          <div class="text-4xl animate-bounce">🛵</div>
+          <div class="flex-1">
+            <p class="font-bold text-lg text-white">Kuller on teel!</p>
+            <p class="text-sm text-cyan-400">
+              Tellimus <span class="font-mono font-bold">{{ deliveringOrder.order_number }}</span> toimetatakse kohale
+            </p>
+          </div>
+          <div class="bg-cyan-500 group-hover:bg-cyan-400 text-black font-bold px-5 py-2.5 rounded-xl text-sm transition shrink-0">
+            Jälgi reaalajas →
+          </div>
+        </div>
+        <div class="h-1 w-full bg-linear-to-r from-cyan-600 to-cyan-400"></div>
+      </Link>
       <div class="mb-12 flex items-center justify-between">
         <div>
           <h1 class="text-4xl font-bold mb-2">Minu tellimused</h1>
@@ -129,7 +147,7 @@ import { useToast } from '@/composables/useToast';
 const { success, error } = useToast();
 
 interface OrderItem { id: number; burger_name: string; price: number; quantity: number; }
-interface Order { id: number; order_number: string; total_amount: number; status: string; created_at: string; customer_notes: string | null; admin_notes: string | null; items: OrderItem[]; }
+interface Order { id: number; order_number: string; total_amount: number; status: string; created_at: string; customer_notes: string | null; admin_notes: string | null; items: OrderItem[]; courier_lat?: number | null; courier_lng?: number | null; }
 interface Props { orders: Order[]; }
 
 const props = defineProps<Props>();
@@ -138,7 +156,8 @@ const selectedOrders = ref<number[]>([]);
 const modal = reactive({ show: false, type: 'danger' as 'danger'|'warning', title: '', message: '', confirmLabel: 'Kinnita', onConfirm: () => {} });
 const openModal = (opts: Omit<typeof modal, 'show'>) => { Object.assign(modal, { show: true, ...opts }); };
 
-const hasActiveOrders = computed(() => props.orders.some(o => ['pending','confirmed','preparing','ready'].includes(o.status)));
+const hasActiveOrders = computed(() => props.orders.some(o => ['pending','confirmed','preparing','ready','delivering'].includes(o.status)));
+const deliveringOrder = computed(() => props.orders.find(o => o.status === 'delivering') ?? null);
 let refreshInterval: ReturnType<typeof setInterval> | null = null;
 onMounted(() => { if (hasActiveOrders.value) refreshInterval = setInterval(() => router.reload({ only: ['orders'] }), 15000); });
 onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval); });

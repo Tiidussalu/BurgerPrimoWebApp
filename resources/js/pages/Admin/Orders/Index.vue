@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/layouts/AdminLayout.vue';
-import { 
-  Clock, 
-  Check, 
-  X, 
+import DeliveryMap from '@/components/DeliveryMap.vue';
+import {
+  Clock,
+  Check,
+  X,
   Bell,
   Home,
   ShoppingBag,
@@ -13,12 +14,38 @@ import {
   AlertCircle,
   User,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Bike,
+  Copy,
 } from 'lucide-vue-next';
 import { useToast } from '@/composables/useToast';
 
 const { success, error } = useToast();
+const page = usePage();
+const origin = typeof window !== 'undefined' ? window.location.origin : '';
 const confirmModal = reactive({ show: false, title: '', message: '', confirmLabel: 'Kinnita', onConfirm: () => {} });
+
+// Kulleri link modal — kuvatakse pärast "Saada kulleriga" klõpsamist
+const courierLinkModal = reactive({ show: false, link: '' });
+const copiedLink = ref(false);
+
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(courierLinkModal.link);
+    copiedLink.value = true;
+    setTimeout(() => (copiedLink.value = false), 2000);
+  } catch {
+    // Vana brauser fallback
+    const el = document.createElement('textarea');
+    el.value = courierLinkModal.link;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    copiedLink.value = true;
+    setTimeout(() => (copiedLink.value = false), 2000);
+  }
+};
 const openConfirmModal = (opts: Omit<typeof confirmModal, 'show'>) => { Object.assign(confirmModal, { show: true, ...opts }); };
 
 interface User {
@@ -51,6 +78,10 @@ interface Order {
   customer_notes?: string | null;
   delivery_method?: string;
   items: OrderItem[];
+  courier_token?: string | null;
+  courier_lat?: number | null;
+  courier_lng?: number | null;
+  courier_updated_at?: string | null;
 }
 
 interface PaginationLink {
@@ -89,8 +120,8 @@ const filteredOrders = computed(() => {
   }
   
   if (activeFilter.value === 'active') {
-    return props.orders.data.filter(o => 
-      ['pending', 'confirmed', 'preparing', 'ready'].includes(o.status)
+    return props.orders.data.filter(o =>
+      ['pending', 'confirmed', 'preparing', 'ready', 'delivering'].includes(o.status),
     );
   }
   
@@ -110,9 +141,9 @@ const preparingOrders = computed(() =>
   props.orders.data.filter(o => o.status === 'preparing')
 );
 
-const readyOrders = computed(() => 
-  props.orders.data.filter(o => o.status === 'ready')
-);
+const readyOrders = computed(() => props.orders.data.filter((o) => o.status === 'ready'));
+
+const deliveringOrders = computed(() => props.orders.data.filter((o) => o.status === 'delivering'));
 
 // Play notification sound
 const playNotificationSound = () => {
@@ -196,10 +227,22 @@ const requestNotificationPermission = () => {
   }
 };
 
+// Jälgi courier_link flash-i reaktiivselt — töötab nii page load'il kui router.post järel
+watch(
+  () => (page.props.flash as any)?.courier_link,
+  (link) => {
+    if (link) {
+      courierLinkModal.link = link;
+      courierLinkModal.show = true;
+    }
+  },
+  { immediate: true },
+);
+
 // Start auto-refresh on mount
 onMounted(() => {
   requestNotificationPermission();
-  
+
   // Refresh every 10 seconds
   refreshInterval.value = window.setInterval(() => {
     refreshOrders();
@@ -217,9 +260,11 @@ onUnmounted(() => {
 });
 
 const confirmOrder = (orderId: number) => {
-  router.post(`/admin/orders/${orderId}/confirm`, {}, {
-    preserveScroll: true,
-  });
+  router.post(`/admin/orders/${orderId}/confirm`, {}, { preserveScroll: true });
+};
+
+const startDelivery = (orderId: number) => {
+  router.post(`/admin/orders/${orderId}/start-delivery`, {}, { preserveScroll: true });
 };
 
 const updateOrderStatus = (orderId: number, newStatus: string) => {
@@ -298,6 +343,38 @@ const setFilter = (filter: string) => {
 
 </template>
 
+    <!-- Kulleri link modal -->
+    <Teleport to="body">
+      <Transition enter-active-class="transition duration-150 ease-out" enter-from-class="opacity-0" enter-to-class="opacity-100">
+        <div v-if="courierLinkModal.show" class="fixed inset-0 z-9999 flex items-center justify-center p-4" @click.self="courierLinkModal.show = false">
+          <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div class="relative bg-[#161616] border border-white/10 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="h-1 w-full bg-gradient-to-r from-cyan-600 to-cyan-400" />
+            <div class="p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center flex-shrink-0">
+                  <Bike :size="22" />
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-white">Kulleri jälgimislink</h3>
+                  <p class="text-sm text-gray-400">Saada see link kullerile</p>
+                </div>
+              </div>
+              <div class="bg-[#0d0d0d] rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+                <p class="text-xs font-mono text-gray-300 flex-1 break-all">{{ courierLinkModal.link }}</p>
+                <button @click="copyLink" class="flex-shrink-0 p-2 rounded-lg hover:bg-white/10 transition" :title="copiedLink ? 'Kopeeritud!' : 'Kopeeri'">
+                  <Check v-if="copiedLink" :size="18" class="text-green-400" />
+                  <Copy v-else :size="18" class="text-gray-400" />
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mb-5">Kuller avab selle lingi oma telefonis. GPS käivitub automaatselt ja asukoht uueneb reaalajas.</p>
+              <button @click="courierLinkModal.show = false" class="w-full py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm transition">Sulje</button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <!-- Auto-refresh Indicator -->
     <div class="mb-4 flex items-center justify-between bg-[#111111] border border-gray-800 rounded-lg px-4 py-3">
       <div class="flex items-center gap-3">
@@ -322,7 +399,7 @@ const setFilter = (filter: string) => {
       </div>
 
       <!-- Filter Buttons -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <!-- All Orders -->
         <button
           @click="setFilter('all')"
@@ -433,8 +510,8 @@ const setFilter = (filter: string) => {
           @click="setFilter('ready')"
           :class="[
             'p-4 rounded-lg border-2 transition-all text-left',
-            activeFilter === 'ready' 
-              ? 'border-green-600 bg-green-600/10' 
+            activeFilter === 'ready'
+              ? 'border-green-600 bg-green-600/10'
               : 'border-gray-800 bg-[#0a0a0a] hover:border-gray-700'
           ]"
         >
@@ -446,6 +523,27 @@ const setFilter = (filter: string) => {
           </div>
           <p :class="['text-sm font-semibold', activeFilter === 'ready' ? 'text-green-500' : 'text-gray-400']">
             Valmis
+          </p>
+        </button>
+
+        <!-- Delivering -->
+        <button
+          @click="setFilter('delivering')"
+          :class="[
+            'p-4 rounded-lg border-2 transition-all text-left',
+            activeFilter === 'delivering'
+              ? 'border-cyan-600 bg-cyan-600/10'
+              : 'border-gray-800 bg-[#0a0a0a] hover:border-gray-700'
+          ]"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <Bike :size="20" :class="activeFilter === 'delivering' ? 'text-cyan-400' : 'text-gray-400'" />
+            <span :class="['text-2xl font-bold', activeFilter === 'delivering' ? 'text-cyan-400' : 'text-white']">
+              {{ deliveringOrders.length }}
+            </span>
+          </div>
+          <p :class="['text-sm font-semibold', activeFilter === 'delivering' ? 'text-cyan-400' : 'text-gray-400']">
+            Teel
           </p>
         </button>
       </div>
@@ -460,7 +558,8 @@ const setFilter = (filter: string) => {
              activeFilter === 'pending' ? 'Uued tellimused' :
              activeFilter === 'confirmed' ? 'Kinnitatud tellimused' :
              activeFilter === 'preparing' ? 'Valmistamisel' :
-             activeFilter === 'ready' ? 'Valmis tellimused' : '' }}
+             activeFilter === 'ready' ? 'Valmis tellimused' :
+             activeFilter === 'delivering' ? 'Kohaletoimetamisel' : '' }}
         </span>
         <span class="text-sm text-gray-400">({{ filteredOrders.length }})</span>
       </div>
@@ -700,19 +799,131 @@ const setFilter = (filter: string) => {
             <div class="p-4">
               <p class="text-xs text-gray-400 mb-2">{{ order.items.length }} toode(t)</p>
               <p class="text-2xl font-bold text-green-500 mb-3">€{{ Number(order.total_amount).toFixed(2) }}</p>
-              <button
-                @click="updateOrderStatus(order.id, 'completed')"
-                class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition"
-              >
-                Märgi täidetuks
-              </button>
+              <div class="flex gap-2">
+                <button
+                  @click="updateOrderStatus(order.id, 'completed')"
+                  class="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-semibold transition text-sm"
+                >
+                  Märgi täidetuks
+                </button>
+                <button
+                  @click="startDelivery(order.id)"
+                  class="flex-1 bg-cyan-600/20 hover:bg-cyan-600 border border-cyan-700/50 hover:border-cyan-600 text-cyan-400 hover:text-white px-3 py-2 rounded-lg font-semibold transition text-sm flex items-center justify-center gap-1.5"
+                >
+                  <Bike :size="15" />
+                  Saada kulleriga
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DELIVERING ORDERS -->
+      <div v-if="filteredOrders.some(o => o.status === 'delivering')">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-0.5 flex-1 bg-cyan-600/20"></div>
+          <h3 class="text-lg font-bold text-cyan-400 flex items-center gap-2">
+            <Bike :size="20" />
+            TEEL ({{ filteredOrders.filter(o => o.status === 'delivering').length }})
+          </h3>
+          <div class="h-0.5 flex-1 bg-cyan-600/20"></div>
+        </div>
+
+        <div class="space-y-6">
+          <div
+            v-for="order in filteredOrders.filter(o => o.status === 'delivering')"
+            :key="order.id"
+            class="bg-[#111111] rounded-xl border-2 border-cyan-600/30 overflow-hidden"
+          >
+            <!-- Header -->
+            <div class="bg-cyan-600/5 px-6 py-3 border-b border-gray-800 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-xl font-bold text-cyan-400">#{{ order.order_number }}</span>
+                <span class="text-sm text-gray-300">{{ order.user.name }}</span>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-400">{{ getTimeSince(order.created_at) }}</span>
+                <span class="text-xl font-bold text-white">€{{ Number(order.total_amount).toFixed(2) }}</span>
+              </div>
+            </div>
+
+            <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Kaart -->
+              <div>
+                <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Kulleri asukoht</p>
+                <DeliveryMap
+                  :courier-lat="order.courier_lat ?? null"
+                  :courier-lng="order.courier_lng ?? null"
+                  :courier-updated-at="order.courier_updated_at ?? null"
+                  height="280px"
+                />
+              </div>
+
+              <!-- Info + Actions -->
+              <div class="flex flex-col justify-between">
+                <!-- Tooted -->
+                <div class="space-y-2 mb-4">
+                  <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Tooted</p>
+                  <div
+                    v-for="item in order.items"
+                    :key="item.id"
+                    class="bg-[#0a0a0a] rounded p-3 border border-gray-800 flex items-center justify-between"
+                  >
+                    <span class="font-semibold text-sm">
+                      <span class="text-cyan-400">{{ item.quantity }}x</span> {{ item.burger_name }}
+                    </span>
+                    <span class="text-cyan-400 font-bold text-sm">€{{ Number(item.price * item.quantity).toFixed(2) }}</span>
+                  </div>
+                </div>
+
+                <!-- Kulleri link -->
+                <div v-if="order.courier_token" class="bg-[#0a0a0a] rounded-xl p-3 border border-gray-800 mb-4">
+                  <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Kulleri jälgimislink</p>
+                  <div class="flex items-center gap-2">
+                    <p class="text-xs font-mono text-gray-400 flex-1 truncate">
+                      /courier/track/{{ order.courier_token.substring(0, 12) }}...
+                    </p>
+                    <button
+                      @click="() => { courierLinkModal.link = `${origin}/courier/track/${order.courier_token}`; courierLinkModal.show = true; }"
+                      class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold transition flex items-center gap-1"
+                    >
+                      <Copy :size="13" />
+                      Kopeeri
+                    </button>
+                  </div>
+                </div>
+
+                <!-- GPS staatus -->
+                <div class="bg-[#0a0a0a] rounded-xl p-3 border border-gray-800 mb-4">
+                  <div v-if="order.courier_lat" class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs text-green-400 font-semibold">GPS aktiivne</span>
+                    <span v-if="order.courier_updated_at" class="text-xs text-gray-500 ml-auto">
+                      {{ formatTime(order.created_at) }}
+                    </span>
+                  </div>
+                  <div v-else class="flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
+                    <span class="text-xs text-yellow-400">Ootab kulleri GPS signaali...</span>
+                  </div>
+                </div>
+
+                <!-- Lõpeta nupp -->
+                <button
+                  @click="updateOrderStatus(order.id, 'completed')"
+                  class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl font-bold transition"
+                >
+                  Märgi täidetuks
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Other Orders -->
-      <div v-if="filteredOrders.some(o => !['pending', 'confirmed', 'preparing', 'ready'].includes(o.status))">
+      <div v-if="filteredOrders.some(o => !['pending', 'confirmed', 'preparing', 'ready', 'delivering'].includes(o.status))">
         <div class="flex items-center gap-3 mb-4">
           <div class="h-0.5 flex-1 bg-gray-800"></div>
           <h3 class="text-lg font-bold text-gray-400">MUUD</h3>

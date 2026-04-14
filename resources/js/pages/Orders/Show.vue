@@ -3,8 +3,79 @@
     <Navbar />
 
     <main class="max-w-3xl mx-auto px-6 py-12">
-      <!-- Success Banner -->
-      <div class="mb-8 bg-green-900/20 border border-green-800/50 rounded-2xl p-8 text-center">
+
+      <!-- ───── KOHALETOIMETAMINE: Bolt-laadne vaade ───── -->
+      <template v-if="order.status === 'delivering'">
+
+        <!-- Suur kaart -->
+        <div class="mb-4 rounded-2xl overflow-hidden shadow-2xl">
+          <DeliveryMap
+            :courier-lat="order.courier_lat ?? null"
+            :courier-lng="order.courier_lng ?? null"
+            :courier-updated-at="order.courier_updated_at ?? null"
+            :delivery-lat="order.delivery_lat ?? null"
+            :delivery-lng="order.delivery_lng ?? null"
+            :delivery-address="order.delivery_address ?? null"
+            height="420px"
+          />
+        </div>
+
+        <!-- Kuller on teel info -->
+        <div class="mb-6 bg-[#121212] border border-cyan-900/40 rounded-2xl overflow-hidden">
+          <div class="bg-cyan-950/40 px-6 py-4 flex items-center gap-4 border-b border-cyan-900/30">
+            <div class="w-12 h-12 rounded-full bg-cyan-500/15 flex items-center justify-center text-2xl shrink-0">🛵</div>
+            <div class="flex-1">
+              <p class="font-bold text-lg text-white">Kuller on teel!</p>
+              <p class="text-sm text-cyan-400">Tellimus nr
+                <span class="font-mono font-bold">{{ order.order_number }}</span>
+                toimetatakse kohale
+              </p>
+            </div>
+            <span :class="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
+          </div>
+          <div class="px-6 py-4 flex items-center gap-3">
+            <span class="text-xl">🏠</span>
+            <div>
+              <p class="text-xs text-gray-500 mb-0.5">Sihtkoht</p>
+              <p class="text-sm text-gray-200 font-medium">{{ order.delivery_address ?? 'Sihtkoht määramata' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tellimuse detailid (kompaktne) -->
+        <div class="bg-[#121212] rounded-2xl border border-[#1a1a1a] p-5 space-y-4 mb-6">
+          <div class="space-y-2">
+            <p class="text-xs text-gray-500 uppercase tracking-widest">Tooted</p>
+            <div v-for="item in order.items" :key="item.id"
+                 class="flex items-center justify-between bg-[#0d0d0d] rounded-xl px-4 py-3">
+              <div>
+                <p class="font-semibold text-sm">{{ item.burger_name }}</p>
+                <p class="text-xs text-gray-500">{{ item.quantity }}x kogus</p>
+              </div>
+              <p class="font-bold text-[#D2691E] text-sm">{{ Number(item.price * item.quantity).toFixed(2) }}€</p>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-3 border-t border-[#1a1a1a]">
+            <span class="text-gray-400 text-sm">Kokku</span>
+            <span class="text-2xl font-bold text-[#D2691E]">{{ Number(order.total_amount).toFixed(2) }}€</span>
+          </div>
+        </div>
+
+        <!-- Auto-refresh teade -->
+        <p class="text-center text-xs text-gray-600 mb-4">
+          Asukoht uueneb automaatselt iga 15 sekundi järel
+        </p>
+
+      </template>
+
+      <!-- ───── TAVALINE VAADE (kõik muud staatused) ───── -->
+      <template v-else>
+
+      <!-- Success / Status Banner -->
+      <div class="mb-8 rounded-2xl p-8 text-center"
+           :class="order.status === 'completed'
+             ? 'bg-green-900/20 border border-green-800/50'
+             : 'bg-green-900/20 border border-green-800/50'">
         <div class="text-6xl mb-4">✅</div>
         <h1 class="text-3xl font-bold mb-2">Tellimus esitatud!</h1>
         <p class="text-gray-400">Tellimuse number:
@@ -28,6 +99,7 @@
         </div>
 
         <div class="p-6 space-y-6">
+
           <!-- Status progress indicator -->
           <div class="flex items-center gap-2">
             <div
@@ -99,6 +171,37 @@
         Staatus uuendatakse automaatselt iga 15 sekundi järel
       </p>
 
+      <!-- Sihtkoha määramine (kui pole veel seatud) -->
+      <div v-if="canSetLocation" class="mt-6 bg-[#121212] rounded-2xl border border-[#1a1a1a] p-5">
+        <p class="text-sm font-semibold text-white mb-1">🏠 Määra sihtkoht</p>
+        <p class="text-xs text-gray-500 mb-4">Kuhu soovid, et kuller tuleks? Otsi aadressi või kliki kaardil.</p>
+        <AddressPickerMap
+          :model-lat="pickLat"
+          :model-lng="pickLng"
+          :model-address="pickAddress"
+          @update:model-lat="pickLat = $event"
+          @update:model-lng="pickLng = $event"
+          @update:model-address="pickAddress = $event"
+        />
+        <button
+          @click="saveDeliveryLocation"
+          :disabled="!pickAddress || savingLocation"
+          class="mt-4 w-full py-3 rounded-xl font-semibold text-sm transition disabled:opacity-40 disabled:cursor-not-allowed"
+          style="background-color: #D2691E; color: white;"
+        >
+          {{ savingLocation ? 'Salvestamine...' : 'Salvesta sihtkoht' }}
+        </button>
+      </div>
+
+      <!-- Seatud sihtkoht (näita kui on olemas) -->
+      <div v-else-if="order.delivery_address" class="mt-4 bg-[#121212] rounded-2xl border border-[#1a1a1a] px-5 py-4 flex items-start gap-3">
+        <span class="text-xl mt-0.5">🏠</span>
+        <div>
+          <p class="text-xs text-gray-500 uppercase tracking-widest mb-0.5">Sihtkoht</p>
+          <p class="text-sm text-gray-200">{{ order.delivery_address }}</p>
+        </div>
+      </div>
+
       <!-- Actions -->
       <div class="mt-6 flex gap-4">
         <Link
@@ -115,13 +218,18 @@
           Kõik tellimused
         </Link>
       </div>
+
+      </template><!-- /v-else -->
+
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
+import DeliveryMap from '@/components/DeliveryMap.vue';
+import AddressPickerMap from '@/components/AddressPickerMap.vue';
 import { Link, router } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import Navbar from '@/components/Navbar.vue';
 
 interface Ingredient {
@@ -145,6 +253,12 @@ interface Order {
   created_at: string;
   customer_notes: string | null;
   items: OrderItem[];
+  courier_lat?: number | null;
+  courier_lng?: number | null;
+  courier_updated_at?: string | null;
+  delivery_lat?: number | null;
+  delivery_lng?: number | null;
+  delivery_address?: string | null;
 }
 
 interface Props {
@@ -153,16 +267,40 @@ interface Props {
 
 const props = defineProps<Props>();
 
+// Delivery address picker (shown when address not yet set)
+const pickLat = ref<number | null>(null);
+const pickLng = ref<number | null>(null);
+const pickAddress = ref('');
+const savingLocation = ref(false);
+
+const canSetLocation = computed(() =>
+  !props.order.delivery_address &&
+  ['pending', 'confirmed', 'preparing', 'ready', 'delivering'].includes(props.order.status)
+);
+
+const saveDeliveryLocation = () => {
+  if (!pickLat.value || !pickLng.value || !pickAddress.value) return;
+  savingLocation.value = true;
+  router.patch(`/orders/${props.order.id}/delivery-location`, {
+    delivery_lat: pickLat.value,
+    delivery_lng: pickLng.value,
+    delivery_address: pickAddress.value,
+  }, {
+    onFinish: () => { savingLocation.value = false; },
+  });
+};
+
 // Status progress steps
 const statusSteps = [
-  { key: 'pending',   label: 'Ootel' },
-  { key: 'confirmed', label: 'Kinnitatud' },
-  { key: 'preparing', label: 'Valmistamisel' },
-  { key: 'ready',     label: 'Valmis' },
-  { key: 'completed', label: 'Täidetud' },
+  { key: 'pending',    label: 'Ootel' },
+  { key: 'confirmed',  label: 'Kinnitatud' },
+  { key: 'preparing',  label: 'Valmistamisel' },
+  { key: 'ready',      label: 'Valmis' },
+  { key: 'delivering', label: 'Teel' },
+  { key: 'completed',  label: 'Täidetud' },
 ];
 
-const statusOrder = statusSteps.map(s => s.key);
+const statusOrder = ['pending', 'confirmed', 'preparing', 'ready', 'delivering', 'completed', 'cancelled', 'rejected'];
 
 const isStepDone = (stepKey: string): boolean => {
   const currentIndex = statusOrder.indexOf(props.order.status);
@@ -178,7 +316,7 @@ const getStepClass = (stepKey: string): string => {
 
 // Auto-refresh while order is active
 const isActive = computed(() =>
-  ['pending', 'confirmed', 'preparing', 'ready'].includes(props.order.status)
+  ['pending', 'confirmed', 'preparing', 'ready', 'delivering'].includes(props.order.status)
 );
 
 let refreshInterval: ReturnType<typeof setInterval> | null = null;
@@ -197,26 +335,28 @@ onUnmounted(() => {
 
 const getStatusClass = (status: string): string => {
   const classes: Record<string, string> = {
-    pending:   'px-3 py-1 rounded-full bg-yellow-900/30 text-yellow-400 text-xs font-semibold',
-    confirmed: 'px-3 py-1 rounded-full bg-blue-900/30 text-blue-400 text-xs font-semibold',
-    preparing: 'px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-xs font-semibold',
-    ready:     'px-3 py-1 rounded-full bg-[#D2691E]/20 text-[#D2691E] text-xs font-semibold',
-    completed: 'px-3 py-1 rounded-full bg-green-900/30 text-green-400 text-xs font-semibold',
-    cancelled: 'px-3 py-1 rounded-full bg-gray-800 text-gray-400 text-xs font-semibold',
-    rejected:  'px-3 py-1 rounded-full bg-red-900/30 text-red-400 text-xs font-semibold',
+    pending:    'px-3 py-1 rounded-full bg-yellow-900/30 text-yellow-400 text-xs font-semibold',
+    confirmed:  'px-3 py-1 rounded-full bg-blue-900/30 text-blue-400 text-xs font-semibold',
+    preparing:  'px-3 py-1 rounded-full bg-purple-900/30 text-purple-400 text-xs font-semibold',
+    ready:      'px-3 py-1 rounded-full bg-[#D2691E]/20 text-[#D2691E] text-xs font-semibold',
+    delivering: 'px-3 py-1 rounded-full bg-cyan-900/30 text-cyan-400 text-xs font-semibold',
+    completed:  'px-3 py-1 rounded-full bg-green-900/30 text-green-400 text-xs font-semibold',
+    cancelled:  'px-3 py-1 rounded-full bg-gray-800 text-gray-400 text-xs font-semibold',
+    rejected:   'px-3 py-1 rounded-full bg-red-900/30 text-red-400 text-xs font-semibold',
   };
   return classes[status] || classes.pending;
 };
 
 const getStatusLabel = (status: string): string => {
   const labels: Record<string, string> = {
-    pending:   'Ootel',
-    confirmed: 'Kinnitatud',
-    preparing: 'Valmistamisel',
-    ready:     'Valmis peale tulema',
-    completed: 'Täidetud',
-    cancelled: 'Tühistatud',
-    rejected:  'Tagasi lükatud',
+    pending:    'Ootel',
+    confirmed:  'Kinnitatud',
+    preparing:  'Valmistamisel',
+    ready:      'Valmis peale tulema',
+    delivering: 'Teel sinuni 🛵',
+    completed:  'Täidetud',
+    cancelled:  'Tühistatud',
+    rejected:   'Tagasi lükatud',
   };
   return labels[status] || status;
 };
