@@ -493,7 +493,11 @@ onMounted(async () => {});
 .bb-builder { display:grid; grid-template-columns:420px 1fr; align-items:start; border-bottom:1px solid #141414; }
 @media (max-width:960px) { .bb-builder { grid-template-columns:1fr; } }
 .bb-left { border-right:1px solid #141414; position:sticky; top:0; height:100vh; overflow:hidden; }
+@media (max-width:960px) { .bb-left { position:static; height:auto; border-right:none; border-bottom:1px solid #141414; } }
 .bb-burger-panel { height:100%; overflow-y:auto; padding:2.5rem 2rem; display:flex; flex-direction:column; gap:1.5rem; scrollbar-width:none; }
+@media (max-width:960px) { .bb-burger-panel { padding:1.5rem 1rem; height:auto; overflow:visible; } }
+@media (max-width:960px) { .bb-burger-visual { min-height:140px; } }
+@media (max-width:960px) { .bb-burger-visual svg { width:160px !important; } }
 .bb-burger-panel::-webkit-scrollbar { display:none; }
 .bb-burger-title { display:flex; align-items:center; justify-content:space-between; }
 .bb-burger-name-display { font-size:.8rem; color:#D2691E; font-weight:600; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
