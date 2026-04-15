@@ -115,136 +115,153 @@
                   </g>
                 </g>
 
-                <!-- INGREDIENT LAYERS -->
-                <g v-for="(L,i) in layers3" :key="i" filter="url(#fds2)">
+                <!-- INGREDIENT LAYERS — no outer drop-shadow filter (it creates dark stripes between layers) -->
+                <g v-for="(L,i) in layers3" :key="i">
 
                   <!-- PATTY -->
                   <g v-if="L.t==='p'">
-                    <!-- Bottom shadow -->
-                    <rect x="22" :y="L.y+L.h*0.55" width="216" :height="L.h*0.48+3" rx="10" :fill="L.s"/>
+                    <!-- Cast shadow below patty -->
+                    <rect x="20" :y="L.y+L.h-2" width="220" height="10" rx="10" fill="rgba(0,0,0,0.38)"/>
                     <!-- Main patty body -->
-                    <rect x="22" :y="L.y" width="216" :height="L.h" rx="10" :fill="L.c"/>
-                    <clipPath :id="`cp${i}`"><rect x="22" :y="L.y" width="216" :height="L.h" rx="10"/></clipPath>
+                    <rect x="20" :y="L.y" width="220" :height="L.h" rx="11" :fill="L.c"/>
+                    <clipPath :id="`cp${i}`"><rect x="20" :y="L.y" width="220" :height="L.h" rx="11"/></clipPath>
                     <g :clip-path="`url(#cp${i})`">
-                      <!-- Diagonal grill marks (blurred for realism, no hard lines) -->
+                      <!-- Diagonal grill marks (blurred) -->
                       <g filter="url(#fGrill)">
-                        <path v-for="g in [32,60,90,120,150,180]" :key="g"
-                          :d="`M${g},${L.y} L${g+9},${L.y} L${g+17},${L.y+L.h} L${g+8},${L.y+L.h} Z`"
-                          fill="rgba(4,0,0,0.70)"/>
-                        <!-- Warm char glow on right edge of each mark -->
-                        <path v-for="g in [40,68,98,128,158,188]" :key="`w${g}`"
+                        <path v-for="g in [32,62,94,126,158,188]" :key="g"
+                          :d="`M${g},${L.y} L${g+10},${L.y} L${g+18},${L.y+L.h} L${g+8},${L.y+L.h} Z`"
+                          fill="rgba(3,0,0,0.68)"/>
+                        <path v-for="g in [42,72,104,136,168,198]" :key="`w${g}`"
                           :d="`M${g},${L.y} L${g+3},${L.y} L${g+5},${L.y+L.h} L${g+2},${L.y+L.h} Z`"
-                          fill="rgba(210,70,0,0.22)"/>
+                          fill="rgba(200,65,0,0.20)"/>
                       </g>
-                      <!-- Caramelised dark spots -->
-                      <ellipse cx="65"  :cy="L.y+L.h*0.55" rx="12" :ry="L.h*0.28" fill="rgba(20,2,0,0.38)"/>
-                      <ellipse cx="118" :cy="L.y+L.h*0.4"  rx="9"  :ry="L.h*0.22" fill="rgba(20,2,0,0.30)"/>
-                      <ellipse cx="175" :cy="L.y+L.h*0.6"  rx="14" :ry="L.h*0.26" fill="rgba(20,2,0,0.32)"/>
-                      <!-- Top surface sheen -->
-                      <rect x="22" :y="L.y" width="216" height="3" fill="rgba(255,110,20,0.12)"/>
+                      <!-- Caramelised spots -->
+                      <ellipse cx="68"  :cy="L.y+L.h*0.55" rx="13" :ry="L.h*0.30" fill="rgba(18,2,0,0.35)"/>
+                      <ellipse cx="128" :cy="L.y+L.h*0.38" rx="10" :ry="L.h*0.22" fill="rgba(18,2,0,0.28)"/>
+                      <ellipse cx="178" :cy="L.y+L.h*0.60" rx="15" :ry="L.h*0.26" fill="rgba(18,2,0,0.30)"/>
+                      <!-- Bottom darkening for depth -->
+                      <rect x="20" :y="L.y+L.h*0.60" width="220" :height="L.h*0.40" rx="8" fill="rgba(0,0,0,0.22)"/>
+                      <!-- Top surface glow -->
+                      <ellipse cx="130" :cy="L.y+L.h*0.28" rx="90" :ry="L.h*0.32" fill="rgba(255,100,20,0.10)"/>
                     </g>
                   </g>
 
                   <!-- CHEESE -->
                   <g v-else-if="L.t==='c'">
-                    <!-- Melt drips hanging below (bigger for taller slab) -->
-                    <ellipse v-for="d in [28,58,92,124,158,192,220]" :key="d" :cx="d" :cy="L.y+L.h+9" rx="7" ry="10" :fill="L.c"/>
-                    <!-- Underside shadow -->
-                    <rect x="5" :y="L.y+L.h*0.52" width="250" :height="L.h*0.52" rx="4" :fill="L.s"/>
-                    <!-- Main slab -->
-                    <rect x="5" :y="L.y" width="250" :height="L.h" rx="5" :fill="L.c"/>
-                    <!-- Bottom depth darkening -->
-                    <rect x="5" :y="L.y+L.h*0.55" width="250" :height="L.h*0.45" rx="4" fill="rgba(0,0,0,0.16)"/>
-                    <!-- Top highlight (wide soft ellipse — no hard line) -->
-                    <ellipse cx="130" :cy="L.y+5" rx="112" ry="7" fill="rgba(255,255,210,0.24)"/>
+                    <!-- Cast shadow below -->
+                    <rect x="2" :y="L.y+L.h-2" width="256" height="10" rx="6" fill="rgba(0,0,0,0.30)"/>
+                    <!-- Melt drips (peek below) -->
+                    <ellipse v-for="d in [22,55,90,124,160,195,225]" :key="d" :cx="d" :cy="L.y+L.h+7" rx="8" ry="10" :fill="L.s"/>
+                    <ellipse v-for="d in [22,55,90,124,160,195,225]" :key="`dc${d}`" :cx="d" :cy="L.y+L.h+5" rx="7" ry="9" :fill="L.c"/>
+                    <!-- Underside darker slab -->
+                    <rect x="2" :y="L.y+L.h*0.50" width="256" :height="L.h*0.54" rx="5" :fill="L.s"/>
+                    <!-- Main cheese slab -->
+                    <rect x="2" :y="L.y" width="256" :height="L.h" rx="6" :fill="L.c"/>
+                    <!-- Bottom depth -->
+                    <rect x="2" :y="L.y+L.h*0.58" width="256" :height="L.h*0.42" rx="5" fill="rgba(0,0,0,0.14)"/>
+                    <!-- Top shine (wide, rounded — not a line) -->
+                    <ellipse cx="128" :cy="L.y+L.h*0.30" rx="115" :ry="L.h*0.36" fill="rgba(255,255,220,0.22)"/>
                   </g>
 
                   <!-- LETTUCE -->
                   <g v-else-if="L.t==='l'">
+                    <!-- Cast shadow -->
+                    <path :d="lp(L.y+4,true)" fill="rgba(0,0,0,0.28)"/>
+                    <!-- Back frills (darker) -->
                     <path :d="lp(L.y,true)"  :fill="L.s"/>
+                    <!-- Front frills (main colour) -->
                     <path :d="lp(L.y,false)" :fill="L.c"/>
-                    <!-- Subtle vein sheen (soft ellipses, no hard lines) -->
-                    <ellipse cx="70"  :cy="L.y+6" rx="14" ry="2.5" fill="rgba(200,255,180,0.10)"/>
-                    <ellipse cx="142" :cy="L.y+5" rx="16" ry="2.5" fill="rgba(200,255,180,0.08)"/>
-                    <ellipse cx="193" :cy="L.y+7" rx="11" ry="2"   fill="rgba(200,255,180,0.08)"/>
+                    <!-- Gloss sheen along top peaks -->
+                    <ellipse cx="80"  :cy="L.y+5" rx="28" :ry="L.h*0.28" fill="rgba(200,255,180,0.18)"/>
+                    <ellipse cx="174" :cy="L.y+4" rx="26" :ry="L.h*0.24" fill="rgba(200,255,180,0.14)"/>
                   </g>
 
                   <!-- TOMATO -->
                   <g v-else-if="L.t==='t'">
-                    <!-- Shadow underside -->
-                    <rect x="16" :y="L.y+L.h*0.52" width="228" :height="L.h*0.52" rx="5" :fill="L.s"/>
+                    <!-- Cast shadow -->
+                    <rect x="14" :y="L.y+L.h-2" width="232" height="10" rx="6" fill="rgba(0,0,0,0.30)"/>
+                    <!-- Underside -->
+                    <rect x="14" :y="L.y+L.h*0.50" width="232" :height="L.h*0.54" rx="6" :fill="L.s"/>
                     <!-- Main slice -->
-                    <rect x="16" :y="L.y" width="228" :height="L.h" rx="6" :fill="L.c"/>
+                    <rect x="14" :y="L.y" width="232" :height="L.h" rx="8" :fill="L.c"/>
                     <!-- Bottom depth -->
-                    <rect x="16" :y="L.y+L.h*0.58" width="228" :height="L.h*0.42" rx="5" fill="rgba(0,0,0,0.16)"/>
-                    <!-- Seed pockets (lighter gel) -->
-                    <ellipse v-for="x in [46,84,126,166,206]" :key="x" :cx="x" :cy="L.y+L.h*0.48" rx="8" ry="5" fill="rgba(255,220,190,0.55)"/>
-                    <!-- Seeds -->
-                    <ellipse v-for="x in [46,84,126,166,206]" :key="`s${x}`" :cx="x" :cy="L.y+L.h*0.48" rx="3" ry="2" fill="rgba(200,120,60,0.7)"/>
-                    <!-- Top highlight (wide soft ellipse) -->
-                    <ellipse cx="130" :cy="L.y+5" rx="105" ry="6" fill="rgba(255,200,180,0.20)"/>
+                    <rect x="14" :y="L.y+L.h*0.60" width="232" :height="L.h*0.40" rx="6" fill="rgba(0,0,0,0.16)"/>
+                    <!-- Seed gel pockets -->
+                    <ellipse v-for="x in [44,84,126,168,208]" :key="x" :cx="x" :cy="L.y+L.h*0.46" rx="10" ry="6" fill="rgba(255,210,180,0.50)"/>
+                    <!-- Seeds inside pockets -->
+                    <ellipse v-for="x in [44,84,126,168,208]" :key="`s${x}`" :cx="x" :cy="L.y+L.h*0.46" rx="3.5" ry="2" fill="rgba(195,115,55,0.72)"/>
+                    <!-- Top juicy shine -->
+                    <ellipse cx="128" :cy="L.y+L.h*0.28" rx="100" :ry="L.h*0.34" fill="rgba(255,200,180,0.22)"/>
                   </g>
 
                   <!-- CUCUMBER -->
                   <g v-else-if="L.t==='k'">
-                    <!-- Underside shadow -->
-                    <rect x="14" :y="L.y+L.h*0.52" width="232" :height="L.h*0.52" rx="4" fill="#1A5006"/>
-                    <!-- Main body -->
-                    <rect x="14" :y="L.y" width="232" :height="L.h" rx="5" :fill="L.c"/>
+                    <!-- Cast shadow -->
+                    <rect x="12" :y="L.y+L.h-2" width="236" height="8" rx="5" fill="rgba(0,0,0,0.28)"/>
+                    <!-- Darker skin edge -->
+                    <rect x="12" :y="L.y+L.h*0.50" width="236" :height="L.h*0.54" rx="5" fill="#1E5808"/>
+                    <!-- Main flesh body -->
+                    <rect x="12" :y="L.y" width="236" :height="L.h" rx="6" :fill="L.c"/>
                     <!-- Bottom depth -->
-                    <rect x="14" :y="L.y+L.h*0.58" width="232" :height="L.h*0.42" rx="4" fill="rgba(0,0,0,0.15)"/>
-                    <!-- Seed pockets -->
-                    <ellipse v-for="x in [42,82,124,164,204]" :key="x" :cx="x" :cy="L.y+L.h*0.46" rx="6" ry="4" fill="rgba(220,255,200,0.38)"/>
-                    <!-- Top highlight -->
-                    <ellipse cx="130" :cy="L.y+5" rx="108" ry="6" fill="rgba(180,255,160,0.16)"/>
+                    <rect x="12" :y="L.y+L.h*0.60" width="236" :height="L.h*0.40" rx="5" fill="rgba(0,0,0,0.14)"/>
+                    <!-- Seed cells (cucumber cross section) -->
+                    <ellipse v-for="x in [42,82,124,164,204]" :key="x" :cx="x" :cy="L.y+L.h*0.44" rx="7" ry="5" fill="rgba(215,255,195,0.40)"/>
+                    <ellipse v-for="x in [42,82,124,164,204]" :key="`c${x}`" :cx="x" :cy="L.y+L.h*0.44" rx="3" ry="2" fill="rgba(180,240,155,0.30)"/>
+                    <!-- Top waxy sheen -->
+                    <ellipse cx="128" :cy="L.y+L.h*0.26" rx="106" :ry="L.h*0.32" fill="rgba(180,255,160,0.18)"/>
                   </g>
 
                   <!-- ONION -->
                   <g v-else-if="L.t==='o'">
-                    <!-- Subtle base wash across full layer -->
-                    <rect x="12" :y="L.y" width="236" :height="L.h" rx="6" fill="rgba(155,55,185,0.30)"/>
-                    <!-- Left ring: blurred so edges are soft, not line-like -->
-                    <g filter="url(#fOnion)">
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="50" :ry="L.h/2+3" fill="rgba(228,148,252,0.52)"/>
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="34" :ry="L.h/2-1" fill="rgba(68,8,88,0.62)"/>
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="18" :ry="L.h/2-5" fill="rgba(212,118,238,0.44)"/>
-                    </g>
-                    <!-- Right ring: blurred -->
-                    <g filter="url(#fOnion)">
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="50" :ry="L.h/2+3" fill="rgba(228,148,252,0.52)"/>
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="34" :ry="L.h/2-1" fill="rgba(68,8,88,0.62)"/>
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="18" :ry="L.h/2-5" fill="rgba(212,118,238,0.44)"/>
-                    </g>
-                    <!-- Top sheen (wide, soft) -->
-                    <ellipse cx="130" :cy="L.y+L.h*0.3" rx="100" :ry="L.h*0.28" fill="rgba(255,220,255,0.09)"/>
+                    <!-- Cast shadow -->
+                    <rect x="12" :y="L.y+L.h-2" width="236" height="8" rx="6" fill="rgba(0,0,0,0.28)"/>
+                    <!-- Underside -->
+                    <rect x="12" :y="L.y+L.h*0.50" width="236" :height="L.h*0.54" rx="6" fill="rgba(90,20,115,0.70)"/>
+                    <!-- Main body (solid translucent purple slab) -->
+                    <rect x="12" :y="L.y" width="236" :height="L.h" rx="7" fill="rgba(195,95,225,0.75)"/>
+                    <!-- Bottom depth -->
+                    <rect x="12" :y="L.y+L.h*0.60" width="236" :height="L.h*0.40" rx="6" fill="rgba(0,0,0,0.14)"/>
+                    <!-- Ring cross-section hints (soft blobs — no hard outlines) -->
+                    <ellipse cx="75"  :cy="L.y+L.h*0.42" rx="42" :ry="L.h*0.44" fill="rgba(230,155,255,0.22)"/>
+                    <ellipse cx="75"  :cy="L.y+L.h*0.42" rx="24" :ry="L.h*0.28" fill="rgba(80,12,105,0.28)"/>
+                    <ellipse cx="188" :cy="L.y+L.h*0.42" rx="42" :ry="L.h*0.44" fill="rgba(230,155,255,0.22)"/>
+                    <ellipse cx="188" :cy="L.y+L.h*0.42" rx="24" :ry="L.h*0.28" fill="rgba(80,12,105,0.28)"/>
+                    <!-- Top pearlescent sheen -->
+                    <ellipse cx="128" :cy="L.y+L.h*0.26" rx="108" :ry="L.h*0.34" fill="rgba(255,218,255,0.20)"/>
                   </g>
 
                   <!-- AVOCADO -->
                   <g v-else-if="L.t==='a'">
-                    <!-- Underside shadow -->
-                    <rect x="14" :y="L.y+L.h*0.52" width="232" :height="L.h*0.52" rx="4" fill="#254008"/>
-                    <!-- Main body -->
-                    <rect x="14" :y="L.y" width="232" :height="L.h" rx="5" :fill="L.c"/>
+                    <!-- Cast shadow -->
+                    <rect x="12" :y="L.y+L.h-2" width="236" height="8" rx="5" fill="rgba(0,0,0,0.28)"/>
+                    <!-- Darker skin underside -->
+                    <rect x="12" :y="L.y+L.h*0.50" width="236" :height="L.h*0.54" rx="5" fill="#2A4C0A"/>
+                    <!-- Main flesh -->
+                    <rect x="12" :y="L.y" width="236" :height="L.h" rx="6" :fill="L.c"/>
                     <!-- Bottom depth -->
-                    <rect x="14" :y="L.y+L.h*0.58" width="232" :height="L.h*0.42" rx="4" fill="rgba(0,0,0,0.16)"/>
-                    <!-- Fat marbling (rounder blobs) -->
-                    <ellipse v-for="(e,ei) in [{x:60},{x:120},{x:180}]" :key="ei" :cx="e.x" :cy="L.y+L.h*0.44" rx="22" ry="6" fill="rgba(160,220,100,0.24)"/>
-                    <!-- Top highlight -->
-                    <ellipse cx="130" :cy="L.y+5" rx="108" ry="6" fill="rgba(200,255,150,0.15)"/>
+                    <rect x="12" :y="L.y+L.h*0.60" width="236" :height="L.h*0.40" rx="5" fill="rgba(0,0,0,0.15)"/>
+                    <!-- Buttery marbling blobs -->
+                    <ellipse v-for="(e,ei) in [{x:58,rx:26,ry:7},{x:128,rx:30,ry:8},{x:196,rx:24,ry:6}]" :key="ei"
+                      :cx="e.x" :cy="L.y+L.h*0.40" :rx="e.rx" :ry="e.ry" fill="rgba(155,215,95,0.28)"/>
+                    <!-- Top waxy shine -->
+                    <ellipse cx="128" :cy="L.y+L.h*0.26" rx="108" :ry="L.h*0.34" fill="rgba(195,255,140,0.18)"/>
                   </g>
 
                   <!-- SAUCE -->
                   <g v-else-if="L.t==='s'">
-                    <!-- Underside shadow -->
-                    <rect x="18" :y="L.y+L.h*0.52" width="224" :height="L.h*0.52" rx="3" :fill="L.s"/>
+                    <!-- Cast shadow -->
+                    <rect x="16" :y="L.y+L.h-2" width="228" height="8" rx="5" fill="rgba(0,0,0,0.28)"/>
+                    <!-- Underside (darker) -->
+                    <rect x="16" :y="L.y+L.h*0.50" width="228" :height="L.h*0.54" rx="5" :fill="L.s"/>
                     <!-- Main body -->
-                    <rect x="18" :y="L.y" width="224" :height="L.h" rx="5" :fill="L.c"/>
+                    <rect x="16" :y="L.y" width="228" :height="L.h" rx="6" :fill="L.c"/>
                     <!-- Bottom depth -->
-                    <rect x="18" :y="L.y+L.h*0.55" width="224" :height="L.h*0.45" rx="3" fill="rgba(0,0,0,0.18)"/>
-                    <!-- Top highlight (wide soft ellipse) -->
-                    <ellipse cx="130" :cy="L.y+5" rx="100" ry="6" fill="rgba(255,255,255,0.18)"/>
-                    <!-- Sauce texture blobs (round, not line-like) -->
-                    <ellipse v-for="(e,ei) in [{x:60,r:16},{x:130,r:20},{x:195,r:15}]" :key="ei" :cx="e.x" :cy="L.y+L.h*0.42" :rx="e.r" :ry="e.r*0.55" fill="rgba(255,255,255,0.09)"/>
+                    <rect x="16" :y="L.y+L.h*0.60" width="228" :height="L.h*0.40" rx="5" fill="rgba(0,0,0,0.16)"/>
+                    <!-- Glossy top (wide rounded glow) -->
+                    <ellipse cx="128" :cy="L.y+L.h*0.28" rx="100" :ry="L.h*0.36" fill="rgba(255,255,255,0.16)"/>
+                    <!-- Blob highlights -->
+                    <ellipse v-for="(e,ei) in [{x:62,r:18},{x:130,r:22},{x:196,r:16}]" :key="ei"
+                      :cx="e.x" :cy="L.y+L.h*0.36" :rx="e.r" :ry="e.r*0.50" fill="rgba(255,255,255,0.10)"/>
                   </g>
 
                 </g>
@@ -516,10 +533,10 @@ const scrollToSaved = () => {
 
 // ═══ SVG BURGER ═══
 const BUN_DOME = 62
-const BOT_H    = 22
-const RIM_H    = 10
+const BOT_H    = 26
+const RIM_H    = 12
 const START_Y  = 8
-const GAP      = 2
+const GAP      = 4
 
 interface SL { t:string; y:number; h:number; c:string; s:string; }
 
