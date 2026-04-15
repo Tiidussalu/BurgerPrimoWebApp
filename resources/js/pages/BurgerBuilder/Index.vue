@@ -147,16 +147,16 @@
 
                   <!-- CHEESE -->
                   <g v-else-if="L.t==='c'">
-                    <!-- Melt drips hanging below -->
-                    <ellipse v-for="d in [28,58,92,124,158,192,220]" :key="d" :cx="d" :cy="L.y+L.h+6" rx="5.5" ry="7" :fill="L.c"/>
-                    <!-- Darker base shadow -->
-                    <rect x="5" :y="L.y+5" width="250" height="7" rx="3" :fill="L.s"/>
-                    <!-- Main cheese slab -->
-                    <rect x="5" :y="L.y" width="250" :height="L.h+2" rx="3" :fill="L.c"/>
-                    <!-- Top gloss (wide soft ellipse, not a thin line rect) -->
-                    <ellipse cx="130" :cy="L.y+2" rx="118" ry="3.5" fill="rgba(255,255,200,0.22)"/>
-                    <!-- Oil sheen streaks -->
-                    <ellipse v-for="(e,ei) in [{x:55},{x:108},{x:165},{x:215}]" :key="ei" :cx="e.x" :cy="L.y+L.h/2" rx="22" ry="2" fill="rgba(255,255,160,0.18)"/>
+                    <!-- Melt drips hanging below (bigger for taller slab) -->
+                    <ellipse v-for="d in [28,58,92,124,158,192,220]" :key="d" :cx="d" :cy="L.y+L.h+9" rx="7" ry="10" :fill="L.c"/>
+                    <!-- Underside shadow -->
+                    <rect x="5" :y="L.y+L.h*0.52" width="250" :height="L.h*0.52" rx="4" :fill="L.s"/>
+                    <!-- Main slab -->
+                    <rect x="5" :y="L.y" width="250" :height="L.h" rx="5" :fill="L.c"/>
+                    <!-- Bottom depth darkening -->
+                    <rect x="5" :y="L.y+L.h*0.55" width="250" :height="L.h*0.45" rx="4" fill="rgba(0,0,0,0.16)"/>
+                    <!-- Top highlight (wide soft ellipse — no hard line) -->
+                    <ellipse cx="130" :cy="L.y+5" rx="112" ry="7" fill="rgba(255,255,210,0.24)"/>
                   </g>
 
                   <!-- LETTUCE -->
@@ -171,26 +171,32 @@
 
                   <!-- TOMATO -->
                   <g v-else-if="L.t==='t'">
-                    <!-- Shadow edge -->
-                    <rect x="16" :y="L.y+L.h*0.55" width="228" :height="L.h*0.48" rx="4" :fill="L.s"/>
+                    <!-- Shadow underside -->
+                    <rect x="16" :y="L.y+L.h*0.52" width="228" :height="L.h*0.52" rx="5" :fill="L.s"/>
                     <!-- Main slice -->
-                    <rect x="16" :y="L.y" width="228" :height="L.h" rx="5" :fill="L.c"/>
+                    <rect x="16" :y="L.y" width="228" :height="L.h" rx="6" :fill="L.c"/>
+                    <!-- Bottom depth -->
+                    <rect x="16" :y="L.y+L.h*0.58" width="228" :height="L.h*0.42" rx="5" fill="rgba(0,0,0,0.16)"/>
                     <!-- Seed pockets (lighter gel) -->
-                    <ellipse v-for="x in [46,84,126,166,206]" :key="x" :cx="x" :cy="L.y+L.h/2" rx="7" ry="4" fill="rgba(255,220,190,0.55)"/>
-                    <!-- Seeds inside pockets -->
-                    <ellipse v-for="x in [46,84,126,166,206]" :key="`s${x}`" :cx="x" :cy="L.y+L.h/2" rx="2.5" ry="1.5" fill="rgba(200,120,60,0.7)"/>
-                    <!-- Surface sheen (soft ellipse) -->
-                    <ellipse cx="130" :cy="L.y+2" rx="108" ry="2.5" fill="rgba(255,200,180,0.18)"/>
+                    <ellipse v-for="x in [46,84,126,166,206]" :key="x" :cx="x" :cy="L.y+L.h*0.48" rx="8" ry="5" fill="rgba(255,220,190,0.55)"/>
+                    <!-- Seeds -->
+                    <ellipse v-for="x in [46,84,126,166,206]" :key="`s${x}`" :cx="x" :cy="L.y+L.h*0.48" rx="3" ry="2" fill="rgba(200,120,60,0.7)"/>
+                    <!-- Top highlight (wide soft ellipse) -->
+                    <ellipse cx="130" :cy="L.y+5" rx="105" ry="6" fill="rgba(255,200,180,0.20)"/>
                   </g>
 
                   <!-- CUCUMBER -->
                   <g v-else-if="L.t==='k'">
-                    <rect x="14" :y="L.y+L.h*0.55" width="232" :height="L.h*0.48" rx="3" fill="#1A5006"/>
-                    <rect x="14" :y="L.y" width="232" :height="L.h" rx="4" :fill="L.c"/>
+                    <!-- Underside shadow -->
+                    <rect x="14" :y="L.y+L.h*0.52" width="232" :height="L.h*0.52" rx="4" fill="#1A5006"/>
+                    <!-- Main body -->
+                    <rect x="14" :y="L.y" width="232" :height="L.h" rx="5" :fill="L.c"/>
+                    <!-- Bottom depth -->
+                    <rect x="14" :y="L.y+L.h*0.58" width="232" :height="L.h*0.42" rx="4" fill="rgba(0,0,0,0.15)"/>
                     <!-- Seed pockets -->
-                    <ellipse v-for="x in [42,82,124,164,204]" :key="x" :cx="x" :cy="L.y+L.h/2" rx="5" ry="2.5" fill="rgba(220,255,200,0.35)"/>
-                    <!-- Surface sheen (soft ellipse) -->
-                    <ellipse cx="130" :cy="L.y+1.5" rx="110" ry="2.2" fill="rgba(180,255,160,0.13)"/>
+                    <ellipse v-for="x in [42,82,124,164,204]" :key="x" :cx="x" :cy="L.y+L.h*0.46" rx="6" ry="4" fill="rgba(220,255,200,0.38)"/>
+                    <!-- Top highlight -->
+                    <ellipse cx="130" :cy="L.y+5" rx="108" ry="6" fill="rgba(180,255,160,0.16)"/>
                   </g>
 
                   <!-- ONION -->
@@ -215,22 +221,30 @@
 
                   <!-- AVOCADO -->
                   <g v-else-if="L.t==='a'">
-                    <rect x="14" :y="L.y+L.h*0.55" width="232" :height="L.h*0.48" rx="3" fill="#254008"/>
-                    <rect x="14" :y="L.y" width="232" :height="L.h" rx="4" :fill="L.c"/>
-                    <!-- Lighter patches (fat marbling) -->
-                    <ellipse v-for="(e,ei) in [{x:60},{x:120},{x:180}]" :key="ei" :cx="e.x" :cy="L.y+L.h/2" rx="20" ry="3.5" fill="rgba(160,220,100,0.22)"/>
-                    <!-- Surface sheen (soft ellipse) -->
-                    <ellipse cx="130" :cy="L.y+1.5" rx="110" ry="2.2" fill="rgba(200,255,150,0.11)"/>
+                    <!-- Underside shadow -->
+                    <rect x="14" :y="L.y+L.h*0.52" width="232" :height="L.h*0.52" rx="4" fill="#254008"/>
+                    <!-- Main body -->
+                    <rect x="14" :y="L.y" width="232" :height="L.h" rx="5" :fill="L.c"/>
+                    <!-- Bottom depth -->
+                    <rect x="14" :y="L.y+L.h*0.58" width="232" :height="L.h*0.42" rx="4" fill="rgba(0,0,0,0.16)"/>
+                    <!-- Fat marbling (rounder blobs) -->
+                    <ellipse v-for="(e,ei) in [{x:60},{x:120},{x:180}]" :key="ei" :cx="e.x" :cy="L.y+L.h*0.44" rx="22" ry="6" fill="rgba(160,220,100,0.24)"/>
+                    <!-- Top highlight -->
+                    <ellipse cx="130" :cy="L.y+5" rx="108" ry="6" fill="rgba(200,255,150,0.15)"/>
                   </g>
 
                   <!-- SAUCE -->
                   <g v-else-if="L.t==='s'">
-                    <rect x="18" :y="L.y+L.h*0.55" width="224" :height="L.h*0.48" rx="2" :fill="L.s"/>
-                    <rect x="18" :y="L.y" width="224" :height="L.h" rx="3" :fill="L.c"/>
-                    <!-- Sauce gloss (soft ellipse, not a rect line) -->
-                    <ellipse cx="130" :cy="L.y+1.5" rx="105" ry="2" fill="rgba(255,255,255,0.13)"/>
-                    <!-- Sauce blobs -->
-                    <ellipse v-for="(e,ei) in [{x:55,r:18},{x:120,r:22},{x:185,r:16}]" :key="ei" :cx="e.x" :cy="L.y+L.h/2" :rx="e.r" ry="1.8" fill="rgba(255,255,255,0.10)"/>
+                    <!-- Underside shadow -->
+                    <rect x="18" :y="L.y+L.h*0.52" width="224" :height="L.h*0.52" rx="3" :fill="L.s"/>
+                    <!-- Main body -->
+                    <rect x="18" :y="L.y" width="224" :height="L.h" rx="5" :fill="L.c"/>
+                    <!-- Bottom depth -->
+                    <rect x="18" :y="L.y+L.h*0.55" width="224" :height="L.h*0.45" rx="3" fill="rgba(0,0,0,0.18)"/>
+                    <!-- Top highlight (wide soft ellipse) -->
+                    <ellipse cx="130" :cy="L.y+5" rx="100" ry="6" fill="rgba(255,255,255,0.18)"/>
+                    <!-- Sauce texture blobs (round, not line-like) -->
+                    <ellipse v-for="(e,ei) in [{x:60,r:16},{x:130,r:20},{x:195,r:15}]" :key="ei" :cx="e.x" :cy="L.y+L.h*0.42" :rx="e.r" :ry="e.r*0.55" fill="rgba(255,255,255,0.09)"/>
                   </g>
 
                 </g>
@@ -517,20 +531,20 @@ function mkL(): SL[] {
   const pi = selectedIngredients.value['pitav']??[]
   const push = (t:string,h:number,c:string,s:string) => out.push({t,y:0,h,c,s})
   if(pi.length>=2){
-    push('p',20,pC(pi[0]),pS())
-    ju.forEach(x=>{const n=gn(x.id);push('c',7,cC(n),cS(n))})
+    push('p',22,pC(pi[0]),pS())
+    ju.forEach(x=>{const n=gn(x.id);push('c',16,cC(n),cS(n))})
     sa.forEach(x=>{const n=gn(x.id);const[t,h,c,s]=vD(n);push(t,h,c,s)})
-    li.forEach(x=>{const n=gn(x.id);push('s',6,sC(n),sS(n))})
-    push('p',20,pC(pi[1]),pS())
+    li.forEach(x=>{const n=gn(x.id);push('s',12,sC(n),sS(n))})
+    push('p',22,pC(pi[1]),pS())
   } else if(pi.length===1){
-    push('p',20,pC(pi[0]),pS())
-    ju.forEach(x=>{const n=gn(x.id);push('c',7,cC(n),cS(n))})
+    push('p',22,pC(pi[0]),pS())
+    ju.forEach(x=>{const n=gn(x.id);push('c',16,cC(n),cS(n))})
     sa.forEach(x=>{const n=gn(x.id);const[t,h,c,s]=vD(n);push(t,h,c,s)})
-    li.forEach(x=>{const n=gn(x.id);push('s',6,sC(n),sS(n))})
+    li.forEach(x=>{const n=gn(x.id);push('s',12,sC(n),sS(n))})
   } else {
-    ju.forEach(x=>{const n=gn(x.id);push('c',7,cC(n),cS(n))})
+    ju.forEach(x=>{const n=gn(x.id);push('c',16,cC(n),cS(n))})
     sa.forEach(x=>{const n=gn(x.id);const[t,h,c,s]=vD(n);push(t,h,c,s)})
-    li.forEach(x=>{const n=gn(x.id);push('s',6,sC(n),sS(n))})
+    li.forEach(x=>{const n=gn(x.id);push('s',12,sC(n),sS(n))})
   }
   let y = START_Y + BUN_DOME + RIM_H + GAP
   for(const l of out){ l.y=y; y+=l.h+GAP }
@@ -549,11 +563,11 @@ function pS():string{return '#1C0402'}
 function cC(n:string):string{if(n.includes('mozzarella'))return '#F5EEE0';if(n.includes('blue'))return '#A8B8C8';return '#E8A40E'}
 function cS(n:string):string{if(n.includes('mozzarella'))return '#CCBCA0';if(n.includes('blue'))return '#687899';return '#A07208'}
 function vD(n:string):[string,number,string,string]{
-  if(n.includes('tomat'))return ['t',13,'#C01008','#700404']
-  if(n.includes('kurk')) return ['k',9,'#559018','#185808']
-  if(n.includes('sibul')||n.includes('kastrull'))return ['o',11,'transparent','transparent']
-  if(n.includes('avocado'))return ['a',10,'#6A9818','#2E4E08']
-  return ['l',13,'#389A0C','#145C08']
+  if(n.includes('tomat'))return ['t',20,'#C01008','#700404']
+  if(n.includes('kurk')) return ['k',16,'#559018','#185808']
+  if(n.includes('sibul')||n.includes('kastrull'))return ['o',16,'transparent','transparent']
+  if(n.includes('avocado'))return ['a',16,'#6A9818','#2E4E08']
+  return ['l',20,'#389A0C','#145C08']
 }
 function sC(n:string):string{
   if(n.includes('ketšup'))  return '#BE1808'
