@@ -73,6 +73,10 @@
                   <filter id="fds2" x="-8%" y="-8%" width="116%" height="140%">
                     <feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="rgba(0,0,0,0.40)"/>
                   </filter>
+                  <!-- Grill mark blur -->
+                  <filter id="fGrill" x="-20%" y="-5%" width="140%" height="110%">
+                    <feGaussianBlur stdDeviation="1.6"/>
+                  </filter>
                   <!-- Ambient glow under burger -->
                   <radialGradient id="gGlow" cx="50%" cy="50%" r="50%">
                     <stop offset="0%"   stop-color="rgba(210,105,30,0.35)"/>
@@ -102,7 +106,8 @@
                     <ellipse :cx="s.x" :cy="svgTopRim-s.d+2" :rx="s.w" :ry="s.h" :transform="`rotate(${s.r},${s.x},${svgTopRim-s.d})`" fill="rgba(10,2,0,0.35)"/>
                     <ellipse :cx="s.x" :cy="svgTopRim-s.d"   :rx="s.w" :ry="s.h" :transform="`rotate(${s.r},${s.x},${svgTopRim-s.d})`" fill="url(#gSd)"/>
                     <ellipse :cx="s.x-s.w*0.3" :cy="svgTopRim-s.d-s.h*0.3" :rx="s.w*0.35" :ry="s.h*0.3" fill="rgba(255,248,200,0.45)" :transform="`rotate(${s.r},${s.x},${svgTopRim-s.d})`"/>
-                    <line :x1="s.x-s.w+1.5" :y1="svgTopRim-s.d" :x2="s.x+s.w-1.5" :y2="svgTopRim-s.d" stroke="rgba(70,38,2,0.4)" stroke-width="0.9"/>
+                    <!-- Subtle seed crease (thin dark ellipse, no hard line) -->
+                    <ellipse :cx="s.x" :cy="svgTopRim-s.d" :rx="s.w*0.68" :ry="s.h*0.19" :transform="`rotate(${s.r},${s.x},${svgTopRim-s.d})`" fill="rgba(55,24,2,0.26)"/>
                   </g>
                 </g>
 
@@ -117,10 +122,16 @@
                     <rect x="22" :y="L.y" width="216" :height="L.h" rx="10" :fill="L.c"/>
                     <clipPath :id="`cp${i}`"><rect x="22" :y="L.y" width="216" :height="L.h" rx="10"/></clipPath>
                     <g :clip-path="`url(#cp${i})`">
-                      <!-- Grill marks (dark) -->
-                      <rect v-for="g in [44,72,102,132,162,192]" :key="g" :x="g" :y="L.y" width="7" :height="L.h" fill="rgba(2,0,0,0.58)"/>
-                      <!-- Grill mark hot-glow edge -->
-                      <rect v-for="g in [51,79,109,139,169,199]" :key="`e${g}`" :x="g" :y="L.y" width="2" :height="L.h" fill="rgba(200,60,0,0.18)"/>
+                      <!-- Diagonal grill marks (blurred for realism, no hard lines) -->
+                      <g filter="url(#fGrill)">
+                        <path v-for="g in [32,60,90,120,150,180]" :key="g"
+                          :d="`M${g},${L.y} L${g+9},${L.y} L${g+17},${L.y+L.h} L${g+8},${L.y+L.h} Z`"
+                          fill="rgba(4,0,0,0.70)"/>
+                        <!-- Warm char glow on right edge of each mark -->
+                        <path v-for="g in [40,68,98,128,158,188]" :key="`w${g}`"
+                          :d="`M${g},${L.y} L${g+3},${L.y} L${g+5},${L.y+L.h} L${g+2},${L.y+L.h} Z`"
+                          fill="rgba(210,70,0,0.22)"/>
+                      </g>
                       <!-- Caramelised dark spots -->
                       <ellipse cx="65"  :cy="L.y+L.h*0.55" rx="12" :ry="L.h*0.28" fill="rgba(20,2,0,0.38)"/>
                       <ellipse cx="118" :cy="L.y+L.h*0.4"  rx="9"  :ry="L.h*0.22" fill="rgba(20,2,0,0.30)"/>
@@ -148,10 +159,10 @@
                   <g v-else-if="L.t==='l'">
                     <path :d="lp(L.y,true)"  :fill="L.s"/>
                     <path :d="lp(L.y,false)" :fill="L.c"/>
-                    <!-- Vein highlights -->
-                    <line x1="60" :y1="L.y+4" x2="80" :y2="L.y+8" stroke="rgba(255,255,255,0.12)" stroke-width="1.2" stroke-linecap="round"/>
-                    <line x1="130" :y1="L.y+3" x2="155" :y2="L.y+7" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round"/>
-                    <line x1="185" :y1="L.y+5" x2="200" :y2="L.y+9" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-linecap="round"/>
+                    <!-- Subtle vein sheen (soft ellipses, no hard lines) -->
+                    <ellipse cx="70"  :cy="L.y+6" rx="14" ry="2.5" fill="rgba(200,255,180,0.10)"/>
+                    <ellipse cx="142" :cy="L.y+5" rx="16" ry="2.5" fill="rgba(200,255,180,0.08)"/>
+                    <ellipse cx="193" :cy="L.y+7" rx="11" ry="2"   fill="rgba(200,255,180,0.08)"/>
                   </g>
 
                   <!-- TOMATO -->
@@ -179,14 +190,25 @@
 
                   <!-- ONION -->
                   <g v-else-if="L.t==='o'">
-                    <!-- Left ring -->
-                    <ellipse cx="72"  :cy="L.y+L.h/2" rx="52" :ry="L.h/2+2" fill="rgba(200,80,220,0.09)" stroke="#D070E8" stroke-width="3"/>
-                    <ellipse cx="72"  :cy="L.y+L.h/2" rx="34" :ry="L.h/2-2" fill="none" stroke="#B058CC" stroke-width="2"/>
-                    <ellipse cx="72"  :cy="L.y+L.h/2" rx="16" :ry="L.h/2-5" fill="none" stroke="#9040AA" stroke-width="1.5" stroke-dasharray="3,2"/>
-                    <!-- Right ring -->
-                    <ellipse cx="188" :cy="L.y+L.h/2" rx="52" :ry="L.h/2+2" fill="rgba(200,80,220,0.09)" stroke="#D070E8" stroke-width="3"/>
-                    <ellipse cx="188" :cy="L.y+L.h/2" rx="34" :ry="L.h/2-2" fill="none" stroke="#B058CC" stroke-width="2"/>
-                    <ellipse cx="188" :cy="L.y+L.h/2" rx="16" :ry="L.h/2-5" fill="none" stroke="#9040AA" stroke-width="1.5" stroke-dasharray="3,2"/>
+                    <!-- Left ring: concentric filled ellipses, no stroke -->
+                    <g>
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="52" :ry="L.h/2+2" fill="rgba(225,145,245,0.26)"/>
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="43" :ry="L.h/2"   fill="rgba(70,10,90,0.30)"/>
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="35" :ry="L.h/2-2" fill="rgba(205,115,228,0.24)"/>
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="27" :ry="L.h/2-4" fill="rgba(70,10,90,0.28)"/>
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="19" :ry="L.h/2-6" fill="rgba(190,95,215,0.20)"/>
+                      <!-- Top sheen -->
+                      <ellipse cx="72" :cy="L.y+L.h*0.28" rx="38" :ry="L.h*0.22" fill="rgba(255,220,255,0.11)"/>
+                    </g>
+                    <!-- Right ring: same pattern -->
+                    <g>
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="52" :ry="L.h/2+2" fill="rgba(225,145,245,0.26)"/>
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="43" :ry="L.h/2"   fill="rgba(70,10,90,0.30)"/>
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="35" :ry="L.h/2-2" fill="rgba(205,115,228,0.24)"/>
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="27" :ry="L.h/2-4" fill="rgba(70,10,90,0.28)"/>
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="19" :ry="L.h/2-6" fill="rgba(190,95,215,0.20)"/>
+                      <ellipse cx="188" :cy="L.y+L.h*0.28" rx="38" :ry="L.h*0.22" fill="rgba(255,220,255,0.11)"/>
+                    </g>
                   </g>
 
                   <!-- AVOCADO -->
