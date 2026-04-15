@@ -77,6 +77,10 @@
                   <filter id="fGrill" x="-20%" y="-5%" width="140%" height="110%">
                     <feGaussianBlur stdDeviation="1.6"/>
                   </filter>
+                  <!-- Onion ring soft blur -->
+                  <filter id="fOnion" x="-18%" y="-40%" width="136%" height="180%">
+                    <feGaussianBlur stdDeviation="2.4"/>
+                  </filter>
                   <!-- Ambient glow under burger -->
                   <radialGradient id="gGlow" cx="50%" cy="50%" r="50%">
                     <stop offset="0%"   stop-color="rgba(210,105,30,0.35)"/>
@@ -149,8 +153,8 @@
                     <rect x="5" :y="L.y+5" width="250" height="7" rx="3" :fill="L.s"/>
                     <!-- Main cheese slab -->
                     <rect x="5" :y="L.y" width="250" :height="L.h+2" rx="3" :fill="L.c"/>
-                    <!-- Top gloss -->
-                    <rect x="5" :y="L.y" width="250" height="3.5" rx="2" fill="rgba(255,255,200,0.32)"/>
+                    <!-- Top gloss (wide soft ellipse, not a thin line rect) -->
+                    <ellipse cx="130" :cy="L.y+2" rx="118" ry="3.5" fill="rgba(255,255,200,0.22)"/>
                     <!-- Oil sheen streaks -->
                     <ellipse v-for="(e,ei) in [{x:55},{x:108},{x:165},{x:215}]" :key="ei" :cx="e.x" :cy="L.y+L.h/2" rx="22" ry="2" fill="rgba(255,255,160,0.18)"/>
                   </g>
@@ -175,40 +179,38 @@
                     <ellipse v-for="x in [46,84,126,166,206]" :key="x" :cx="x" :cy="L.y+L.h/2" rx="7" ry="4" fill="rgba(255,220,190,0.55)"/>
                     <!-- Seeds inside pockets -->
                     <ellipse v-for="x in [46,84,126,166,206]" :key="`s${x}`" :cx="x" :cy="L.y+L.h/2" rx="2.5" ry="1.5" fill="rgba(200,120,60,0.7)"/>
-                    <!-- Surface sheen -->
-                    <rect x="16" :y="L.y" width="228" height="3" rx="2" fill="rgba(255,200,180,0.28)"/>
+                    <!-- Surface sheen (soft ellipse) -->
+                    <ellipse cx="130" :cy="L.y+2" rx="108" ry="2.5" fill="rgba(255,200,180,0.18)"/>
                   </g>
 
                   <!-- CUCUMBER -->
                   <g v-else-if="L.t==='k'">
                     <rect x="14" :y="L.y+L.h*0.55" width="232" :height="L.h*0.48" rx="3" fill="#1A5006"/>
                     <rect x="14" :y="L.y" width="232" :height="L.h" rx="4" :fill="L.c"/>
-                    <!-- Seed line -->
+                    <!-- Seed pockets -->
                     <ellipse v-for="x in [42,82,124,164,204]" :key="x" :cx="x" :cy="L.y+L.h/2" rx="5" ry="2.5" fill="rgba(220,255,200,0.35)"/>
-                    <rect x="14" :y="L.y" width="232" height="2.5" rx="2" fill="rgba(180,255,160,0.22)"/>
+                    <!-- Surface sheen (soft ellipse) -->
+                    <ellipse cx="130" :cy="L.y+1.5" rx="110" ry="2.2" fill="rgba(180,255,160,0.13)"/>
                   </g>
 
                   <!-- ONION -->
                   <g v-else-if="L.t==='o'">
-                    <!-- Left ring: concentric filled ellipses, no stroke -->
-                    <g>
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="52" :ry="L.h/2+2" fill="rgba(225,145,245,0.26)"/>
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="43" :ry="L.h/2"   fill="rgba(70,10,90,0.30)"/>
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="35" :ry="L.h/2-2" fill="rgba(205,115,228,0.24)"/>
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="27" :ry="L.h/2-4" fill="rgba(70,10,90,0.28)"/>
-                      <ellipse cx="72" :cy="L.y+L.h/2" rx="19" :ry="L.h/2-6" fill="rgba(190,95,215,0.20)"/>
-                      <!-- Top sheen -->
-                      <ellipse cx="72" :cy="L.y+L.h*0.28" rx="38" :ry="L.h*0.22" fill="rgba(255,220,255,0.11)"/>
+                    <!-- Subtle base wash across full layer -->
+                    <rect x="12" :y="L.y" width="236" :height="L.h" rx="6" fill="rgba(155,55,185,0.30)"/>
+                    <!-- Left ring: blurred so edges are soft, not line-like -->
+                    <g filter="url(#fOnion)">
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="50" :ry="L.h/2+3" fill="rgba(228,148,252,0.52)"/>
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="34" :ry="L.h/2-1" fill="rgba(68,8,88,0.62)"/>
+                      <ellipse cx="72" :cy="L.y+L.h/2" rx="18" :ry="L.h/2-5" fill="rgba(212,118,238,0.44)"/>
                     </g>
-                    <!-- Right ring: same pattern -->
-                    <g>
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="52" :ry="L.h/2+2" fill="rgba(225,145,245,0.26)"/>
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="43" :ry="L.h/2"   fill="rgba(70,10,90,0.30)"/>
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="35" :ry="L.h/2-2" fill="rgba(205,115,228,0.24)"/>
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="27" :ry="L.h/2-4" fill="rgba(70,10,90,0.28)"/>
-                      <ellipse cx="188" :cy="L.y+L.h/2" rx="19" :ry="L.h/2-6" fill="rgba(190,95,215,0.20)"/>
-                      <ellipse cx="188" :cy="L.y+L.h*0.28" rx="38" :ry="L.h*0.22" fill="rgba(255,220,255,0.11)"/>
+                    <!-- Right ring: blurred -->
+                    <g filter="url(#fOnion)">
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="50" :ry="L.h/2+3" fill="rgba(228,148,252,0.52)"/>
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="34" :ry="L.h/2-1" fill="rgba(68,8,88,0.62)"/>
+                      <ellipse cx="188" :cy="L.y+L.h/2" rx="18" :ry="L.h/2-5" fill="rgba(212,118,238,0.44)"/>
                     </g>
+                    <!-- Top sheen (wide, soft) -->
+                    <ellipse cx="130" :cy="L.y+L.h*0.3" rx="100" :ry="L.h*0.28" fill="rgba(255,220,255,0.09)"/>
                   </g>
 
                   <!-- AVOCADO -->
@@ -217,15 +219,16 @@
                     <rect x="14" :y="L.y" width="232" :height="L.h" rx="4" :fill="L.c"/>
                     <!-- Lighter patches (fat marbling) -->
                     <ellipse v-for="(e,ei) in [{x:60},{x:120},{x:180}]" :key="ei" :cx="e.x" :cy="L.y+L.h/2" rx="20" ry="3.5" fill="rgba(160,220,100,0.22)"/>
-                    <rect x="14" :y="L.y" width="232" height="2.5" rx="2" fill="rgba(200,255,150,0.18)"/>
+                    <!-- Surface sheen (soft ellipse) -->
+                    <ellipse cx="130" :cy="L.y+1.5" rx="110" ry="2.2" fill="rgba(200,255,150,0.11)"/>
                   </g>
 
                   <!-- SAUCE -->
                   <g v-else-if="L.t==='s'">
                     <rect x="18" :y="L.y+L.h*0.55" width="224" :height="L.h*0.48" rx="2" :fill="L.s"/>
                     <rect x="18" :y="L.y" width="224" :height="L.h" rx="3" :fill="L.c"/>
-                    <!-- Sauce sheen / gloss -->
-                    <rect x="18" :y="L.y" width="224" height="2.5" rx="1.5" fill="rgba(255,255,255,0.20)"/>
+                    <!-- Sauce gloss (soft ellipse, not a rect line) -->
+                    <ellipse cx="130" :cy="L.y+1.5" rx="105" ry="2" fill="rgba(255,255,255,0.13)"/>
                     <!-- Sauce blobs -->
                     <ellipse v-for="(e,ei) in [{x:55,r:18},{x:120,r:22},{x:185,r:16}]" :key="ei" :cx="e.x" :cy="L.y+L.h/2" :rx="e.r" ry="1.8" fill="rgba(255,255,255,0.10)"/>
                   </g>
