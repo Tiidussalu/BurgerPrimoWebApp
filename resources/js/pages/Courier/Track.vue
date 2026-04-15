@@ -267,13 +267,15 @@ const fetchRoute = async (lat: number, lng: number) => {
   const destLng = props.order.delivery_lng;
   if (!destLat || !destLng || !map || !L) return;
 
-  // Ainult kui liigutud >100m või >60s möödunud
+  // Ainult kui liigutud >100m või >60s möödunud (välja arvatud esimene kord)
   const now = Date.now();
-  const R = 6371000;
-  const dLat = (lat - lastRouteFetchLat) * Math.PI / 180;
-  const dLng = (lng - lastRouteFetchLng) * Math.PI / 180;
-  const moved = R * Math.sqrt(dLat ** 2 + (Math.cos(lat * Math.PI / 180) * dLng) ** 2);
-  if (now - lastRouteFetchTime < 60000 && moved < 100) return;
+  if (routeLayer) {
+    const R = 6371000;
+    const dLat = (lat - lastRouteFetchLat) * Math.PI / 180;
+    const dLng = (lng - lastRouteFetchLng) * Math.PI / 180;
+    const moved = R * Math.sqrt(dLat ** 2 + (Math.cos(lat * Math.PI / 180) * dLng) ** 2);
+    if (now - lastRouteFetchTime < 60000 && moved < 100) return;
+  }
   lastRouteFetchLat = lat;
   lastRouteFetchLng = lng;
   lastRouteFetchTime = now;
@@ -389,6 +391,7 @@ const initMap = async (lat: number, lng: number, isDraggable = false) => {
       const cLng = Math.max(SAAREMAA.sw[1], Math.min(SAAREMAA.ne[1], ln));
       courierMarker.setLatLng([cLat, cLng]);
       sendLocation(cLat, cLng);
+      fetchRoute(cLat, cLng);
     });
     map.on('click', (e: any) => {
       if (stopped.value) return;
@@ -397,9 +400,13 @@ const initMap = async (lat: number, lng: number, isDraggable = false) => {
       courierMarker.setLatLng([cLat, cLng]);
       map.panTo([cLat, cLng], { animate: true, duration: 0.5 });
       sendLocation(cLat, cLng);
+      fetchRoute(cLat, cLng);
     });
     courierMarker.openPopup();
   }
+
+  // Joonista marsruut kohe kaardi laadimisel
+  fetchRoute(lat, lng);
 };
 
 const updateMapPosition = (lat: number, lng: number) => {
@@ -442,10 +449,13 @@ const startTracking = () => {
 const switchToManual = async () => {
   manualMode.value = true;
   isTracking.value = false;
-  const startLat = props.order.delivery_lat ?? RESTAURANT_LAT;
-  const startLng = props.order.delivery_lng ?? RESTAURANT_LNG;
+  const startLat = RESTAURANT_LAT;
+  const startLng = RESTAURANT_LNG;
   if (!map) await initMap(startLat, startLng, true);
-  else courierMarker?.dragging?.enable();
+  else {
+    courierMarker?.dragging?.enable();
+    fetchRoute(startLat, startLng);
+  }
   manualInterval = setInterval(() => {
     if (stopped.value || !courierMarker) return;
     const { lat, lng } = courierMarker.getLatLng();
