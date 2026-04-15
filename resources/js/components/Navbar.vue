@@ -140,7 +140,7 @@ const vClickOutside = {
     ]"
     style="transition: transform 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.6s ease, background 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;"
   >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16 lg:h-20 gap-4">
 
         <!-- Logo -->
