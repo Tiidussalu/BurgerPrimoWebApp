@@ -185,12 +185,22 @@
               </div>
             </div>
 
-            <!-- Olen kohal nupp — ilmub kui <100m sihtkohast -->
-            <div v-if="distToDestination !== null && distToDestination <= 100 && !stopped" class="mt-3">
+            <!-- Kaugus sihtkohani -->
+            <div v-if="distToDestination !== null && distToDestination > 200 && !stopped"
+                 class="mt-2 text-center">
+              <span class="text-xs text-gray-500">
+                Sihtkohani ~{{ distToDestination >= 1000
+                  ? (distToDestination / 1000).toFixed(1) + ' km'
+                  : Math.round(distToDestination) + ' m' }}
+              </span>
+            </div>
+
+            <!-- Olen kohal nupp — ilmub kui <200m sihtkohast või pole koordinaate -->
+            <div v-if="(!order.delivery_lat || distToDestination !== null && distToDestination <= 200) && !stopped" class="mt-3">
               <button
                 @click="markDelivered"
                 :disabled="markingDelivered"
-                class="w-full py-4 rounded-2xl font-black text-lg transition disabled:opacity-60 relative overflow-hidden"
+                class="w-full py-4 rounded-2xl font-black text-lg transition disabled:opacity-60"
                 style="background: linear-gradient(135deg, #16a34a, #15803d); color: white; box-shadow: 0 0 24px rgba(22,163,74,0.5);"
               >
                 <span v-if="!markingDelivered" class="flex items-center justify-center gap-2">
@@ -505,10 +515,6 @@ const startTracking = () => {
       updateNavStep(lat, lng);
       sendLocation(lat, lng);
       fetchRoute(lat, lng);
-      // Arvuta kaugus sihtkohani
-      if (props.order.delivery_lat && props.order.delivery_lng) {
-        distToDestination.value = haversineDist(lat, lng, props.order.delivery_lat, props.order.delivery_lng);
-      }
     },
     (err) => {
       if (err.code === 1) {
@@ -534,6 +540,9 @@ const stopTracking = () => {
 };
 
 const sendLocation = async (lat: number, lng: number) => {
+  if (props.order.delivery_lat && props.order.delivery_lng) {
+    distToDestination.value = haversineDist(lat, lng, props.order.delivery_lat, props.order.delivery_lng);
+  }
   try {
     await fetch(props.updateUrl, {
       method: 'POST',
