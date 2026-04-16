@@ -78,6 +78,23 @@
       </div>
     </template>
 
+    <!-- ───── KOHALE TOIMETATUD ───── -->
+    <template v-else-if="phase === 'delivered'">
+      <div class="flex-1 flex flex-col items-center justify-center px-5 text-center gap-5">
+        <div class="relative">
+          <div class="text-8xl mb-2 animate-bounce">🏠</div>
+          <div class="absolute -top-2 -right-4 text-3xl animate-spin" style="animation-duration:3s">⭐</div>
+          <div class="absolute -bottom-2 -left-4 text-2xl animate-ping" style="animation-duration:2s">✨</div>
+        </div>
+        <div class="space-y-2 mt-4">
+          <h2 class="text-3xl font-black text-white">Tarne lõpetatud!</h2>
+          <p class="text-green-400 font-semibold text-lg">Suurepärane töö 🎉</p>
+          <p class="text-gray-400 text-sm mt-2">Tellimus <span class="font-mono text-[#D2691E] font-bold">{{ order.order_number }}</span> on edukalt kohale toimetatud.</p>
+        </div>
+        <div class="w-20 h-1 rounded-full mt-2" style="background: linear-gradient(90deg, #16a34a, #4ade80)"></div>
+      </div>
+    </template>
+
     <!-- ───── KEELDUTUD ───── -->
     <template v-else-if="phase === 'declined'">
       <div class="flex-1 flex flex-col items-center justify-center px-5 text-center gap-4">
@@ -168,7 +185,22 @@
               </div>
             </div>
 
-            <div v-if="stopped" class="text-center mt-3">
+            <!-- Olen kohal nupp — ilmub kui <100m sihtkohast -->
+            <div v-if="distToDestination !== null && distToDestination <= 100 && !stopped" class="mt-3">
+              <button
+                @click="markDelivered"
+                :disabled="markingDelivered"
+                class="w-full py-4 rounded-2xl font-black text-lg transition disabled:opacity-60 relative overflow-hidden"
+                style="background: linear-gradient(135deg, #16a34a, #15803d); color: white; box-shadow: 0 0 24px rgba(22,163,74,0.5);"
+              >
+                <span v-if="!markingDelivered" class="flex items-center justify-center gap-2">
+                  🏠 Olen kohal — tarne lõpetatud
+                </span>
+                <span v-else>...</span>
+              </button>
+            </div>
+
+            <div v-if="stopped && phase !== 'delivered'" class="text-center mt-3">
               <p class="text-sm text-gray-400">Jälgimine peatatud ✓</p>
             </div>
           </div>
@@ -203,10 +235,11 @@ const props = defineProps<{
   updateUrl: string;
   acceptUrl: string;
   declineUrl: string;
+  deliveredUrl: string;
 }>();
 
 // ─── Phase ────────────────────────────────────────────────
-type Phase = 'deciding' | 'tracking' | 'declined';
+type Phase = 'deciding' | 'tracking' | 'declined' | 'delivered';
 const phase = ref<Phase>('deciding');
 const deciding = ref(false);
 const decideError = ref('');
@@ -255,6 +288,19 @@ let gpsTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const etaMinutes = ref<number | null>(null);
 const etaDistance = ref<string | null>(null);
+const distToDestination = ref<number | null>(null);
+const markingDelivered = ref(false);
+
+const markDelivered = async () => {
+  markingDelivered.value = true;
+  try {
+    await fetch(props.deliveredUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    stopTracking();
+    phase.value = 'delivered';
+  } catch {
+    markingDelivered.value = false;
+  }
+};
 let lastRouteFetchLat = 0;
 let lastRouteFetchLng = 0;
 let lastRouteFetchTime = 0;
@@ -459,9 +505,22 @@ const startTracking = () => {
       updateNavStep(lat, lng);
       sendLocation(lat, lng);
       fetchRoute(lat, lng);
+      // Arvuta kaugus sihtkohani
+      if (props.order.delivery_lat && props.order.delivery_lng) {
+        distToDestination.value = haversineDist(lat, lng, props.order.delivery_lat, props.order.delivery_lng);
+      }
     },
     (err) => {
-      if (err.code === 1) gpsError.value = 'Asukoha luba on keelatud. Luba brauseris asukoht.';
+      if (err.code === 1) {
+        const isHttp = location.protocol === 'http:' && location.hostname !== 'localhost';
+        gpsError.value = isHttp
+          ? 'GPS ei tööta HTTP saidil. Vaja on HTTPS-i.'
+          : 'Asukoha luba on keelatud. Luba brauseris selle saidi asukoht.';
+      } else if (err.code === 2) {
+        gpsError.value = 'GPS signaal puudub. Liigu õue või luba asukoht seadete kaudu.';
+      } else if (err.code === 3) {
+        gpsError.value = 'GPS aegus. Proovi uuesti.';
+      }
     },
     { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 },
   );

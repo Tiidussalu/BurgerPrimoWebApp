@@ -4,8 +4,39 @@
 
     <main class="max-w-3xl mx-auto px-6 py-12">
 
+      <!-- ───── KOHALE TOIMETATUD ───── -->
+      <template v-if="order.status === 'delivered'">
+        <div class="flex flex-col items-center justify-center py-20 text-center gap-6">
+          <!-- Animatsioon -->
+          <div class="relative">
+            <div class="text-9xl" style="filter: drop-shadow(0 0 32px rgba(34,197,94,0.5))">🎉</div>
+            <div class="absolute -top-3 -right-3 text-4xl animate-bounce" style="animation-delay:0.2s">🍔</div>
+            <div class="absolute -bottom-3 -left-3 text-3xl animate-bounce" style="animation-delay:0.5s">⭐</div>
+          </div>
+          <div class="space-y-3 mt-4">
+            <h1 class="text-4xl font-black text-white">Naudi oma sööki!</h1>
+            <p class="text-green-400 font-bold text-xl">Tellimus on kohale toimetatud ✓</p>
+            <p class="text-gray-500 text-sm max-w-xs mx-auto">
+              Tellimus <span class="font-mono text-[#D2691E] font-bold">{{ order.order_number }}</span>
+              on edukalt kätte toimetatud.
+            </p>
+          </div>
+          <div class="flex gap-3 mt-4 flex-wrap justify-center">
+            <a href="/menu"
+               class="px-6 py-3 rounded-2xl font-bold text-sm transition"
+               style="background: linear-gradient(135deg, #D2691E, #B8571A); color: white;">
+              Telli uuesti 🍔
+            </a>
+            <a href="/orders"
+               class="px-6 py-3 rounded-2xl font-bold text-sm bg-white/8 hover:bg-white/12 border border-white/10 text-gray-300 transition">
+              Minu tellimused
+            </a>
+          </div>
+        </div>
+      </template>
+
       <!-- ───── KOHALETOIMETAMINE: Bolt-laadne vaade ───── -->
-      <template v-if="order.status === 'delivering'">
+      <template v-else-if="order.status === 'delivering'">
 
         <!-- Suur kaart -->
         <div class="mb-4 rounded-2xl overflow-hidden shadow-2xl">
@@ -69,13 +100,13 @@
 
         <!-- Auto-refresh teade -->
         <p class="text-center text-xs text-gray-600 mb-4">
-          Asukoht uueneb automaatselt iga 15 sekundi järel
+          Asukoht uueneb automaatselt iga 3 sekundi järel
         </p>
 
       </template>
 
       <!-- ───── TAVALINE VAADE (kõik muud staatused) ───── -->
-      <template v-else>
+      <template v-else-if="order.status !== 'delivered'">
 
       <!-- Success / Status Banner -->
       <div class="mb-8 rounded-2xl p-8 text-center"
@@ -351,7 +382,7 @@ onMounted(() => {
   if (isActive.value) {
     refreshInterval = setInterval(() => {
       router.reload({ only: ['order'] });
-    }, 15000);
+    }, 3000);
   }
 });
 
