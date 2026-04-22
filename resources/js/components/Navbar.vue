@@ -2,6 +2,8 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ToastContainer from '@/components/ToastContainer.vue'
+import LanguageToggle from '@/components/LanguageToggle.vue'
+import { useI18n } from '@/composables/useI18n'
 
 interface User {
   id: number
@@ -12,6 +14,7 @@ interface User {
 
 const page = usePage()
 const user = computed(() => page.props.auth?.user as User | null)
+const { t } = useI18n()
 
 const dropdownOpen   = ref(false)
 const mobileMenuOpen = ref(false)
@@ -22,29 +25,25 @@ const activeAnchor = ref<string | null>(null)
 
 const isHomePage = computed(() => page.url === '/')
 
-const navItems = [
-  { label: 'Avaleht',      href: '/',               anchor: null,            isMenuPage: false },
-  { label: 'Populaarsed',  href: '/#popular',        anchor: 'popular',       isMenuPage: false },
-  { label: 'Meelelahutus', href: '/#entertainment',  anchor: 'entertainment', isMenuPage: false },
-  { label: 'Kontakt',      href: '/#contact',        anchor: 'contact',       isMenuPage: false },
-  { label: 'Menüü',        href: '/menu',            anchor: null,            isMenuPage: true  },
-  { label: 'Tellimused',   href: '/orders',          anchor: null,            isMenuPage: true  },
-  { label: 'Ehita burger', href: '/burger-builder',  anchor: null,            isMenuPage: true  },
-]
+const navItems = computed(() => [
+  { label: t('nav.home'),          href: '/',               anchor: null,            isMenuPage: false },
+  { label: t('nav.popular'),       href: '/#popular',        anchor: 'popular',       isMenuPage: false },
+  { label: t('nav.entertainment'), href: '/#entertainment',  anchor: 'entertainment', isMenuPage: false },
+  { label: t('nav.contact'),       href: '/#contact',        anchor: 'contact',       isMenuPage: false },
+  { label: t('nav.menu'),          href: '/menu',            anchor: null,            isMenuPage: true  },
+  { label: t('nav.orders'),        href: '/orders',          anchor: null,            isMenuPage: true  },
+  { label: t('nav.builder'),       href: '/burger-builder',  anchor: null,            isMenuPage: true  },
+])
 
-function isActive(item: typeof navItems[0]): boolean {
+function isActive(item: { href: string; anchor: string | null; isMenuPage: boolean }): boolean {
   if (item.isMenuPage) return page.url === item.href || page.url.startsWith(item.href + '/')
-
   if (!isHomePage.value) return false
-
   if (item.anchor) return activeAnchor.value === item.anchor
-
   if (item.href === '/') return activeAnchor.value === null
-
   return false
 }
 
-function handleNavClick(item: typeof navItems[0], e: MouseEvent) {
+function handleNavClick(item: { href: string; anchor: string | null }, e: MouseEvent) {
   if (item.anchor && isHomePage.value) {
     e.preventDefault()
     document.getElementById(item.anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -61,7 +60,7 @@ function setupSectionObserver() {
 
   sectionObserver?.disconnect()
 
-  const anchors = navItems.map(i => i.anchor).filter(Boolean) as string[]
+  const anchors = navItems.value.map(i => i.anchor).filter(Boolean) as string[]
   const elements = anchors.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[]
 
   if (!elements.length) return
@@ -201,6 +200,9 @@ const vClickOutside = {
 
         <!-- Right side -->
         <div class="hidden lg:flex items-center gap-3 flex-shrink-0">
+          <!-- Language toggle -->
+          <LanguageToggle />
+
           <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger" target="_blank" rel="noopener"
             class="px-3.5 py-1.5 bg-[#00c2e0]/10 border border-[#00c2e0]/22 text-[#00c2e0] rounded-full text-sm font-bold hover:bg-[#00c2e0]/20 transition-all duration-200">Wolt</a>
           <a href="https://food.bolt.eu/en-US/164/p/90859-primo-burger" target="_blank" rel="noopener"
@@ -251,14 +253,14 @@ const vClickOutside = {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Profiil
+                    {{ t('nav.profile') }}
                   </Link>
                   <hr class="my-1 border-white/5" />
                   <Link href="/logout" method="post" as="button" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/8 hover:text-red-400 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    Logi välja
+                    {{ t('nav.logout') }}
                   </Link>
                 </div>
               </Transition>
@@ -314,18 +316,23 @@ const vClickOutside = {
             </a>
           </template>
 
-          <div class="flex gap-2 px-4 pt-3 pb-1">
+          <div class="flex items-center gap-3 px-4 pt-3 pb-1">
+            <span class="text-[10px] text-gray-700 uppercase tracking-wider font-bold">Keel / Language</span>
+            <LanguageToggle />
+          </div>
+
+          <div class="flex gap-2 px-4 pt-1 pb-1">
             <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger" target="_blank" class="px-3 py-1.5 bg-[#00c2e0]/8 border border-[#00c2e0]/15 text-[#00c2e0] rounded-full text-xs font-bold">Wolt</a>
             <a href="https://food.bolt.eu/en-US/164/p/90859-primo-burger" target="_blank" class="px-3 py-1.5 bg-[#21c93d]/8 border border-[#21c93d]/15 text-[#21c93d] rounded-full text-xs font-bold">Bolt Food</a>
           </div>
 
           <div class="pt-3 mt-2 border-t border-white/6 space-y-1">
             <template v-if="user">
-              <p class="px-4 py-1 text-[10px] text-gray-700 uppercase tracking-wider font-bold">Konto</p>
+              <p class="px-4 py-1 text-[10px] text-gray-700 uppercase tracking-wider font-bold">Account</p>
               <Link v-if="user.is_admin" href="/admin/dashboard" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm font-medium text-yellow-400 bg-yellow-500/6 hover:bg-yellow-500/12 transition-all">⚙️ Admin Dashboard</Link>
-              <Link href="/orders" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all" :class="page.url.startsWith('/orders') ? 'text-white bg-white/8' : ''">📦 Tellimused</Link>
-              <Link href="/settings/profile" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">👤 Profiil</Link>
-              <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="block w-full text-left px-4 py-3 rounded-xl text-sm text-red-500 hover:bg-red-500/8 transition-all">🚪 Logi välja</Link>
+              <Link href="/orders" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all" :class="page.url.startsWith('/orders') ? 'text-white bg-white/8' : ''">📦 {{ t('nav.orders') }}</Link>
+              <Link href="/settings/profile" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">👤 {{ t('nav.profile') }}</Link>
+              <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="block w-full text-left px-4 py-3 rounded-xl text-sm text-red-500 hover:bg-red-500/8 transition-all">🚪 {{ t('nav.logout') }}</Link>
             </template>
           </div>
         </div>

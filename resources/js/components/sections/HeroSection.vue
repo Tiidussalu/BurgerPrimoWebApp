@@ -2,6 +2,9 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { useCountUp } from '@/composables/useScrollAnimation'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const logoX = ref(0)
 const logoY = ref(0)
@@ -51,7 +54,7 @@ function scrollTo(id: string) {
           <div class="h-px w-8 bg-gradient-to-r from-transparent to-[#D2691E]/60" />
           <span class="inline-flex items-center gap-1.5 text-[#D2691E] text-xs font-semibold uppercase tracking-[0.3em]">
             <span class="live-dot w-1.5 h-1.5 rounded-full bg-[#D2691E] inline-block" />
-            Kuressaare · Saaremaa
+            {{ t('hero.eyebrow') }}
           </span>
           <div class="h-px w-8 bg-gradient-to-l from-transparent to-[#D2691E]/60" />
         </div>
@@ -60,18 +63,17 @@ function scrollTo(id: string) {
         <h1
           ref="titleRef"
           class="word-reveal-parent text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.15] tracking-tight mb-4"
-          aria-label="Kirega valmistatud Primo burgerid"
+          :aria-label="t('hero.title.aria')"
         >
-          <span class="word text-white"><span class="word-inner">Kirega </span></span>
-          <span class="word text-white"><span class="word-inner">valmistatud </span></span>
-          <span class="word text-[#D2691E]"><span class="word-inner">Primo </span></span>
-          <span class="word text-white"><span class="word-inner">burgerid</span></span>
+          <span class="word text-white"><span class="word-inner">{{ t('hero.title1') }}</span></span>
+          <span class="word text-white"><span class="word-inner">{{ t('hero.title2') }}</span></span>
+          <span class="word text-[#D2691E]"><span class="word-inner">{{ t('hero.title3') }}</span></span>
+          <span class="word text-white"><span class="word-inner">{{ t('hero.title4') }}</span></span>
         </h1>
 
         <!-- Subtitle -->
         <p class="hero-subtitle text-base md:text-lg text-gray-300 font-light max-w-lg leading-relaxed mb-7">
-          Unikaalsed maitsed, kõrgekvaliteetsed koostisosad ja
-          sõbralik õhkkond Kuressaare südames.
+          {{ t('hero.subtitle') }}
         </p>
 
         <!-- CTAs -->
@@ -80,7 +82,7 @@ function scrollTo(id: string) {
             href="/menu"
             class="btn-magnetic group inline-flex items-center gap-2.5 px-8 py-4 bg-[#D2691E] text-white font-bold rounded-2xl text-sm uppercase tracking-wider shadow-lg shadow-[#D2691E]/25"
           >
-            Avasta Menüüd
+            {{ t('hero.cta.menu') }}
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
             </svg>
@@ -89,7 +91,7 @@ function scrollTo(id: string) {
             @click="scrollTo('popular')"
             class="btn-magnetic inline-flex items-center gap-2 px-8 py-4 bg-white/8 border border-white/15 text-white font-semibold rounded-2xl text-sm uppercase tracking-wider"
           >
-            Populaarsed
+            {{ t('hero.cta.popular') }}
           </button>
         </div>
 
@@ -98,7 +100,7 @@ function scrollTo(id: string) {
 
     <!-- Scroll indicator -->
     <div class="hero-scroll absolute bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/30 z-10">
-      <span class="text-[9px] tracking-[0.35em] uppercase">Keri alla</span>
+      <span class="text-[9px] tracking-[0.35em] uppercase">{{ t('hero.scroll') }}</span>
       <div class="relative w-px h-9 overflow-hidden bg-white/10 rounded-full">
         <div class="absolute top-0 left-0 w-full bg-[#D2691E] rounded-full" style="height:40%; animation: scroll-line 1.8s ease-in-out infinite;" />
       </div>

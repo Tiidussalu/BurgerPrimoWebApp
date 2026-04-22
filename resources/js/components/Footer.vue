@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useScrollAnimation, useStaggerAnimation } from '@/composables/useScrollAnimation'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const currentYear = new Date().getFullYear()
 
@@ -11,18 +14,18 @@ const { containerRef: linksRef } = useStaggerAnimation('fade-up', { staggerMs: 7
 const openSections = ref({ links: false, contact: false, hours: false })
 const toggle = (s: keyof typeof openSections.value) => { openSections.value[s] = !openSections.value[s] }
 
-const navLinks = [
-  { label: 'Avaleht',      href: '/'               },
-  { label: 'Menüü',        href: '/menu'            },
-  { label: 'Meelelahutus', href: '/#entertainment'  },
-  { label: 'Kontakt',      href: '/#contact'        },
-]
+const navLinks = computed(() => [
+  { label: t('nav.home'),          href: '/'               },
+  { label: t('nav.menu'),          href: '/menu'            },
+  { label: t('nav.entertainment'), href: '/#entertainment'  },
+  { label: t('nav.contact'),       href: '/#contact'        },
+])
 
-const hours = [
-  { days: 'E–N', time: '11:00 – 22:00' },
-  { days: 'R–L', time: '11:00 – 23:00' },
-  { days: 'P',   time: '12:00 – 21:00' },
-]
+const hours = computed(() => [
+  { days: t('footer.hours.mon'), time: '11:00 – 22:00' },
+  { days: t('footer.hours.fri'), time: '11:00 – 23:00' },
+  { days: t('footer.hours.sun'), time: '12:00 – 21:00' },
+])
 </script>
 
 <template>
@@ -53,7 +56,7 @@ const hours = [
           </div>
 
           <p class="text-gray-600 text-sm leading-relaxed mb-6">
-            Kirega valmistatud burgerid, mida serveeritakse uhkusega Kuressaare südames.
+            {{ t('footer.tagline') }}
           </p>
 
           <div class="flex gap-2">
@@ -75,7 +78,7 @@ const hours = [
             class="w-full flex items-center justify-between md:cursor-default md:pointer-events-none group"
             @click="toggle('links')"
           >
-            <h4 class="text-white font-bold text-xs mb-4 uppercase tracking-[0.18em]">Kiirlingid</h4>
+            <h4 class="text-white font-bold text-xs mb-4 uppercase tracking-[0.18em]">{{ t('footer.links') }}</h4>
             <span class="md:hidden text-gray-700 mb-4 text-xs transition-transform duration-300" :class="openSections.links ? 'rotate-180' : ''">▾</span>
           </button>
           <ul
@@ -99,7 +102,7 @@ const hours = [
             class="w-full flex items-center justify-between md:cursor-default md:pointer-events-none"
             @click="toggle('contact')"
           >
-            <h4 class="text-white font-bold text-xs mb-4 uppercase tracking-[0.18em]">Kontakt</h4>
+            <h4 class="text-white font-bold text-xs mb-4 uppercase tracking-[0.18em]">{{ t('footer.contact') }}</h4>
             <span class="md:hidden text-gray-700 mb-4 text-xs transition-transform duration-300" :class="openSections.contact ? 'rotate-180' : ''">▾</span>
           </button>
           <ul
@@ -123,7 +126,7 @@ const hours = [
             class="w-full flex items-center justify-between md:cursor-default md:pointer-events-none"
             @click="toggle('hours')"
           >
-            <h4 class="text-white font-bold text-xs mb-4 uppercase tracking-[0.18em]">Lahtiolekuajad</h4>
+            <h4 class="text-white font-bold text-xs mb-4 uppercase tracking-[0.18em]">{{ t('footer.hours') }}</h4>
             <span class="md:hidden text-gray-700 mb-4 text-xs transition-transform duration-300" :class="openSections.hours ? 'rotate-180' : ''">▾</span>
           </button>
           <ul
@@ -145,7 +148,7 @@ const hours = [
 
       <div class="border-t border-white/5 pt-7 flex flex-col sm:flex-row items-center justify-between gap-3">
         <p class="text-gray-700 text-xs">
-          &copy; {{ currentYear }} Burger Primo. Kõik õigused kaitstud.
+          &copy; {{ currentYear }} Burger Primo. {{ t('footer.copy') }}
         </p>
       </div>
 
