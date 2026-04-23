@@ -26,8 +26,8 @@
       <div class="bg-[#121212] border border-[#0B0B0B] rounded-2xl shadow-2xl p-8">
         <!-- Header -->
         <div class="text-center mb-8">
-          <h1 class="text-3xl font-bold text-white mb-2">Tere tulemast tagasi!</h1>
-          <p class="text-gray-400">Sisesta oma andmed sisselogimiseks</p>
+          <h1 class="text-3xl font-bold text-white mb-2">{{ t('login.welcome') }}</h1>
+          <p class="text-gray-400">{{ t('login.subtitle') }}</p>
         </div>
 
         <!-- Status Message -->
@@ -40,7 +40,7 @@
           <!-- Email -->
           <div class="mb-6">
             <label for="email" class="block text-sm font-semibold text-gray-300 mb-2">
-              E-posti aadress
+              {{ t('login.email') }}
             </label>
             <input
               id="email"
@@ -62,14 +62,14 @@
           <div class="mb-6">
             <div class="flex items-center justify-between mb-2">
               <label for="password" class="block text-sm font-semibold text-gray-300">
-                Parool
+                {{ t('login.password') }}
               </label>
               <Link
                 v-if="canResetPassword"
                 href="/forgot-password"
                 class="text-sm text-[#D2691E] hover:text-[#E07A2E] transition-colors"
               >
-                Unustasid parooli?
+                {{ t('login.forgot') }}
               </Link>
             </div>
             <input
@@ -96,7 +96,7 @@
                 class="w-5 h-5 rounded border-gray-600 bg-[#0B0B0B] text-[#D2691E] focus:ring-[#D2691E] focus:ring-offset-[#121212] cursor-pointer"
               />
               <span class="ml-3 text-sm text-gray-300 group-hover:text-white transition-colors">
-                Jäta mind meelde
+                {{ t('login.remember') }}
               </span>
             </label>
           </div>
@@ -117,19 +117,19 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{ form.processing ? 'Sisselogimine...' : 'Logi sisse' }}</span>
+            <span>{{ form.processing ? t('login.submitting') : t('login.submit') }}</span>
           </button>
         </form>
 
         <!-- Register Link -->
         <div v-if="canRegister" class="mt-6 text-center">
           <p class="text-sm text-gray-400">
-            Pole veel kontot?
+            {{ t('login.no.account') }}
             <Link
               href="/register"
               class="text-[#D2691E] hover:text-[#E07A2E] font-semibold transition-colors"
             >
-              Registreeru
+              {{ t('login.register') }}
             </Link>
           </p>
         </div>
@@ -144,7 +144,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Tagasi avalehele
+          {{ t('login.back') }}
         </Link>
       </div>
     </div>
@@ -153,6 +153,7 @@
 
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { useI18n } from '@/composables/useI18n';
 
 interface Props {
   status?: string;
@@ -161,6 +162,7 @@ interface Props {
 }
 
 defineProps<Props>();
+const { t } = useI18n();
 
 const form = useForm({
   email: '',

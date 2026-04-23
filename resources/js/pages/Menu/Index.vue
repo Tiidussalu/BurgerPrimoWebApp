@@ -18,7 +18,7 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Otsi menüüst..."
+          :placeholder="t('menu.search.ph')"
           class="w-full bg-[#121212] border border-[#1a1a1a] focus:border-[#D2691E]/50 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-all"
         />
         <button
@@ -47,7 +47,7 @@
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Otsi menüüst..."
+            :placeholder="t('menu.search.ph')"
             class="w-full bg-[#121212] border border-[#1a1a1a] focus:border-[#D2691E]/50 rounded-xl pl-9 pr-8 py-2.5 text-sm text-white placeholder-gray-600 outline-none transition-all"
           />
           <button
@@ -71,7 +71,7 @@
                 ? 'bg-[#D2691E] text-white'
                 : 'text-gray-400 hover:text-white hover:bg-[#1a1a1a]'
             ]"
-          >★ Lemmikud</button>
+          >★ {{ t('menu.favorites') }}</button>
           <button
             v-for="category in categories"
             :key="category.id"
@@ -91,10 +91,10 @@
 
           <section v-if="searchQuery.trim()">
             <div class="mb-6">
-              <h2 class="text-xl font-bold text-white">Otsingutulemused</h2>
+              <h2 class="text-xl font-bold text-white">{{ t('menu.search.results') }}</h2>
               <p class="text-sm text-gray-500 mt-0.5">
                 <span class="text-white font-medium">{{ totalSearchResults }}</span>
-                tulemust — "<span class="text-[#D2691E]">{{ searchQuery }}</span>"
+                {{ t('menu.search.count') }} — "<span class="text-[#D2691E]">{{ searchQuery }}</span>"
               </p>
             </div>
 
@@ -105,8 +105,8 @@
             <div v-else class="flex items-center justify-center py-16 bg-[#121212] rounded-2xl border border-[#1a1a1a]">
               <div class="text-center">
                 <p class="text-4xl mb-3">🔍</p>
-                <p class="text-gray-400 font-medium mb-1">Tulemusi ei leitud</p>
-                <p class="text-gray-600 text-sm">Proovi teist otsingusõna</p>
+                <p class="text-gray-400 font-medium mb-1">{{ t('menu.search.empty') }}</p>
+                <p class="text-gray-600 text-sm">{{ t('menu.search.empty.sub') }}</p>
               </div>
             </div>
           </section>
@@ -116,11 +116,11 @@
             <section v-if="favorites && favorites.length > 0" id="favorites" class="mb-10">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                  <span class="text-[#D2691E]">★</span> Lemmikud
-                  <span class="text-xs text-gray-600 font-normal ml-1">{{ favorites.length }} toodet</span>
+                  <span class="text-[#D2691E]">★</span> {{ t('menu.favorites') }}
+                  <span class="text-xs text-gray-600 font-normal ml-1">{{ favorites.length }} {{ t('menu.products') }}</span>
                 </h2>
                 <button @click="favoritesCollapsed = !favoritesCollapsed" class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white transition-colors">
-                  {{ favoritesCollapsed ? 'Näita' : 'Peida' }}
+                  {{ favoritesCollapsed ? t('menu.show') : t('menu.hide') }}
                   <component :is="favoritesCollapsed ? ChevronDown : ChevronUp" :size="14" />
                 </button>
               </div>
@@ -140,10 +140,10 @@
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold text-white uppercase tracking-wide flex items-center gap-3">
                   {{ category.name }}
-                  <span class="text-xs text-gray-600 font-normal normal-case tracking-normal">{{ category.active_items?.length || 0 }} toodet</span>
+                  <span class="text-xs text-gray-600 font-normal normal-case tracking-normal">{{ category.active_items?.length || 0 }} {{ t('menu.products') }}</span>
                 </h2>
                 <button @click="toggleCategory(category.id)" class="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white transition-colors">
-                  {{ collapsedCategories.includes(category.id) ? 'Näita' : 'Peida' }}
+                  {{ collapsedCategories.includes(category.id) ? t('menu.show') : t('menu.hide') }}
                   <component :is="collapsedCategories.includes(category.id) ? ChevronDown : ChevronUp" :size="14" />
                 </button>
               </div>
@@ -155,15 +155,15 @@
                   </div>
                 </div>
                 <div v-else class="flex items-center justify-center py-12 bg-[#121212] rounded-xl border border-[#1a1a1a]">
-                  <p class="text-gray-600 text-sm">Selles kategoorias pole hetkel tooteid</p>
+                  <p class="text-gray-600 text-sm">{{ t('menu.cat.empty') }}</p>
                 </div>
               </div>
             </section>
 
             <div v-if="categories.length === 0" class="text-center py-32">
               <p class="text-6xl mb-6">🍔</p>
-              <h3 class="text-2xl font-bold mb-3">Menüü on hetkel tühi</h3>
-              <p class="text-gray-500">Tulge hiljem tagasi!</p>
+              <h3 class="text-2xl font-bold mb-3">{{ t('menu.empty') }}</h3>
+              <p class="text-gray-500">{{ t('menu.empty.sub') }}</p>
             </div>
 
           </template>
@@ -176,6 +176,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useI18n } from '@/composables/useI18n';
 import { Head, usePage } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
 import Footer from '@/components/Footer.vue';
@@ -211,6 +212,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { t } = useI18n();
 
 const navbarHeight = ref(64);
 let navRO: ResizeObserver | null = null;

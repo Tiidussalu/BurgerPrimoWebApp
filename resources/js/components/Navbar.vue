@@ -2,6 +2,8 @@
 import { Link, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import ToastContainer from '@/components/ToastContainer.vue'
+import LanguageToggle from '@/components/LanguageToggle.vue'
+import { useI18n } from '@/composables/useI18n'
 
 interface User {
   id: number
@@ -13,6 +15,7 @@ interface User {
 const page = usePage()
 const user      = computed(() => page.props.auth?.user as User | null)
 const cartCount = computed(() => (page.props as any).cartCount as number ?? 0)
+const { t } = useI18n()
 
 const dropdownOpen   = ref(false)
 const homeDropOpen   = ref(false)
@@ -24,19 +27,19 @@ const mounted        = ref(false)
 const activeAnchor = ref<string | null>(null)
 const isHomePage   = computed(() => page.url === '/')
 
-const homeDropdownItems = [
-  { label: 'Populaarsed',  href: '/#popular',       anchor: 'popular'       },
-  { label: 'Meelelahutus', href: '/#entertainment', anchor: 'entertainment' },
-  { label: 'Kontakt',      href: '/#contact',       anchor: 'contact'       },
-]
+const homeDropdownItems = computed(() => [
+  { label: t('nav.popular'),       href: '/#popular',       anchor: 'popular'       },
+  { label: t('nav.entertainment'), href: '/#entertainment', anchor: 'entertainment' },
+  { label: t('nav.contact'),       href: '/#contact',       anchor: 'contact'       },
+])
 
-const navItems = [
-  { label: 'Menüü',        href: '/menu'           },
-  { label: 'Ehita burger', href: '/burger-builder' },
-]
+const navItems = computed(() => [
+  { label: t('nav.menu'),    href: '/menu'           },
+  { label: t('nav.builder'), href: '/burger-builder' },
+])
 
-type NavItem  = typeof navItems[0]
-type DropItem = typeof homeDropdownItems[0]
+type NavItem  = { label: string; href: string }
+type DropItem = { label: string; href: string; anchor: string }
 
 function isActive(item: NavItem): boolean {
   if (item.href === '/menu') return page.url.startsWith('/menu')
@@ -65,7 +68,7 @@ let sectionObserver: IntersectionObserver | null = null
 function setupSectionObserver() {
   if (!isHomePage.value) return
   sectionObserver?.disconnect()
-  const anchors  = homeDropdownItems.map(i => i.anchor)
+  const anchors  = homeDropdownItems.value.map(i => i.anchor)
   const elements = anchors.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[]
   if (!elements.length) return
   const visibleSections = new Map<string, number>()
@@ -91,12 +94,13 @@ function setupSectionObserver() {
 }
 
 function onScroll() {
-  scrolled.value = window.scrollY > 20
+  scrolled.value = true
   if (window.scrollY < 80) activeAnchor.value = null
 }
 
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true })
+  scrolled.value = true
   setTimeout(() => { mounted.value = true; setupSectionObserver() }, 50)
 })
 onUnmounted(() => {
@@ -122,7 +126,7 @@ const vClickOutside = {
 
 <template>
   <header
-    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 w-screen max-w-full"
+    class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 w-screen max-w-full border-b border-transparent"
     :class="[
       scrolled ? 'navbar-scrolled' : 'bg-transparent',
       mounted ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
@@ -161,12 +165,11 @@ const vClickOutside = {
           <div class="relative" @mouseenter="homeDropOpen = true" @mouseleave="homeDropOpen = false">
             <Link href="/" class="relative px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group flex items-center gap-1"
               :class="isHomePage ? 'text-white' : 'text-gray-500 hover:text-white'">
-              <span class="relative z-10">Avaleht</span>
+              <span class="relative z-10">{{ t('nav.home') }}<span v-if="isHomePage && !activeAnchor" class="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D2691E]" /></span>
               <svg class="w-3 h-3 transition-transform duration-200 relative z-10" :class="{ 'rotate-180': homeDropOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
               <span class="absolute inset-0 rounded-xl transition-all duration-200" :class="isHomePage ? 'bg-[#D2691E]/12' : 'bg-transparent group-hover:bg-white/5'" />
-              <span v-if="isHomePage && !activeAnchor" class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#D2691E]" />
             </Link>
             <Transition enter-active-class="transition ease-out duration-150" enter-from-class="opacity-0 scale-95 translate-y-1" enter-to-class="opacity-100 scale-100 translate-y-0" leave-active-class="transition ease-in duration-100" leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
               <div v-if="homeDropOpen" class="absolute left-0 top-full mt-1 w-44 bg-[#0d0d0d] border border-white/8 rounded-2xl shadow-2xl shadow-black/70 py-1.5 overflow-hidden z-50">
@@ -189,7 +192,7 @@ const vClickOutside = {
 
         <!-- Right: icons + user -->
         <div class="hidden lg:flex items-center gap-1.5 justify-end">
-          <Link href="/cart" title="Korv"
+          <Link href="/cart" :title="t('nav.cart')"
             class="relative p-2 rounded-xl hover:text-white hover:bg-white/5 transition-all duration-200"
             :class="page.url.startsWith('/cart') ? 'text-white bg-white/5' : (cartCount > 0 ? 'text-[#D2691E]' : 'text-gray-500')">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -197,13 +200,17 @@ const vClickOutside = {
             </svg>
             <span v-if="cartCount > 0" class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#D2691E] text-white text-[9px] font-black flex items-center justify-center leading-none">{{ cartCount > 9 ? '9+' : cartCount }}</span>
           </Link>
-          <Link href="/orders" title="Tellimused"
+          <Link href="/orders" :title="t('nav.orders')"
             class="relative p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/5 transition-all duration-200"
             :class="page.url.startsWith('/orders') ? 'text-white bg-white/5' : ''">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </Link>
+
+          <div class="w-px h-5 bg-white/8 mx-0.5" />
+
+          <LanguageToggle />
 
           <div class="w-px h-5 bg-white/8 mx-0.5" />
 
@@ -230,19 +237,19 @@ const vClickOutside = {
                   <div class="h-0.5 bg-gradient-to-r from-transparent via-[#D2691E]/40 to-transparent mb-1" />
                   <Link href="/settings/profile" class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                    Profiil
+                    {{ t('nav.profile') }}
                   </Link>
                   <hr class="my-1 border-white/5" />
                   <Link href="/logout" method="post" as="button" class="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-500/8 hover:text-red-400 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    Logi välja
+                    {{ t('nav.logout') }}
                   </Link>
                 </div>
               </Transition>
             </div>
           </template>
           <template v-else>
-            <Link href="/login" class="px-3 py-1.5 rounded-xl text-sm font-medium text-gray-500 hover:text-white hover:bg-white/5 transition-all">Logi sisse</Link>
+            <Link href="/login" class="px-3 py-1.5 rounded-xl text-sm font-medium text-gray-500 hover:text-white hover:bg-white/5 transition-all">{{ t('nav.login') }}</Link>
           </template>
         </div>
 
@@ -259,7 +266,7 @@ const vClickOutside = {
       <div v-if="mobileMenuOpen" class="lg:hidden border-t border-white/6 bg-[#080808]/98 backdrop-blur-xl w-full">
         <div class="px-4 py-5 space-y-1">
           <button @click="mobileHomeOpen = !mobileHomeOpen" class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" :class="isHomePage ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">
-            Avaleht
+            {{ t('nav.home') }}
             <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': mobileHomeOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </button>
           <div v-if="mobileHomeOpen" class="pl-4 space-y-0.5">
@@ -273,10 +280,10 @@ const vClickOutside = {
             :class="isActive(item) ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">{{ item.label }}</Link>
 
           <Link href="/cart" @click="mobileMenuOpen = false" class="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" :class="page.url.startsWith('/cart') ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">
-            Korv
+            {{ t('nav.cart') }}
             <span v-if="cartCount > 0" class="w-5 h-5 rounded-full bg-[#D2691E] text-white text-[9px] font-black flex items-center justify-center">{{ cartCount > 9 ? '9+' : cartCount }}</span>
           </Link>
-          <Link href="/orders" @click="mobileMenuOpen = false" class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" :class="page.url.startsWith('/orders') ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">Tellimused</Link>
+          <Link href="/orders" @click="mobileMenuOpen = false" class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" :class="page.url.startsWith('/orders') ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">{{ t('nav.orders') }}</Link>
 
           <div class="flex gap-2 px-4 pt-3 pb-1">
             <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger" target="_blank" class="px-3 py-1.5 bg-[#00c2e0]/8 border border-[#00c2e0]/15 text-[#00c2e0] rounded-full text-xs font-bold">Wolt</a>
@@ -284,14 +291,17 @@ const vClickOutside = {
           </div>
 
           <div class="pt-3 mt-2 border-t border-white/6 space-y-1">
+            <div class="px-4 pb-2">
+              <LanguageToggle />
+            </div>
             <template v-if="user">
               <p class="px-4 py-1 text-[10px] text-gray-700 uppercase tracking-wider font-bold">Konto</p>
               <Link v-if="user.is_admin" href="/admin/dashboard" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm font-medium text-yellow-400 bg-yellow-500/6 hover:bg-yellow-500/12 transition-all">⚙️ Admin Dashboard</Link>
-              <Link href="/settings/profile" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">👤 Profiil</Link>
-              <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="block w-full text-left px-4 py-3 rounded-xl text-sm text-red-500 hover:bg-red-500/8 transition-all">🚪 Logi välja</Link>
+              <Link href="/settings/profile" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">👤 {{ t('nav.profile') }}</Link>
+              <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="block w-full text-left px-4 py-3 rounded-xl text-sm text-red-500 hover:bg-red-500/8 transition-all">🚪 {{ t('nav.logout') }}</Link>
             </template>
             <template v-else>
-              <Link href="/login" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">Logi sisse</Link>
+              <Link href="/login" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">{{ t('nav.login') }}</Link>
             </template>
           </div>
         </div>
