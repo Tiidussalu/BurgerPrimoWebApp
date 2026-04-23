@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useScrollAnimation } from '@/composables/useScrollAnimation'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 const { elRef: badgeRef }   = useScrollAnimation('scale-up',   { delay: 0   })
 const { elRef: headingRef } = useScrollAnimation('fade-up',    { delay: 80  })
@@ -32,6 +35,8 @@ const onTouchEnd   = (e: TouchEvent) => {
 const featureListRef = ref<HTMLElement | null>(null)
 let timer: ReturnType<typeof setInterval>
 
+const features = computed(() => [t('ent.feat.1'), t('ent.feat.2')])
+
 onMounted(() => {
   timer = setInterval(next, 4500)
   if (featureListRef.value) {
@@ -62,13 +67,13 @@ onUnmounted(() => clearInterval(timer))
 
         <div class="text-center mb-12 space-y-4">
           <div :ref="(el) => badgeRef = el as any" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/12 bg-white/6 text-gray-300 text-xs font-bold uppercase tracking-[0.22em]">
-            Meelelahutus
+            {{ t('ent.badge') }}
           </div>
           <h2 :ref="(el) => headingRef = el as any" class="text-3xl md:text-5xl font-bold text-white">
-            Mängi <span class="text-[#D2691E]">piljardit</span>
+            {{ t('ent.heading') }} <span class="text-[#D2691E]">{{ t('ent.heading.accent') }}</span>
           </h2>
           <p :ref="(el) => subRef = el as any" class="text-gray-400 text-base max-w-xl mx-auto">
-            Nautige sõpradega piljardimängu, nautides samal ajal meie maitsvaid toite ja jooke
+            {{ t('ent.sub') }}
           </p>
         </div>
 
@@ -97,15 +102,14 @@ onUnmounted(() => clearInterval(timer))
 
           <div :ref="(el) => textRef = el as any" class="space-y-6">
             <div>
-              <h3 class="text-2xl md:text-3xl font-bold text-[#F5DEB3] mb-3">Piljardilaud</h3>
+              <h3 class="text-2xl md:text-3xl font-bold text-[#F5DEB3] mb-3">{{ t('ent.table.title') }}</h3>
               <p class="text-gray-400 text-sm leading-relaxed">
-                Nautige piljardilauda koos vastupidava villase segukanga ja pallikomplektiga.
-                Ideaalne nii algajatele kui ka edasijõudnutele — Primo toidud ja joogid käeulatuses.
+                {{ t('ent.table.desc') }}
               </p>
             </div>
 
             <ul ref="featureListRef" class="space-y-3">
-              <li v-for="(feat, i) in ['Professionaalne piljardilaud', 'Restorani lahtiolekuaegadel võimalik kasutada']" :key="i" class="flex items-center gap-3 text-gray-300 text-sm">
+              <li v-for="(feat, i) in features" :key="i" class="flex items-center gap-3 text-gray-300 text-sm">
                 <span class="w-5 h-5 rounded-full bg-[#D2691E]/15 flex items-center justify-center flex-shrink-0">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-[#D2691E]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </span>
@@ -117,16 +121,16 @@ onUnmounted(() => clearInterval(timer))
               <div class="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none shimmer" />
               <div class="flex items-center gap-3 mb-4">
                 <div>
-                  <p class="text-[#F5DEB3] font-bold text-sm">Hinnakiri</p>
+                  <p class="text-[#F5DEB3] font-bold text-sm">{{ t('ent.price.title') }}</p>
                 </div>
               </div>
               <div class="flex items-center justify-between py-3 border-t border-white/8">
                 <div>
-                  <p class="text-white font-semibold text-sm">8-palli mäng</p>
+                  <p class="text-white font-semibold text-sm">{{ t('ent.price.game') }}</p>
                 </div>
                 <div class="text-right">
                   <span class="text-3xl font-black text-[#D2691E]">2€</span>
-                  <p class="text-gray-600 text-xs">/ mäng</p>
+                  <p class="text-gray-600 text-xs">{{ t('ent.price.per') }}</p>
                 </div>
               </div>
             </div>

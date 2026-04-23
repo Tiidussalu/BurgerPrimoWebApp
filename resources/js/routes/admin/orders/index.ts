@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\OrderController::index
-* @see app/Http/Controllers/Admin/OrderController.php:13
+* @see app/Http/Controllers/Admin/OrderController.php:14
 * @route '/admin/orders'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::index
-* @see app/Http/Controllers/Admin/OrderController.php:13
+* @see app/Http/Controllers/Admin/OrderController.php:14
 * @route '/admin/orders'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::index
-* @see app/Http/Controllers/Admin/OrderController.php:13
+* @see app/Http/Controllers/Admin/OrderController.php:14
 * @route '/admin/orders'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::index
-* @see app/Http/Controllers/Admin/OrderController.php:13
+* @see app/Http/Controllers/Admin/OrderController.php:14
 * @route '/admin/orders'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::show
-* @see app/Http/Controllers/Admin/OrderController.php:40
+* @see app/Http/Controllers/Admin/OrderController.php:42
 * @route '/admin/orders/{order}'
 */
 export const show = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::show
-* @see app/Http/Controllers/Admin/OrderController.php:40
+* @see app/Http/Controllers/Admin/OrderController.php:42
 * @route '/admin/orders/{order}'
 */
 show.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -93,7 +93,7 @@ show.url = (args: { order: number | { id: number } } | [order: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::show
-* @see app/Http/Controllers/Admin/OrderController.php:40
+* @see app/Http/Controllers/Admin/OrderController.php:42
 * @route '/admin/orders/{order}'
 */
 show.get = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -103,7 +103,7 @@ show.get = (args: { order: number | { id: number } } | [order: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::show
-* @see app/Http/Controllers/Admin/OrderController.php:40
+* @see app/Http/Controllers/Admin/OrderController.php:42
 * @route '/admin/orders/{order}'
 */
 show.head = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -113,7 +113,7 @@ show.head = (args: { order: number | { id: number } } | [order: number | { id: n
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::confirm
-* @see app/Http/Controllers/Admin/OrderController.php:75
+* @see app/Http/Controllers/Admin/OrderController.php:77
 * @route '/admin/orders/{order}/confirm'
 */
 export const confirm = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -128,7 +128,7 @@ confirm.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::confirm
-* @see app/Http/Controllers/Admin/OrderController.php:75
+* @see app/Http/Controllers/Admin/OrderController.php:77
 * @route '/admin/orders/{order}/confirm'
 */
 confirm.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -161,7 +161,7 @@ confirm.url = (args: { order: number | { id: number } } | [order: number | { id:
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::confirm
-* @see app/Http/Controllers/Admin/OrderController.php:75
+* @see app/Http/Controllers/Admin/OrderController.php:77
 * @route '/admin/orders/{order}/confirm'
 */
 confirm.post = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -171,7 +171,7 @@ confirm.post = (args: { order: number | { id: number } } | [order: number | { id
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::status
-* @see app/Http/Controllers/Admin/OrderController.php:50
+* @see app/Http/Controllers/Admin/OrderController.php:52
 * @route '/admin/orders/{order}/status'
 */
 export const status = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -186,7 +186,7 @@ status.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::status
-* @see app/Http/Controllers/Admin/OrderController.php:50
+* @see app/Http/Controllers/Admin/OrderController.php:52
 * @route '/admin/orders/{order}/status'
 */
 status.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -219,7 +219,7 @@ status.url = (args: { order: number | { id: number } } | [order: number | { id: 
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::status
-* @see app/Http/Controllers/Admin/OrderController.php:50
+* @see app/Http/Controllers/Admin/OrderController.php:52
 * @route '/admin/orders/{order}/status'
 */
 status.post = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -229,7 +229,7 @@ status.post = (args: { order: number | { id: number } } | [order: number | { id:
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::bulkStatus
-* @see app/Http/Controllers/Admin/OrderController.php:87
+* @see app/Http/Controllers/Admin/OrderController.php:89
 * @route '/admin/orders/bulk-status'
 */
 export const bulkStatus = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -244,7 +244,7 @@ bulkStatus.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::bulkStatus
-* @see app/Http/Controllers/Admin/OrderController.php:87
+* @see app/Http/Controllers/Admin/OrderController.php:89
 * @route '/admin/orders/bulk-status'
 */
 bulkStatus.url = (options?: RouteQueryOptions) => {
@@ -253,7 +253,7 @@ bulkStatus.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::bulkStatus
-* @see app/Http/Controllers/Admin/OrderController.php:87
+* @see app/Http/Controllers/Admin/OrderController.php:89
 * @route '/admin/orders/bulk-status'
 */
 bulkStatus.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -315,7 +315,7 @@ destroy.delete = (args: { order: string | number } | [order: string | number ] |
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::reject
-* @see app/Http/Controllers/Admin/OrderController.php:102
+* @see app/Http/Controllers/Admin/OrderController.php:104
 * @route '/admin/orders/{order}/reject'
 */
 export const reject = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -330,7 +330,7 @@ reject.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::reject
-* @see app/Http/Controllers/Admin/OrderController.php:102
+* @see app/Http/Controllers/Admin/OrderController.php:104
 * @route '/admin/orders/{order}/reject'
 */
 reject.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -363,11 +363,69 @@ reject.url = (args: { order: number | { id: number } } | [order: number | { id: 
 
 /**
 * @see \App\Http\Controllers\Admin\OrderController::reject
-* @see app/Http/Controllers/Admin/OrderController.php:102
+* @see app/Http/Controllers/Admin/OrderController.php:104
 * @route '/admin/orders/{order}/reject'
 */
 reject.post = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: reject.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\Admin\OrderController::startDelivery
+* @see app/Http/Controllers/Admin/OrderController.php:154
+* @route '/admin/orders/{order}/start-delivery'
+*/
+export const startDelivery = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: startDelivery.url(args, options),
+    method: 'post',
+})
+
+startDelivery.definition = {
+    methods: ["post"],
+    url: '/admin/orders/{order}/start-delivery',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\Admin\OrderController::startDelivery
+* @see app/Http/Controllers/Admin/OrderController.php:154
+* @route '/admin/orders/{order}/start-delivery'
+*/
+startDelivery.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { order: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { order: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            order: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        order: typeof args.order === 'object'
+        ? args.order.id
+        : args.order,
+    }
+
+    return startDelivery.definition.url
+            .replace('{order}', parsedArgs.order.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Admin\OrderController::startDelivery
+* @see app/Http/Controllers/Admin/OrderController.php:154
+* @route '/admin/orders/{order}/start-delivery'
+*/
+startDelivery.post = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: startDelivery.url(args, options),
     method: 'post',
 })
 
@@ -379,6 +437,7 @@ const orders = {
     bulkStatus: Object.assign(bulkStatus, bulkStatus),
     destroy: Object.assign(destroy, destroy),
     reject: Object.assign(reject, reject),
+    startDelivery: Object.assign(startDelivery, startDelivery),
 }
 
 export default orders

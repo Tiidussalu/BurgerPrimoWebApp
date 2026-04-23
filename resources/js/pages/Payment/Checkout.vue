@@ -64,6 +64,30 @@
         <div class="bg-[#121212] rounded-2xl p-6">
           <h2 class="text-2xl font-bold mb-6">Makseandmed</h2>
 
+          <!-- Delivery Address Picker (takeaway / home delivery) — KOHUSTUSLIK -->
+          <div v-if="deliveryMethod !== 'dine_in'" class="mb-6" ref="addressSection">
+            <label class="text-sm mb-3 flex items-center gap-2"
+                   :class="addressError ? 'text-red-400' : 'text-gray-400'">
+              🏠 <span>Sihtkoht</span>
+              <span class="text-xs font-normal" :class="addressError ? 'text-red-400' : 'text-gray-600'">
+                {{ addressError ? '— kohustuslik!' : '(ainult Saaremaa)' }}
+              </span>
+            </label>
+            <div :class="addressError ? 'ring-2 ring-red-500/60 rounded-xl' : ''">
+              <AddressPickerMap
+                :model-lat="deliveryLat"
+                :model-lng="deliveryLng"
+                :model-address="deliveryAddress"
+                @update:model-lat="deliveryLat = $event; addressError = false"
+                @update:model-lng="deliveryLng = $event"
+                @update:model-address="deliveryAddress = $event"
+              />
+            </div>
+            <p v-if="addressError" class="mt-2 text-sm text-red-400 flex items-center gap-1.5">
+              ⚠ Palun märgi kaardil oma tarneaadress
+            </p>
+          </div>
+
           <!-- Customer Notes -->
           <div class="mb-6">
             <label for="customer_notes" class="text-sm text-gray-400 mb-2 block">Märkused (valikuline)</label>
@@ -106,12 +130,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useToast } from '@/composables/useToast';
 
 const { success, error: showError } = useToast();
 import { router } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
+import AddressPickerMap from '@/components/AddressPickerMap.vue';
 
 interface CartItem {
   type: string;
@@ -135,6 +160,12 @@ const deliveryMethod = ref<'dine_in' | 'takeaway'>(props.deliveryMethod);
 const customerNotes = ref('');
 const processing = ref(false);
 const cardError = ref('');
+
+const deliveryLat = ref<number | null>(null);
+const deliveryLng = ref<number | null>(null);
+const deliveryAddress = ref('');
+const addressError = ref(false);
+const addressSection = ref<HTMLElement | null>(null);
 
 let stripe: any = null;
 let cardElement: any = null;
@@ -176,6 +207,14 @@ onMounted(async () => {
 });
 
 const handleSubmit = async () => {
+  // Valideeri tarneaadress
+  if (deliveryMethod.value !== 'dine_in' && !deliveryAddress.value) {
+    addressError.value = true;
+    await nextTick();
+    addressSection.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
   if (!stripe || !cardElement) {
     cardError.value = 'Stripe ei ole veel laaditud. Palun proovige uuesti.';
     return;
@@ -195,6 +234,9 @@ const handleSubmit = async () => {
       body: JSON.stringify({
         delivery_method: deliveryMethod.value,
         customer_notes: customerNotes.value,
+        delivery_lat: deliveryLat.value,
+        delivery_lng: deliveryLng.value,
+        delivery_address: deliveryAddress.value || null,
       }),
     });
 
@@ -227,6 +269,9 @@ const handleSubmit = async () => {
           payment_intent_id: paymentIntent.id,
           delivery_method: deliveryMethod.value,
           customer_notes: customerNotes.value,
+          delivery_lat: deliveryLat.value,
+          delivery_lng: deliveryLng.value,
+          delivery_address: deliveryAddress.value || null,
         }),
       });
 

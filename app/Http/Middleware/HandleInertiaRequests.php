@@ -46,6 +46,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'courier_link' => fn () => $request->session()->get('courier_link'),
             ],
             // Share cart count globally so Navbar can always display it
             'cartCount' => $cartCount,

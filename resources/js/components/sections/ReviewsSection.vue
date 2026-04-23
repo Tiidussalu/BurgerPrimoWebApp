@@ -2,6 +2,9 @@
 import { ref, computed } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import { useScrollAnimation, useStaggerAnimation } from '@/composables/useScrollAnimation'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 interface Review {
   id: number; name: string; content: string; rating: number
@@ -56,24 +59,24 @@ const closeModal = () => { reviewModalOpen.value = false; submitSuccess.value = 
 <template>
   <section class="section-py relative z-10">
 
-    <!-- Heading inside glass -->
+    <!-- Heading -->
     <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-8">
       <div class="px-6 py-10 md:px-12 md:py-12">
         <div class="text-center space-y-4">
           <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-yellow-500/25 bg-yellow-500/8 text-yellow-400 text-xs font-bold uppercase tracking-[0.22em]">
-            ★ Arvustused
+            {{ t('reviews.badge') }}
           </div>
           <h2 :ref="(el) => headingRef = el as any" class="text-3xl md:text-5xl font-bold text-white">
-            Klientide <span class="text-[#D2691E]">kogemus</span>
+            {{ t('reviews.heading') }} <span class="text-[#D2691E]">{{ t('reviews.heading.accent') }}</span>
           </h2>
           <p :ref="(el) => subRef = el as any" class="text-gray-400 text-base max-w-md mx-auto">
-            Mida meie kliendid Burger Primo kogemuse kohta ütlevad
+            {{ t('reviews.sub') }}
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Dual marquee — full width, outside glass so it bleeds edge-to-edge -->
+    <!-- Dual marquee -->
     <template v-if="displayReviews.length >= 4">
       <div class="relative w-full mb-4 overflow-hidden">
         <div class="pointer-events-none absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black/80 to-transparent z-10" />
@@ -110,7 +113,7 @@ const closeModal = () => { reviewModalOpen.value = false; submitSuccess.value = 
     <template v-else-if="displayReviews.length > 0">
       <div class="max-w-6xl mx-auto px-4 sm:px-6 mb-8">
         <div :ref="(el) => staticGridRef = el as any" class="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div v-for="(review, i) in displayReviews" :key="review.id" data-stagger class="glass-card p-6 hover:border-[#D2691E]/20 transition-colors duration-300 group">
+          <div v-for="(review) in displayReviews" :key="review.id" data-stagger class="glass-card p-6 hover:border-[#D2691E]/20 transition-colors duration-300 group">
             <div class="flex gap-1 mb-4"><span v-for="j in 5" :key="j" class="text-lg group-hover:scale-110 transition-transform duration-150" :class="j <= review.rating ? 'text-yellow-400' : 'text-gray-700'" :style="{ transitionDelay: `${j * 40}ms` }">★</span></div>
             <p class="text-gray-300 text-sm leading-relaxed mb-4">{{ review.content }}</p>
             <div class="flex items-center gap-2.5">
@@ -141,7 +144,7 @@ const closeModal = () => { reviewModalOpen.value = false; submitSuccess.value = 
 
     <div v-else class="max-w-6xl mx-auto px-4 mb-8 text-center py-10">
       <p class="text-4xl mb-3 animate-bob inline-block">⭐</p>
-      <p class="text-gray-500 mt-2">Arvustusi pole veel. Ole esimene!</p>
+      <p class="text-gray-500 mt-2">{{ t('reviews.empty') }}</p>
     </div>
 
     <!-- CTA -->
@@ -153,7 +156,7 @@ const closeModal = () => { reviewModalOpen.value = false; submitSuccess.value = 
         :class="alreadySubmitted ? 'bg-black/40 text-gray-600 cursor-not-allowed border border-white/8' : 'bg-[#D2691E]/12 border border-[#D2691E]/35 text-[#D2691E] hover:bg-[#D2691E] hover:text-white hover:border-[#D2691E]'"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        {{ alreadySubmitted ? 'Arvustus saadetud' : 'Jäta arvustus' }}
+        {{ alreadySubmitted ? t('reviews.cta.sent') : t('reviews.cta') }}
       </button>
     </div>
 
@@ -172,42 +175,46 @@ const closeModal = () => { reviewModalOpen.value = false; submitSuccess.value = 
                 <Transition enter-active-class="transition duration-400 ease-out" enter-from-class="opacity-0 scale-90" enter-to-class="opacity-100 scale-100">
                   <div v-if="submitSuccess" class="text-center py-8">
                     <p class="text-5xl mb-4 animate-bob inline-block">🎉</p>
-                    <p class="text-green-400 font-bold text-lg">Täname!</p>
-                    <p class="text-gray-500 text-sm mt-2">Teie arvustus on saadetud ülevaatamiseks.</p>
+                    <p class="text-green-400 font-bold text-lg">{{ t('reviews.modal.thanks') }}</p>
+                    <p class="text-gray-500 text-sm mt-2">{{ t('reviews.modal.thanks.sub') }}</p>
                   </div>
                 </Transition>
                 <template v-if="!alreadySubmitted && !submitSuccess">
-                  <div class="mb-6"><h4 class="text-lg font-bold text-white">Jäta arvustus</h4><p class="text-sm text-gray-500 mt-1">Mida arvate Burger Primost?</p></div>
+                  <div class="mb-6">
+                    <h4 class="text-lg font-bold text-white">{{ t('reviews.modal.title') }}</h4>
+                    <p class="text-sm text-gray-500 mt-1">{{ t('reviews.modal.sub') }}</p>
+                  </div>
                   <div v-if="errorMsg" class="mb-4 px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl"><p class="text-red-400 text-sm">{{ errorMsg }}</p></div>
                   <form @submit.prevent="submitReview" class="space-y-4">
                     <div>
-                      <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Nimi <span class="text-[#D2691E]">*</span></label>
-                      <input v-model="formData.name" type="text" required placeholder="Teie nimi" class="primo-input w-full px-4 py-3 text-sm bg-black/40 border border-white/10 rounded-xl text-white placeholder-gray-700" />
+                      <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">{{ t('reviews.modal.name') }} <span class="text-[#D2691E]">*</span></label>
+                      <input v-model="formData.name" type="text" required :placeholder="t('reviews.modal.ph.name')" class="primo-input w-full px-4 py-3 text-sm bg-black/40 border border-white/10 rounded-xl text-white placeholder-gray-700" />
                     </div>
                     <div>
-                      <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Hinne <span class="text-[#D2691E]">*</span></label>
+                      <label class="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">{{ t('reviews.modal.rating') }} <span class="text-[#D2691E]">*</span></label>
                       <div class="flex gap-1">
                         <button v-for="star in 5" :key="star" type="button" @click="formData.rating = star" @mouseenter="hoveredStar = star" @mouseleave="hoveredStar = 0" class="text-2xl transition-all duration-100 hover:scale-125" :class="star <= (hoveredStar || formData.rating) ? 'text-yellow-400' : 'text-gray-700'">★</button>
                       </div>
                     </div>
                     <div>
                       <div class="flex justify-between items-center mb-1.5">
-                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Arvustus <span class="text-[#D2691E]">*</span></label>
+                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ t('reviews.modal.text') }} <span class="text-[#D2691E]">*</span></label>
                         <span class="text-xs font-mono" :class="formData.content.length >= 80 ? 'text-red-400' : 'text-gray-600'">{{ formData.content.length }}/85</span>
                       </div>
-                      <textarea v-model="formData.content" required rows="3" maxlength="85" placeholder="Kirjutage oma kogemusest..." class="primo-input w-full px-4 py-3 text-sm bg-black/40 border border-white/10 rounded-xl text-white placeholder-gray-700 resize-none" />
+                      <textarea v-model="formData.content" required rows="3" maxlength="85" :placeholder="t('reviews.modal.ph.text')" class="primo-input w-full px-4 py-3 text-sm bg-black/40 border border-white/10 rounded-xl text-white placeholder-gray-700 resize-none" />
                     </div>
                     <button type="submit" :disabled="isSubmitting" class="btn-magnetic w-full py-3.5 text-sm bg-[#D2691E] text-white font-bold rounded-xl hover:bg-[#B8511A] transition-all disabled:opacity-40 flex items-center justify-center gap-2">
                       <svg v-if="isSubmitting" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                      {{ isSubmitting ? 'Saadan...' : 'Saada arvustus' }}
+                      {{ isSubmitting ? t('reviews.modal.sending') : t('reviews.modal.submit') }}
                     </button>
                   </form>
                 </template>
                 <template v-else-if="alreadySubmitted && !submitSuccess">
                   <div class="text-center py-6">
-                    <p class="text-4xl mb-4">✅</p><p class="text-white font-bold">Arvustus juba saadetud</p>
-                    <p class="text-gray-500 text-sm mt-2">Olete selle seansi jooksul juba arvustuse saatnud.</p>
-                    <button @click="closeModal" class="mt-5 w-full py-3 text-sm bg-white/6 text-gray-400 font-semibold rounded-xl hover:bg-white/10 transition-all">Sulge</button>
+                    <p class="text-4xl mb-4">✅</p>
+                    <p class="text-white font-bold">{{ t('reviews.modal.already') }}</p>
+                    <p class="text-gray-500 text-sm mt-2">{{ t('reviews.modal.already.sub') }}</p>
+                    <button @click="closeModal" class="mt-5 w-full py-3 text-sm bg-white/6 text-gray-400 font-semibold rounded-xl hover:bg-white/10 transition-all">{{ t('reviews.modal.close') }}</button>
                   </div>
                 </template>
               </div>

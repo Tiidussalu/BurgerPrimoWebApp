@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::index
-* @see app/Http/Controllers/BurgerBuilderController.php:13
+* @see app/Http/Controllers/BurgerBuilderController.php:17
 * @route '/burger-builder'
 */
 export const index = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::index
-* @see app/Http/Controllers/BurgerBuilderController.php:13
+* @see app/Http/Controllers/BurgerBuilderController.php:17
 * @route '/burger-builder'
 */
 index.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ index.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::index
-* @see app/Http/Controllers/BurgerBuilderController.php:13
+* @see app/Http/Controllers/BurgerBuilderController.php:17
 * @route '/burger-builder'
 */
 index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -35,7 +35,7 @@ index.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::index
-* @see app/Http/Controllers/BurgerBuilderController.php:13
+* @see app/Http/Controllers/BurgerBuilderController.php:17
 * @route '/burger-builder'
 */
 index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::store
-* @see app/Http/Controllers/BurgerBuilderController.php:33
+* @see app/Http/Controllers/BurgerBuilderController.php:46
 * @route '/burger-builder'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -60,7 +60,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::store
-* @see app/Http/Controllers/BurgerBuilderController.php:33
+* @see app/Http/Controllers/BurgerBuilderController.php:46
 * @route '/burger-builder'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::store
-* @see app/Http/Controllers/BurgerBuilderController.php:33
+* @see app/Http/Controllers/BurgerBuilderController.php:46
 * @route '/burger-builder'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -79,7 +79,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::update
-* @see app/Http/Controllers/BurgerBuilderController.php:66
+* @see app/Http/Controllers/BurgerBuilderController.php:86
 * @route '/burger-builder/{burger}'
 */
 export const update = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -94,7 +94,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::update
-* @see app/Http/Controllers/BurgerBuilderController.php:66
+* @see app/Http/Controllers/BurgerBuilderController.php:86
 * @route '/burger-builder/{burger}'
 */
 update.url = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -127,7 +127,7 @@ update.url = (args: { burger: number | { id: number } } | [burger: number | { id
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::update
-* @see app/Http/Controllers/BurgerBuilderController.php:66
+* @see app/Http/Controllers/BurgerBuilderController.php:86
 * @route '/burger-builder/{burger}'
 */
 update.put = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -137,7 +137,7 @@ update.put = (args: { burger: number | { id: number } } | [burger: number | { id
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::destroy
-* @see app/Http/Controllers/BurgerBuilderController.php:99
+* @see app/Http/Controllers/BurgerBuilderController.php:119
 * @route '/burger-builder/{burger}'
 */
 export const destroy = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -152,7 +152,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::destroy
-* @see app/Http/Controllers/BurgerBuilderController.php:99
+* @see app/Http/Controllers/BurgerBuilderController.php:119
 * @route '/burger-builder/{burger}'
 */
 destroy.url = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -185,7 +185,7 @@ destroy.url = (args: { burger: number | { id: number } } | [burger: number | { i
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::destroy
-* @see app/Http/Controllers/BurgerBuilderController.php:99
+* @see app/Http/Controllers/BurgerBuilderController.php:119
 * @route '/burger-builder/{burger}'
 */
 destroy.delete = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -195,7 +195,7 @@ destroy.delete = (args: { burger: number | { id: number } } | [burger: number | 
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::favorite
-* @see app/Http/Controllers/BurgerBuilderController.php:108
+* @see app/Http/Controllers/BurgerBuilderController.php:128
 * @route '/burger-builder/{burger}/favorite'
 */
 export const favorite = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -210,7 +210,7 @@ favorite.definition = {
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::favorite
-* @see app/Http/Controllers/BurgerBuilderController.php:108
+* @see app/Http/Controllers/BurgerBuilderController.php:128
 * @route '/burger-builder/{burger}/favorite'
 */
 favorite.url = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -243,11 +243,69 @@ favorite.url = (args: { burger: number | { id: number } } | [burger: number | { 
 
 /**
 * @see \App\Http\Controllers\BurgerBuilderController::favorite
-* @see app/Http/Controllers/BurgerBuilderController.php:108
+* @see app/Http/Controllers/BurgerBuilderController.php:128
 * @route '/burger-builder/{burger}/favorite'
 */
 favorite.post = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: favorite.url(args, options),
+    method: 'post',
+})
+
+/**
+* @see \App\Http\Controllers\BurgerBuilderController::submit
+* @see app/Http/Controllers/BurgerBuilderController.php:139
+* @route '/burger-builder/{burger}/submit'
+*/
+export const submit = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: submit.url(args, options),
+    method: 'post',
+})
+
+submit.definition = {
+    methods: ["post"],
+    url: '/burger-builder/{burger}/submit',
+} satisfies RouteDefinition<["post"]>
+
+/**
+* @see \App\Http\Controllers\BurgerBuilderController::submit
+* @see app/Http/Controllers/BurgerBuilderController.php:139
+* @route '/burger-builder/{burger}/submit'
+*/
+submit.url = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { burger: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { burger: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            burger: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        burger: typeof args.burger === 'object'
+        ? args.burger.id
+        : args.burger,
+    }
+
+    return submit.definition.url
+            .replace('{burger}', parsedArgs.burger.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\BurgerBuilderController::submit
+* @see app/Http/Controllers/BurgerBuilderController.php:139
+* @route '/burger-builder/{burger}/submit'
+*/
+submit.post = (args: { burger: number | { id: number } } | [burger: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+    url: submit.url(args, options),
     method: 'post',
 })
 
@@ -257,6 +315,7 @@ const burgerBuilder = {
     update: Object.assign(update, update),
     destroy: Object.assign(destroy, destroy),
     favorite: Object.assign(favorite, favorite),
+    submit: Object.assign(submit, submit),
 }
 
 export default burgerBuilder

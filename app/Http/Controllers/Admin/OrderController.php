@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,6 +28,7 @@ class OrderController extends Controller
             'confirmed' => Order::where('status', 'confirmed')->count(),
             'preparing' => Order::where('status', 'preparing')->count(),
             'ready' => Order::where('status', 'ready')->count(),
+            'delivering' => Order::where('status', 'delivering')->count(),
             'completed' => Order::where('status', 'completed')->count(),
         ];
 
@@ -51,7 +53,7 @@ class OrderController extends Controller
     {
 
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,preparing,ready,completed,cancelled',
+            'status' => 'required|in:pending,confirmed,preparing,ready,delivering,completed,cancelled',
             'admin_notes' => 'nullable|string|max:500',
         ]);
 
@@ -90,7 +92,7 @@ class OrderController extends Controller
         $validated = $request->validate([
             'order_ids' => 'required|array',
             'order_ids.*' => 'exists:orders,id',
-            'status' => 'required|in:confirmed,preparing,ready,completed,cancelled',
+            'status' => 'required|in:confirmed,preparing,ready,delivering,completed,cancelled',
         ]);
 
         Order::whereIn('id', $validated['order_ids'])
@@ -144,6 +146,28 @@ public function reject(Request $request, Order $order)
     
     return redirect()->back()->with('success', 'Order rejected successfully!');
 }
+
+    /**
+     * Mark order as delivering and generate a unique courier tracking token.
+     * Returns the courier link so admin can send it to the courier.
+     */
+    public function startDelivery(Order $order)
+    {
+        if ($order->status !== 'ready') {
+            return redirect()->back()->with('error', 'Ainult valmis tellimusi saab kohale toimetada.');
+        }
+
+        $token = Str::random(40);
+
+        $order->update([
+            'status' => 'delivering',
+            'courier_token' => $token,
+        ]);
+
+        $courierLink = url("/courier/track/{$token}");
+
+        return redirect()->back()->with('courier_link', $courierLink);
+    }
 
     /**
      * Bulk delete completed orders

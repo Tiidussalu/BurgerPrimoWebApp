@@ -2,6 +2,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import { useScrollAnimation, useStaggerAnimation } from '@/composables/useScrollAnimation'
+import { useI18n } from '@/composables/useI18n'
+
+const { t } = useI18n()
 
 interface MenuItem {
   id: number
@@ -74,13 +77,13 @@ const onTouchEnd   = (e: TouchEvent) => {
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 icon-hover-spin" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
             </svg>
-            Populaarsed Valikud
+            {{ t('popular.badge') }}
           </div>
           <h2 :ref="(el) => headingRef = el as any" class="text-3xl md:text-5xl font-bold text-white">
-            Enim tellitud <span class="text-[#D2691E]">toidud</span>
+            {{ t('popular.heading') }} <span class="text-[#D2691E]">{{ t('popular.heading.accent') }}</span>
           </h2>
           <p :ref="(el) => subRef = el as any" class="text-gray-400 text-base max-w-md mx-auto">
-            Klientide poolt korduvalt valitud absoluutsed lemmikud
+            {{ t('popular.sub') }}
           </p>
         </div>
 
@@ -170,7 +173,7 @@ const onTouchEnd   = (e: TouchEvent) => {
         <!-- CTA -->
         <div :ref="(el) => ctaRef = el as any" class="text-center">
           <Link href="/menu" class="btn-magnetic group inline-flex items-center gap-3 px-9 py-3.5 border border-[#D2691E]/40 text-[#D2691E] font-bold rounded-2xl text-sm uppercase tracking-wider hover:bg-[#D2691E] hover:text-white hover:border-[#D2691E] transition-colors duration-200">
-            Avasta Kogu Menüü
+            {{ t('popular.cta') }}
             <span class="w-6 h-6 rounded-full border border-current flex items-center justify-center group-hover:bg-white/15 transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />

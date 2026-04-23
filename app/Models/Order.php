@@ -25,12 +25,24 @@ class Order extends Model
         'payment_status',
         'payment_method',
         'paid_at',
+        'courier_lat',
+        'courier_lng',
+        'courier_updated_at',
+        'courier_token',
+        'delivery_lat',
+        'delivery_lng',
+        'delivery_address',
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
         'confirmed_at' => 'datetime',
         'paid_at' => 'datetime',
+        'courier_lat' => 'float',
+        'courier_lng' => 'float',
+        'courier_updated_at' => 'datetime',
+        'delivery_lat' => 'float',
+        'delivery_lng' => 'float',
     ];
 
     public function user(): BelongsTo

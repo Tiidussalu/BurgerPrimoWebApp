@@ -6,7 +6,7 @@ const { toasts, dismiss } = useToast();
 
 <template>
   <Teleport to="body">
-    <div class="fixed bottom-6 right-6 z-[9999] flex flex-col-reverse items-end gap-2.5 pointer-events-none">
+    <div style="position:fixed; bottom:2rem; right:2rem; z-index:99999; display:flex; flex-direction:column-reverse; align-items:flex-end; gap:10px; pointer-events:none;">
       <TransitionGroup
         enter-active-class="transition ease-out duration-300"
         enter-from-class="opacity-0 translate-x-4 scale-95"
@@ -19,15 +19,15 @@ const { toasts, dismiss } = useToast();
           v-for="toast in toasts"
           :key="toast.id"
           @click="dismiss(toast.id)"
-          class="pointer-events-auto flex items-center gap-3 min-w-[300px] max-w-xs px-4 py-3.5 rounded-xl shadow-2xl shadow-black/60 border cursor-pointer select-none backdrop-blur-sm"
+          style="pointer-events:auto; cursor:pointer; min-width:300px; max-width:360px;"
+          class="flex items-center gap-3 px-4 py-3.5 rounded-xl shadow-2xl border select-none"
           :class="{
-            'bg-[#0a1a0a]/95 border-green-500/25 text-green-300': toast.type === 'success',
-            'bg-[#1a0a0a]/95 border-red-500/25   text-red-300':   toast.type === 'error',
-            'bg-[#1a1400]/95 border-yellow-500/25 text-yellow-300': toast.type === 'warning',
-            'bg-[#0a1020]/95 border-blue-500/25   text-blue-300':  toast.type === 'info',
+            'bg-[#0a1a0a] border-green-500/30 text-green-300': toast.type === 'success',
+            'bg-[#1a0a0a] border-red-500/30   text-red-300':   toast.type === 'error',
+            'bg-[#1a1400] border-yellow-500/30 text-yellow-300': toast.type === 'warning',
+            'bg-[#0a1020] border-blue-500/30   text-blue-300':  toast.type === 'info',
           }"
         >
-          <!-- Icon -->
           <div
             class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
             :class="{
@@ -53,8 +53,7 @@ const { toasts, dismiss } = useToast();
 
           <span class="text-sm font-medium flex-1 leading-snug">{{ toast.message }}</span>
 
-          <!-- Close hint -->
-          <svg class="w-3.5 h-3.5 opacity-30 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <svg class="w-3.5 h-3.5 opacity-25 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </div>

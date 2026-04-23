@@ -45,7 +45,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\OrderController::store
-* @see app/Http/Controllers/OrderController.php:29
+* @see app/Http/Controllers/OrderController.php:42
 * @route '/orders'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -60,7 +60,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\OrderController::store
-* @see app/Http/Controllers/OrderController.php:29
+* @see app/Http/Controllers/OrderController.php:42
 * @route '/orders'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -69,7 +69,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\OrderController::store
-* @see app/Http/Controllers/OrderController.php:29
+* @see app/Http/Controllers/OrderController.php:42
 * @route '/orders'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -79,7 +79,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\OrderController::show
-* @see app/Http/Controllers/OrderController.php:84
+* @see app/Http/Controllers/OrderController.php:97
 * @route '/orders/{order}'
 */
 export const show = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -94,7 +94,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\OrderController::show
-* @see app/Http/Controllers/OrderController.php:84
+* @see app/Http/Controllers/OrderController.php:97
 * @route '/orders/{order}'
 */
 show.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -127,7 +127,7 @@ show.url = (args: { order: number | { id: number } } | [order: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\OrderController::show
-* @see app/Http/Controllers/OrderController.php:84
+* @see app/Http/Controllers/OrderController.php:97
 * @route '/orders/{order}'
 */
 show.get = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -137,7 +137,7 @@ show.get = (args: { order: number | { id: number } } | [order: number | { id: nu
 
 /**
 * @see \App\Http\Controllers\OrderController::show
-* @see app/Http/Controllers/OrderController.php:84
+* @see app/Http/Controllers/OrderController.php:97
 * @route '/orders/{order}'
 */
 show.head = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -147,7 +147,7 @@ show.head = (args: { order: number | { id: number } } | [order: number | { id: n
 
 /**
 * @see \App\Http\Controllers\OrderController::cancel
-* @see app/Http/Controllers/OrderController.php:98
+* @see app/Http/Controllers/OrderController.php:132
 * @route '/orders/{order}/cancel'
 */
 export const cancel = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -162,7 +162,7 @@ cancel.definition = {
 
 /**
 * @see \App\Http\Controllers\OrderController::cancel
-* @see app/Http/Controllers/OrderController.php:98
+* @see app/Http/Controllers/OrderController.php:132
 * @route '/orders/{order}/cancel'
 */
 cancel.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -195,7 +195,7 @@ cancel.url = (args: { order: number | { id: number } } | [order: number | { id: 
 
 /**
 * @see \App\Http\Controllers\OrderController::cancel
-* @see app/Http/Controllers/OrderController.php:98
+* @see app/Http/Controllers/OrderController.php:132
 * @route '/orders/{order}/cancel'
 */
 cancel.post = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -204,8 +204,66 @@ cancel.post = (args: { order: number | { id: number } } | [order: number | { id:
 })
 
 /**
+* @see \App\Http\Controllers\OrderController::deliveryLocation
+* @see app/Http/Controllers/OrderController.php:111
+* @route '/orders/{order}/delivery-location'
+*/
+export const deliveryLocation = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: deliveryLocation.url(args, options),
+    method: 'patch',
+})
+
+deliveryLocation.definition = {
+    methods: ["patch"],
+    url: '/orders/{order}/delivery-location',
+} satisfies RouteDefinition<["patch"]>
+
+/**
+* @see \App\Http\Controllers\OrderController::deliveryLocation
+* @see app/Http/Controllers/OrderController.php:111
+* @route '/orders/{order}/delivery-location'
+*/
+deliveryLocation.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { order: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { order: args.id }
+    }
+
+    if (Array.isArray(args)) {
+        args = {
+            order: args[0],
+        }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+        order: typeof args.order === 'object'
+        ? args.order.id
+        : args.order,
+    }
+
+    return deliveryLocation.definition.url
+            .replace('{order}', parsedArgs.order.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\OrderController::deliveryLocation
+* @see app/Http/Controllers/OrderController.php:111
+* @route '/orders/{order}/delivery-location'
+*/
+deliveryLocation.patch = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: deliveryLocation.url(args, options),
+    method: 'patch',
+})
+
+/**
 * @see \App\Http\Controllers\OrderController::destroy
-* @see app/Http/Controllers/OrderController.php:114
+* @see app/Http/Controllers/OrderController.php:148
 * @route '/orders/{order}'
 */
 export const destroy = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -220,7 +278,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\OrderController::destroy
-* @see app/Http/Controllers/OrderController.php:114
+* @see app/Http/Controllers/OrderController.php:148
 * @route '/orders/{order}'
 */
 destroy.url = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -253,7 +311,7 @@ destroy.url = (args: { order: number | { id: number } } | [order: number | { id:
 
 /**
 * @see \App\Http\Controllers\OrderController::destroy
-* @see app/Http/Controllers/OrderController.php:114
+* @see app/Http/Controllers/OrderController.php:148
 * @route '/orders/{order}'
 */
 destroy.delete = (args: { order: number | { id: number } } | [order: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -263,7 +321,7 @@ destroy.delete = (args: { order: number | { id: number } } | [order: number | { 
 
 /**
 * @see \App\Http\Controllers\OrderController::bulkDelete
-* @see app/Http/Controllers/OrderController.php:0
+* @see app/Http/Controllers/OrderController.php:30
 * @route '/orders/bulk-delete'
 */
 export const bulkDelete = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -278,7 +336,7 @@ bulkDelete.definition = {
 
 /**
 * @see \App\Http\Controllers\OrderController::bulkDelete
-* @see app/Http/Controllers/OrderController.php:0
+* @see app/Http/Controllers/OrderController.php:30
 * @route '/orders/bulk-delete'
 */
 bulkDelete.url = (options?: RouteQueryOptions) => {
@@ -287,7 +345,7 @@ bulkDelete.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\OrderController::bulkDelete
-* @see app/Http/Controllers/OrderController.php:0
+* @see app/Http/Controllers/OrderController.php:30
 * @route '/orders/bulk-delete'
 */
 bulkDelete.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -300,6 +358,7 @@ const orders = {
     store: Object.assign(store, store),
     show: Object.assign(show, show),
     cancel: Object.assign(cancel, cancel),
+    deliveryLocation: Object.assign(deliveryLocation, deliveryLocation),
     destroy: Object.assign(destroy, destroy),
     bulkDelete: Object.assign(bulkDelete, bulkDelete),
 }
