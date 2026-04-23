@@ -18,12 +18,20 @@ class CustomBurger extends Model
         'description',
         'total_price',
         'is_favorite',
+        'status',
+        'admin_note',
     ];
 
     protected $casts = [
         'total_price' => 'decimal:2',
         'is_favorite' => 'boolean',
     ];
+
+    // Status konstandid
+    const STATUS_DRAFT    = 'draft';
+    const STATUS_PENDING  = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
 
     public function user(): BelongsTo
     {
@@ -42,11 +50,16 @@ class CustomBurger extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // Calculate total price based on ingredients
     public function calculateTotalPrice(): float
     {
         return $this->ingredients->sum(function ($ingredient) {
             return $ingredient->price * $ingredient->pivot->quantity;
         });
     }
+
+    // Helper meetodid
+    public function isPending(): bool  { return $this->status === self::STATUS_PENDING; }
+    public function isApproved(): bool { return $this->status === self::STATUS_APPROVED; }
+    public function isRejected(): bool { return $this->status === self::STATUS_REJECTED; }
+    public function isDraft(): bool    { return $this->status === self::STATUS_DRAFT; }
 }

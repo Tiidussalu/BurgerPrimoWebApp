@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\MenuItem;
-use App\Models\MenuCategory;
 use App\Models\Order;
+use App\Models\CustomBurger;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,108 +13,116 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
-        // ── Menu stats ──────────────────────────────────────────────────
-        $totalItems       = MenuItem::count();
-        $totalCategories  = MenuCategory::count();
-        $featuredItems    = MenuItem::where('is_featured', true)->count();
-        $unavailableItems = MenuItem::where('is_available', false)->count();
-
-        // ── Revenue (current month, completed orders) ────────────────────
+        // Total revenue for CURRENT month only (completed orders)
         $totalRevenue = Order::where('status', 'completed')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->sum('total_amount');
 
+        // Total completed orders for CURRENT month only
         $totalOrders = Order::where('status', 'completed')
             ->whereMonth('created_at', now()->month)
             ->whereYear('created_at', now()->year)
             ->count();
 
+        // Growth percentage (compare CURRENT month to LAST month completed orders)
         $lastMonthOrders = Order::where('status', 'completed')
             ->whereMonth('created_at', now()->subMonth()->month)
             ->whereYear('created_at', now()->subMonth()->year)
             ->count();
-
-        $growthPercentage = $lastMonthOrders > 0
-            ? round((($totalOrders - $lastMonthOrders) / $lastMonthOrders) * 100, 1)
+        
+        $growthPercentage = $lastMonthOrders > 0 
+            ? (($totalOrders - $lastMonthOrders) / $lastMonthOrders) * 100 
             : ($totalOrders > 0 ? 100 : 0);
 
-        // ── Daily sales last 7 days ──────────────────────────────────────
+        // Daily sales for bar chart (last 7 days)
         $dailySales = collect();
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
+            $total = Order::where('status', 'completed')
+                ->whereDate('created_at', $date->toDateString())
+                ->sum('total_amount');
+            
             $dailySales->push([
-                'day'   => (int) $date->format('N'),
-                'date'  => $date->toDateString(),
-                'total' => (float) Order::where('status', 'completed')
-                    ->whereDate('created_at', $date->toDateString())
-                    ->sum('total_amount'),
+                'day' => $date->format('N'), // 1 = Monday, 7 = Sunday
+                'date' => $date->toDateString(),
+                'total' => (float) $total,
             ]);
         }
 
-        // ── Monthly orders last 7 months ─────────────────────────────────
+        // Monthly orders for line chart (last 7 months)
         $monthlyOrders = collect();
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subMonths($i);
+            $count = Order::whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->count();
+            
             $monthlyOrders->push([
                 'month' => (int) $date->format('m'),
-                'year'  => (int) $date->format('Y'),
-                'count' => Order::whereYear('created_at', $date->year)
-                    ->whereMonth('created_at', $date->month)
-                    ->count(),
+                'year' => (int) $date->format('Y'),
+                'count' => $count,
             ]);
         }
 
-        // ── Popular products ─────────────────────────────────────────────
+        // Popular products (most ordered burgers)
         $popularProducts = DB::table('order_items')
             ->select('burger_name', DB::raw('COUNT(*) as order_count'), DB::raw('SUM(quantity) as total_sold'))
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
-            ->whereNotIn('orders.status', ['cancelled', 'rejected'])
+            ->where('orders.status', '!=', 'cancelled')
+            ->where('orders.status', '!=', 'rejected')
             ->groupBy('burger_name')
-            ->orderByDesc('total_sold')
-            ->limit(8)
+            ->orderBy('total_sold', 'desc')
+            ->limit(12)
             ->get()
-            ->map(fn ($item) => [
-                'name'   => $item->burger_name,
-                'orders' => $item->order_count,
-                'sold'   => $item->total_sold,
-                'price'  => (float) DB::table('order_items')->where('burger_name', $item->burger_name)->avg('price'),
-            ]);
+            ->map(function ($item) {
+                // Calculate average price
+                $avgPrice = DB::table('order_items')
+                    ->where('burger_name', $item->burger_name)
+                    ->avg('price');
+                
+                return [
+                    'name' => $item->burger_name,
+                    'orders' => $item->order_count,
+                    'sold' => $item->total_sold,
+                    'price' => (float) $avgPrice,
+                ];
+            });
 
-        // ── Pending orders count ─────────────────────────────────────────
-        $pendingOrders = Order::where('status', 'pending')->count();
-
-        // ── Recent menu items ────────────────────────────────────────────
-        $recentItems = MenuItem::with('category')
-            ->latest()
-            ->take(6)
+        // Ootavad burgerid adminile ülevaatamiseks
+        $pendingBurgers = CustomBurger::where('status', 'pending')
+            ->with(['user', 'ingredients'])
+            ->orderBy('created_at', 'asc')
             ->get()
-            ->map(fn ($item) => [
-                'id'           => $item->id,
-                'name'         => $item->name,
-                'price'        => (float) $item->price,
-                'is_active'    => (bool) $item->is_active,
-                'is_featured'  => (bool) $item->is_featured,
-                'is_available' => (bool) $item->is_available,
-                'image_url'    => $item->image_url,
-                'category'     => $item->category ? ['name' => $item->category->name] : null,
-            ]);
+            ->map(function ($burger) {
+                return [
+                    'id'          => $burger->id,
+                    'name'        => $burger->name,
+                    'total_price' => (float) $burger->total_price,
+                    'created_at'  => $burger->created_at->format('d.m.Y H:i'),
+                    'user'        => [
+                        'name'  => $burger->user->name,
+                        'email' => $burger->user->email,
+                    ],
+                    'ingredients' => $burger->ingredients->map(fn($i) => [
+                        'name'     => $i->name,
+                        'category' => $i->category,
+                        'quantity' => $i->pivot->quantity,
+                        'price'    => (float) $i->price,
+                    ]),
+                ];
+            });
 
         return Inertia::render('Admin/Dashboard/Index', [
             'stats' => [
-                'totalItems'       => $totalItems,
-                'totalCategories'  => $totalCategories,
-                'featuredItems'    => $featuredItems,
-                'unavailableItems' => $unavailableItems,
-                'totalRevenue'     => (float) $totalRevenue,
-                'totalOrders'      => $totalOrders,
-                'growthPercentage' => $growthPercentage,
-                'pendingOrders'    => $pendingOrders,
+                'totalRevenue' => (float) $totalRevenue,
+                'totalOrders' => $totalOrders,
+                'growthPercentage' => round($growthPercentage, 1),
             ],
-            'recentItems'     => $recentItems,
-            'dailySales'      => $dailySales,
-            'monthlyOrders'   => $monthlyOrders,
+            'dailySales' => $dailySales,
+            'monthlyOrders' => $monthlyOrders,
             'popularProducts' => $popularProducts,
+            'pendingBurgers' => $pendingBurgers,
         ]);
     }
 }

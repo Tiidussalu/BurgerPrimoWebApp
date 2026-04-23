@@ -1,8 +1,14 @@
 <template>
-  <div class="min-h-screen bg-[#0B0B0B] text-white">
+  <div class="relative min-h-screen text-white overflow-x-hidden">
+    <!-- Background -->
+    <div class="page-bg fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+         style="background-image: url('/images/bg.jpg')"></div>
+    <div class="page-bg-overlay fixed inset-0 z-0 bg-black/70"></div>
+
+    <div class="relative z-10 flex flex-col min-h-screen">
     <Navbar />
 
-    <main class="max-w-3xl mx-auto px-6 py-12">
+    <main class="flex-1 max-w-3xl mx-auto w-full px-6 py-12">
       <!-- Success Banner -->
       <div class="mb-8 bg-green-900/20 border border-green-800/50 rounded-2xl p-8 text-center">
         <div class="text-6xl mb-4">✅</div>
@@ -13,10 +19,10 @@
       </div>
 
       <!-- Order Card -->
-      <div class="bg-[#121212] rounded-2xl overflow-hidden border border-[#1a1a1a]">
+      <div class="glass rounded-2xl overflow-hidden">
 
         <!-- Status Bar -->
-        <div class="bg-[#0d0d0d] px-6 py-4 flex items-center justify-between border-b border-[#1a1a1a]">
+        <div class="bg-black/30 px-6 py-4 flex items-center justify-between border-b border-white/10">
           <div>
             <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Olek</p>
             <span :class="getStatusClass(order.status)">{{ getStatusLabel(order.status) }}</span>
@@ -62,7 +68,7 @@
               <div
                 v-for="item in order.items"
                 :key="item.id"
-                class="bg-[#0d0d0d] rounded-xl px-4 py-3"
+                class="glass-card px-4 py-3"
               >
                 <div class="flex justify-between items-start">
                   <div>
@@ -81,13 +87,13 @@
           </div>
 
           <!-- Customer Notes -->
-          <div v-if="order.customer_notes" class="bg-[#0d0d0d] rounded-xl px-4 py-3">
+          <div v-if="order.customer_notes" class="glass-card px-4 py-3">
             <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Sinu märkused</p>
             <p class="text-sm text-gray-300">{{ order.customer_notes }}</p>
           </div>
 
           <!-- Total -->
-          <div class="flex items-center justify-between pt-4 border-t border-[#1a1a1a]">
+          <div class="flex items-center justify-between pt-4 border-t border-white/10">
             <span class="text-gray-400 font-medium">Kokku</span>
             <span class="text-3xl font-bold text-[#D2691E]">{{ Number(order.total_amount).toFixed(2) }}€</span>
           </div>
@@ -110,12 +116,14 @@
         </Link>
         <Link
           href="/orders"
-          class="flex-1 bg-[#121212] hover:bg-[#1a1a1a] text-white px-6 py-3.5 rounded-xl font-semibold transition text-center border border-[#1a1a1a]"
+          class="flex-1 glass hover:bg-white/5 text-white px-6 py-3.5 rounded-xl font-semibold transition text-center"
         >
           Kõik tellimused
         </Link>
       </div>
     </main>
+    <Footer />
+    </div>
   </div>
 </template>
 
@@ -123,6 +131,7 @@
 import { Link, router } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted } from 'vue';
 import Navbar from '@/components/Navbar.vue';
+import Footer from '@/components/Footer.vue';
 
 interface Ingredient {
   name: string;
