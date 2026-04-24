@@ -89,6 +89,12 @@ interface PaginationLink {
   active: boolean;
 }
 
+interface Courier {
+  id: number;
+  name: string;
+  email: string;
+}
+
 interface Props {
   orders: {
     data: Order[];
@@ -96,9 +102,17 @@ interface Props {
   };
   stats?: any;
   filters?: any;
+  couriers?: Courier[];
 }
 
 const props = defineProps<Props>();
+
+const selectedCourierPerOrder = reactive<Record<number, number | null>>({});
+
+const startDeliveryWithCourier = (orderId: number) => {
+  const courierId = selectedCourierPerOrder[orderId] ?? null;
+  router.post(`/admin/orders/${orderId}/start-delivery`, { courier_user_id: courierId }, { preserveScroll: true });
+};
 
 const orderStatuses = reactive<Record<number, string>>({});
 const activeFilter = ref<string>('all');
@@ -805,13 +819,23 @@ const setFilter = (filter: string) => {
                 >
                   Märgi täidetuks
                 </button>
-                <button
-                  @click="startDelivery(order.id)"
-                  class="flex-1 bg-cyan-600/20 hover:bg-cyan-600 border border-cyan-700/50 hover:border-cyan-600 text-cyan-400 hover:text-white px-3 py-2 rounded-lg font-semibold transition text-sm flex items-center justify-center gap-1.5"
-                >
-                  <Bike :size="15" />
-                  Saada kulleriga
-                </button>
+                <div class="flex-1 flex flex-col gap-1.5">
+                  <select
+                    v-model="selectedCourierPerOrder[order.id]"
+                    class="w-full bg-[#0f0f0f] border border-white/10 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-cyan-500/50"
+                  >
+                    <option :value="undefined" disabled>— Vali kuller —</option>
+                    <option v-for="c in (props.couriers ?? [])" :key="c.id" :value="c.id">{{ c.name }}</option>
+                  </select>
+                  <button
+                    @click="startDeliveryWithCourier(order.id)"
+                    :disabled="!selectedCourierPerOrder[order.id]"
+                    class="w-full bg-cyan-600/20 hover:bg-cyan-600 border border-cyan-700/50 hover:border-cyan-600 text-cyan-400 hover:text-white px-3 py-2 rounded-lg font-semibold transition text-sm flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-cyan-600/20 disabled:hover:text-cyan-400"
+                  >
+                    <Bike :size="15" />
+                    Saada kulleriga
+                  </button>
+                </div>
               </div>
             </div>
           </div>

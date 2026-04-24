@@ -12,6 +12,7 @@ import {
   User,
   X,
   ClipboardList,
+  Users,
 } from 'lucide-vue-next';
 
 const page = usePage();
@@ -55,6 +56,12 @@ const navigation = [
     url: '/admin/menu/items',
     icon: Package,
     isActive: currentPath.value.startsWith('/admin/menu/items'),
+  },
+  {
+    title: 'Kasutajad',
+    url: '/admin/users',
+    icon: Users,
+    isActive: currentPath.value.startsWith('/admin/users'),
   },
 ];
 

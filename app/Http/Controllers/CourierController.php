@@ -10,6 +10,136 @@ use Inertia\Response;
 
 class CourierController extends Controller
 {
+    // ─── Account-based methods ────────────────────────────────
+
+    public function dashboard(): Response
+    {
+        $user = auth()->user();
+
+        if (!$user->is_courier && !$user->is_admin) {
+            abort(403);
+        }
+
+        $orders = Order::where('courier_user_id', $user->id)
+            ->whereIn('status', ['delivering', 'completed'])
+            ->with('items')
+            ->latest()
+            ->get()
+            ->map(fn ($o) => $this->formatOrder($o));
+
+        return Inertia::render('Courier/Dashboard', [
+            'orders' => $orders,
+        ]);
+    }
+
+    public function showOrder(Order $order): Response
+    {
+        $user = auth()->user();
+
+        if ($order->courier_user_id !== $user->id && !$user->is_admin) {
+            abort(403);
+        }
+
+        $order->load('items');
+
+        return Inertia::render('Courier/Track', [
+            'order'        => $this->formatOrder($order),
+            'updateUrl'    => route('courier.order.location', $order),
+            'acceptUrl'    => route('courier.order.accept', $order),
+            'declineUrl'   => route('courier.order.decline', $order),
+            'deliveredUrl' => route('courier.order.delivered', $order),
+            'dashboardUrl' => route('courier.dashboard'),
+        ]);
+    }
+
+    public function acceptOrder(Order $order): JsonResponse
+    {
+        $user = auth()->user();
+
+        if ($order->courier_user_id !== $user->id && !$user->is_admin) {
+            abort(403);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function declineOrder(Order $order): JsonResponse
+    {
+        $user = auth()->user();
+
+        if ($order->courier_user_id !== $user->id && !$user->is_admin) {
+            abort(403);
+        }
+
+        $order->update([
+            'status'           => 'ready',
+            'courier_user_id'  => null,
+            'courier_lat'      => null,
+            'courier_lng'      => null,
+            'courier_updated_at' => null,
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function deliverOrder(Order $order): JsonResponse
+    {
+        $user = auth()->user();
+
+        if ($order->courier_user_id !== $user->id && !$user->is_admin) {
+            abort(403);
+        }
+
+        $order->update([
+            'status'             => 'completed',
+            'courier_updated_at' => now(),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function updateOrderLocation(Request $request, Order $order): JsonResponse
+    {
+        $user = auth()->user();
+
+        if ($order->courier_user_id !== $user->id && !$user->is_admin) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'lat' => 'required|numeric|between:-90,90',
+            'lng' => 'required|numeric|between:-180,180',
+        ]);
+
+        $order->update([
+            'courier_lat'        => $validated['lat'],
+            'courier_lng'        => $validated['lng'],
+            'courier_updated_at' => now(),
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    private function formatOrder(Order $order): array
+    {
+        return [
+            'id'               => $order->id,
+            'order_number'     => $order->order_number,
+            'status'           => $order->status,
+            'total_amount'     => (float) $order->total_amount,
+            'delivery_lat'     => $order->delivery_lat,
+            'delivery_lng'     => $order->delivery_lng,
+            'delivery_address' => $order->delivery_address,
+            'items'            => $order->items->map(fn ($item) => [
+                'burger_name' => $item->burger_name,
+                'quantity'    => $item->quantity,
+                'price'       => (float) $item->price,
+            ]),
+        ];
+    }
+
+    // ─── Token-based methods (legacy) ────────────────────────
+
     /**
      * Show the courier tracking page (runs on courier's phone).
      * Accessible via unique token — no login required.

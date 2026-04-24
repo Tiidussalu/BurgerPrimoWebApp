@@ -92,6 +92,12 @@
           <p class="text-gray-400 text-sm mt-2">Tellimus <span class="font-mono text-[#D2691E] font-bold">{{ order.order_number }}</span> on edukalt kohale toimetatud.</p>
         </div>
         <div class="w-20 h-1 rounded-full mt-2" style="background: linear-gradient(90deg, #16a34a, #4ade80)"></div>
+        <button
+          @click="closeDelivered"
+          class="mt-4 px-8 py-3 rounded-2xl font-bold text-white text-base transition hover:opacity-90"
+          style="background: linear-gradient(135deg, #374151, #1f2937); border: 1px solid rgba(255,255,255,0.1);">
+          Sulge ✕
+        </button>
       </div>
     </template>
 
@@ -241,12 +247,20 @@ const props = defineProps<{
     delivery_address?: string | null;
     items: OrderItem[];
   };
-  token: string;
+  token?: string;
   updateUrl: string;
   acceptUrl: string;
   declineUrl: string;
   deliveredUrl: string;
+  dashboardUrl?: string;
 }>();
+
+const csrfToken = (): string =>
+  (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+
+const closeDelivered = () => {
+  window.location.href = props.dashboardUrl ?? '/';
+};
 
 // ─── Phase ────────────────────────────────────────────────
 type Phase = 'deciding' | 'tracking' | 'declined' | 'delivered';
@@ -256,13 +270,17 @@ const decideError = ref('');
 const previewMapContainer = ref<HTMLElement | null>(null);
 let previewMap: any = null;
 
+const authHeaders = () => ({
+  'Content-Type': 'application/json',
+  'X-CSRF-TOKEN': csrfToken(),
+});
+
 const acceptOrder = async () => {
   deciding.value = true;
   decideError.value = '';
   try {
-    await fetch(props.acceptUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    await fetch(props.acceptUrl, { method: 'POST', headers: authHeaders() });
     phase.value = 'tracking';
-    // GPS käivitub pärast faasi muutumist (mapContainer on siis DOM-is)
     setTimeout(() => startTracking(), 100);
   } catch {
     decideError.value = 'Viga. Proovi uuesti.';
@@ -274,8 +292,12 @@ const declineOrder = async () => {
   deciding.value = true;
   decideError.value = '';
   try {
-    await fetch(props.declineUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-    phase.value = 'declined';
+    await fetch(props.declineUrl, { method: 'POST', headers: authHeaders() });
+    if (props.dashboardUrl) {
+      window.location.href = props.dashboardUrl;
+    } else {
+      phase.value = 'declined';
+    }
   } catch {
     decideError.value = 'Viga. Proovi uuesti.';
   }
@@ -304,7 +326,7 @@ const markingDelivered = ref(false);
 const markDelivered = async () => {
   markingDelivered.value = true;
   try {
-    await fetch(props.deliveredUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    await fetch(props.deliveredUrl, { method: 'POST', headers: authHeaders() });
     stopTracking();
     phase.value = 'delivered';
   } catch {
@@ -546,7 +568,7 @@ const sendLocation = async (lat: number, lng: number) => {
   try {
     await fetch(props.updateUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ lat, lng }),
     });
   } catch { /* vaikne */ }

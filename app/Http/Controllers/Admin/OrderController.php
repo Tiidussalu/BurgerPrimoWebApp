@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -32,10 +33,16 @@ class OrderController extends Controller
             'completed' => Order::where('status', 'completed')->count(),
         ];
 
+        $couriers = User::where('is_courier', true)->orWhere('is_admin', true)
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('Admin/Orders/Index', [
             'orders' => $orders,
             'stats' => $stats,
             'filters' => $request->only('status'),
+            'couriers' => $couriers,
         ]);
     }
 
@@ -151,22 +158,22 @@ public function reject(Request $request, Order $order)
      * Mark order as delivering and generate a unique courier tracking token.
      * Returns the courier link so admin can send it to the courier.
      */
-    public function startDelivery(Order $order)
+    public function startDelivery(Request $request, Order $order)
     {
         if ($order->status !== 'ready') {
             return redirect()->back()->with('error', 'Ainult valmis tellimusi saab kohale toimetada.');
         }
 
-        $token = Str::random(40);
-
-        $order->update([
-            'status' => 'delivering',
-            'courier_token' => $token,
+        $validated = $request->validate([
+            'courier_user_id' => 'required|exists:users,id',
         ]);
 
-        $courierLink = url("/courier/track/{$token}");
+        $order->update([
+            'status'          => 'delivering',
+            'courier_user_id' => $validated['courier_user_id'],
+        ]);
 
-        return redirect()->back()->with('courier_link', $courierLink);
+        return redirect()->back()->with('success', 'Kuller määratud.');
     }
 
     /**

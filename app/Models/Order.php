@@ -32,6 +32,7 @@ class Order extends Model
         'delivery_lat',
         'delivery_lng',
         'delivery_address',
+        'courier_user_id',
     ];
 
     protected $casts = [
@@ -53,6 +54,11 @@ class Order extends Model
     public function confirmedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'confirmed_by');
+    }
+
+    public function courierUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'courier_user_id');
     }
 
     public function items(): HasMany

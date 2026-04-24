@@ -106,6 +106,16 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::post('/orders/bulk-delete', [OrderController::class, 'bulkDelete'])->name('orders.bulk-delete');
 
+    // Courier (account-based)
+    Route::middleware(['auth'])->prefix('courier')->name('courier.')->group(function () {
+        Route::get('/dashboard', [CourierController::class, 'dashboard'])->name('dashboard');
+        Route::get('/orders/{order}', [CourierController::class, 'showOrder'])->name('order.show');
+        Route::post('/orders/{order}/accept', [CourierController::class, 'acceptOrder'])->name('order.accept');
+        Route::post('/orders/{order}/decline', [CourierController::class, 'declineOrder'])->name('order.decline');
+        Route::post('/orders/{order}/delivered', [CourierController::class, 'deliverOrder'])->name('order.delivered');
+        Route::post('/orders/{order}/location', [CourierController::class, 'updateOrderLocation'])->name('order.location');
+    });
+
     // Admin
     Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
 
@@ -165,6 +175,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
         Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
         Route::post('/announcements/{announcement}/toggle', [AnnouncementController::class, 'toggle'])->name('announcements.toggle');
+
+        // Users
+        Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+        Route::post('/users/{user}/toggle-courier', [\App\Http\Controllers\Admin\UserController::class, 'toggleCourier'])->name('users.toggle-courier');
 
         // Addons
         Route::get('/addons', [AddonItemController::class, 'index'])->name('addons.index');

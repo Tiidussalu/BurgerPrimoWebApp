@@ -20,6 +20,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_courier',
     ];
 
     /**
@@ -48,7 +49,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_admin' => 'boolean',  // Add this line too!
+            'is_admin' => 'boolean',
+            'is_courier' => 'boolean',
         ];
     }
 
@@ -68,5 +70,10 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function courierOrders(): HasMany
+    {
+        return $this->hasMany(Order::class, 'courier_user_id');
     }
 }
