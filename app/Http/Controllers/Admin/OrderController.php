@@ -165,21 +165,13 @@ public function reject(Request $request, Order $order)
         }
 
         $validated = $request->validate([
-            'courier_user_id' => 'nullable|exists:users,id',
+            'courier_user_id' => 'required|exists:users,id',
         ]);
 
-        $updateData = ['status' => 'delivering'];
-
-        if (!empty($validated['courier_user_id'])) {
-            $updateData['courier_user_id'] = $validated['courier_user_id'];
-        } else {
-            $token = Str::random(40);
-            $updateData['courier_token'] = $token;
-            $courierLink = url("/courier/track/{$token}");
-            return redirect()->back()->with('courier_link', $courierLink);
-        }
-
-        $order->update($updateData);
+        $order->update([
+            'status'          => 'delivering',
+            'courier_user_id' => $validated['courier_user_id'],
+        ]);
 
         return redirect()->back()->with('success', 'Kuller määratud.');
     }

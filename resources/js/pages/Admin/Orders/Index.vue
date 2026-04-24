@@ -821,16 +821,16 @@ const setFilter = (filter: string) => {
                 </button>
                 <div class="flex-1 flex flex-col gap-1.5">
                   <select
-                    v-if="props.couriers && props.couriers.length > 0"
                     v-model="selectedCourierPerOrder[order.id]"
                     class="w-full bg-[#0f0f0f] border border-white/10 text-white text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-cyan-500/50"
                   >
-                    <option :value="null">— Genereeri link —</option>
-                    <option v-for="c in props.couriers" :key="c.id" :value="c.id">{{ c.name }}</option>
+                    <option :value="undefined" disabled>— Vali kuller —</option>
+                    <option v-for="c in (props.couriers ?? [])" :key="c.id" :value="c.id">{{ c.name }}</option>
                   </select>
                   <button
                     @click="startDeliveryWithCourier(order.id)"
-                    class="w-full bg-cyan-600/20 hover:bg-cyan-600 border border-cyan-700/50 hover:border-cyan-600 text-cyan-400 hover:text-white px-3 py-2 rounded-lg font-semibold transition text-sm flex items-center justify-center gap-1.5"
+                    :disabled="!selectedCourierPerOrder[order.id]"
+                    class="w-full bg-cyan-600/20 hover:bg-cyan-600 border border-cyan-700/50 hover:border-cyan-600 text-cyan-400 hover:text-white px-3 py-2 rounded-lg font-semibold transition text-sm flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-cyan-600/20 disabled:hover:text-cyan-400"
                   >
                     <Bike :size="15" />
                     Saada kulleriga

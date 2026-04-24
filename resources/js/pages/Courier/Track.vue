@@ -93,7 +93,7 @@
         </div>
         <div class="w-20 h-1 rounded-full mt-2" style="background: linear-gradient(90deg, #16a34a, #4ade80)"></div>
         <button
-          @click="() => window.location.href = dashboardUrl ?? '/'"
+          @click="closeDelivered"
           class="mt-4 px-8 py-3 rounded-2xl font-bold text-white text-base transition hover:opacity-90"
           style="background: linear-gradient(135deg, #374151, #1f2937); border: 1px solid rgba(255,255,255,0.1);">
           Sulge ✕
@@ -257,6 +257,10 @@ const props = defineProps<{
 
 const csrfToken = (): string =>
   (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+
+const closeDelivered = () => {
+  window.location.href = props.dashboardUrl ?? '/';
+};
 
 // ─── Phase ────────────────────────────────────────────────
 type Phase = 'deciding' | 'tracking' | 'declined' | 'delivered';
