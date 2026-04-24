@@ -142,6 +142,20 @@
             <!-- Delivery type -->
             <div class="mb-6">
               <p class="text-xs text-gray-500 uppercase tracking-widest font-semibold mb-3">Tellimuse tüüp</p>
+
+              <!-- Kulleri saadavuse indikaator -->
+              <div v-if="deliveryStatus" class="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-xs font-semibold"
+                   :class="deliveryStatus.available
+                     ? 'bg-green-950/50 border border-green-800/40 text-green-400'
+                     : 'bg-white/4 border border-white/8 text-gray-500'">
+                <span class="w-2 h-2 rounded-full flex-shrink-0"
+                      :class="deliveryStatus.available ? 'bg-green-400 animate-pulse' : 'bg-gray-600'"></span>
+                <span v-if="deliveryStatus.available">
+                  {{ deliveryStatus.couriers }} kuller{{ deliveryStatus.couriers === 1 ? '' : 'it' }} saadaval · ~{{ deliveryStatus.eta }}
+                </span>
+                <span v-else>Kohaletoimetamine pole hetkel saadaval</span>
+              </div>
+
               <div class="grid grid-cols-2 gap-3">
                 <button type="button" @click="deliveryMethod = 'dine_in'" :class="deliveryMethod === 'dine_in' ? 'border-[#D2691E] bg-[#D2691E]/10 text-white' : 'border-white/8 text-gray-500 hover:border-white/20 hover:text-gray-300'" class="py-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
@@ -189,7 +203,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Link, router } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import Navbar from '@/components/Navbar.vue'
 import Footer from '@/components/Footer.vue'
 
@@ -210,6 +224,9 @@ interface CartItem {
 }
 
 const props = defineProps<{ cartItems: CartItem[]; total: number }>()
+
+const page = usePage()
+const deliveryStatus = computed(() => (page.props as any).deliveryStatus as { available: boolean; couriers: number; eta: string | null } | null)
 
 const deliveryMethod    = ref<'dine_in' | 'takeaway' | null>(null)
 const showDeliveryWarning = ref(false)

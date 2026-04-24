@@ -12,6 +12,19 @@ class CourierController extends Controller
 {
     // ─── Account-based methods ────────────────────────────────
 
+    public function toggleOnline(): JsonResponse
+    {
+        $user = auth()->user();
+
+        if (!$user->is_courier && !$user->is_admin) {
+            abort(403);
+        }
+
+        $user->update(['courier_online' => !$user->courier_online]);
+
+        return response()->json(['online' => $user->courier_online]);
+    }
+
     public function dashboard(): Response
     {
         $user = auth()->user();
@@ -28,7 +41,8 @@ class CourierController extends Controller
             ->map(fn ($o) => $this->formatOrder($o));
 
         return Inertia::render('Courier/Dashboard', [
-            'orders' => $orders,
+            'orders'        => $orders,
+            'courierOnline' => (bool) $user->courier_online,
         ]);
     }
 

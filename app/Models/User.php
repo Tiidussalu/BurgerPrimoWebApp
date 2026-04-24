@@ -51,6 +51,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'is_courier' => 'boolean',
+            'courier_online' => 'boolean',
         ];
     }
 

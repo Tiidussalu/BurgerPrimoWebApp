@@ -3,11 +3,38 @@
     <Navbar />
 
     <main class="max-w-xl mx-auto px-4 py-8">
-      <h1 class="text-2xl font-black mb-1">Kulleri töölaud</h1>
-      <p class="text-gray-500 text-sm mb-6">Sinu määratud tellimused</p>
+      <h1 class="text-2xl font-black mb-6">Kulleri töölaud</h1>
+
+      <!-- Online toggle -->
+      <div class="rounded-2xl border p-5 mb-8 transition-all"
+           :class="isOnline
+             ? 'bg-green-950/40 border-green-700/40'
+             : 'bg-[#111] border-white/8'">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="font-bold text-lg" :class="isOnline ? 'text-green-400' : 'text-gray-300'">
+              {{ isOnline ? 'Oled tööl' : 'Oled offline' }}
+            </p>
+            <p class="text-sm mt-0.5" :class="isOnline ? 'text-green-600' : 'text-gray-600'">
+              {{ isOnline ? 'Kliendid näevad sind saadavalolekuna' : 'Kliendid ei näe sind saadavalolekuna' }}
+            </p>
+          </div>
+          <button
+            @click="toggleOnline"
+            :disabled="toggling"
+            class="px-5 py-2.5 rounded-xl font-bold text-sm transition disabled:opacity-50"
+            :class="isOnline
+              ? 'bg-red-900/40 border border-red-800/50 text-red-400 hover:bg-red-900/70'
+              : 'border border-green-700/50 text-green-400 hover:bg-green-900/30'"
+            style="background: isOnline ? '' : 'linear-gradient(135deg, #14532d33, #16653433)'"
+          >
+            {{ toggling ? '...' : (isOnline ? 'Lõpeta tööpäev' : 'Alusta tööpäevaga') }}
+          </button>
+        </div>
+      </div>
 
       <div v-if="activeOrders.length === 0 && completedOrders.length === 0"
-           class="text-center py-20">
+           class="text-center py-16">
         <div class="text-6xl mb-4">🛵</div>
         <p class="text-gray-400 font-semibold">Hetkel pole sulle ühtegi tellimust määratud</p>
         <p class="text-gray-600 text-sm mt-1">Uued tellimused ilmuvad siia automaatselt</p>
@@ -62,8 +89,8 @@
 
 <script setup lang="ts">
 import Navbar from '@/components/Navbar.vue';
-import { Link, router } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 interface OrderItem { burger_name: string; quantity: number; price: number; }
 interface Order {
@@ -75,10 +102,30 @@ interface Order {
   items: OrderItem[];
 }
 
-const props = defineProps<{ orders: Order[] }>();
+const props = defineProps<{ orders: Order[]; courierOnline: boolean }>();
+
+const page = usePage();
+const isOnline = ref(props.courierOnline);
+const toggling = ref(false);
 
 const activeOrders = computed(() => props.orders.filter(o => o.status === 'delivering'));
 const completedOrders = computed(() => props.orders.filter(o => o.status === 'completed'));
+
+const csrfToken = (): string =>
+  (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+
+const toggleOnline = async () => {
+  toggling.value = true;
+  try {
+    const res = await fetch('/courier/toggle-online', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken() },
+    });
+    const data = await res.json();
+    isOnline.value = data.online;
+  } catch { /* vaikne */ }
+  toggling.value = false;
+};
 
 let refreshInterval: ReturnType<typeof setInterval> | null = null;
 
