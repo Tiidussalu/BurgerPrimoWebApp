@@ -14,8 +14,9 @@ interface User {
 }
 
 const page = usePage()
-const user      = computed(() => page.props.auth?.user as User | null)
-const cartCount = computed(() => (page.props as any).cartCount as number ?? 0)
+const user           = computed(() => page.props.auth?.user as User | null)
+const cartCount      = computed(() => (page.props as any).cartCount as number ?? 0)
+const deliveryStatus = computed(() => (page.props as any).deliveryStatus as { available: boolean; couriers: number; eta: string | null } | null)
 const { t } = useI18n()
 
 const dropdownOpen   = ref(false)

@@ -109,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
     // Courier (account-based)
     Route::middleware(['auth'])->prefix('courier')->name('courier.')->group(function () {
         Route::get('/dashboard', [CourierController::class, 'dashboard'])->name('dashboard');
+        Route::post('/toggle-online', [CourierController::class, 'toggleOnline'])->name('toggle-online');
         Route::get('/orders/{order}', [CourierController::class, 'showOrder'])->name('order.show');
         Route::post('/orders/{order}/accept', [CourierController::class, 'acceptOrder'])->name('order.accept');
         Route::post('/orders/{order}/decline', [CourierController::class, 'declineOrder'])->name('order.decline');

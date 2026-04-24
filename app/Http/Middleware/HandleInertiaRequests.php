@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Middleware;
-use Illuminate\Foundation\Inspiring;
+use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -48,8 +49,33 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
                 'courier_link' => fn () => $request->session()->get('courier_link'),
             ],
-            // Share cart count globally so Navbar can always display it
             'cartCount' => $cartCount,
+            'deliveryStatus' => fn () => $this->getDeliveryStatus(),
         ]);
+    }
+
+    private function getDeliveryStatus(): array
+    {
+        $onlineCouriers = User::where('is_courier', true)
+            ->where('courier_online', true)
+            ->count();
+
+        if ($onlineCouriers === 0) {
+            return ['available' => false, 'couriers' => 0, 'eta' => null];
+        }
+
+        $activeDeliveries = Order::where('status', 'delivering')->count();
+        $freeCouriers = max(0, $onlineCouriers - $activeDeliveries);
+
+        $baseEta = 20;
+        $extraMin = $freeCouriers > 0 ? (int) ceil($activeDeliveries / $freeCouriers) * 5 : 30;
+        $etaMin = $baseEta + $extraMin;
+        $etaMax = $etaMin + 10;
+
+        return [
+            'available' => true,
+            'couriers'  => $onlineCouriers,
+            'eta'       => "{$etaMin}–{$etaMax} min",
+        ];
     }
 }

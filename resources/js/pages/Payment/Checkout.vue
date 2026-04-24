@@ -73,19 +73,33 @@
                 {{ addressError ? '— kohustuslik!' : '(ainult Saaremaa)' }}
               </span>
             </label>
-            <div :class="addressError ? 'ring-2 ring-red-500/60 rounded-xl' : ''">
-              <AddressPickerMap
-                :model-lat="deliveryLat"
-                :model-lng="deliveryLng"
-                :model-address="deliveryAddress"
-                @update:model-lat="deliveryLat = $event; addressError = false"
-                @update:model-lng="deliveryLng = $event"
-                @update:model-address="deliveryAddress = $event"
-              />
+
+            <!-- Kullereid pole saadaval -->
+            <div v-if="!couriersAvailable"
+                 class="flex items-center gap-3 bg-gray-900/60 border border-white/10 rounded-xl px-4 py-4">
+              <span class="text-2xl">🛵</span>
+              <div>
+                <p class="text-sm font-semibold text-gray-300">Kohaletoimetamine pole hetkel saadaval</p>
+                <p class="text-xs text-gray-500 mt-0.5">Kullerid pole hetkel tööl.</p>
+              </div>
             </div>
-            <p v-if="addressError" class="mt-2 text-sm text-red-400 flex items-center gap-1.5">
-              ⚠ Palun märgi kaardil oma tarneaadress
-            </p>
+
+            <!-- Kaart — ainult kui kullerid saadaval -->
+            <template v-else>
+              <div :class="addressError ? 'ring-2 ring-red-500/60 rounded-xl' : ''">
+                <AddressPickerMap
+                  :model-lat="deliveryLat"
+                  :model-lng="deliveryLng"
+                  :model-address="deliveryAddress"
+                  @update:model-lat="deliveryLat = $event; addressError = false"
+                  @update:model-lng="deliveryLng = $event"
+                  @update:model-address="deliveryAddress = $event"
+                />
+              </div>
+              <p v-if="addressError" class="mt-2 text-sm text-red-400 flex items-center gap-1.5">
+                ⚠ Palun märgi kaardil oma tarneaadress
+              </p>
+            </template>
           </div>
 
           <!-- Customer Notes -->
@@ -130,11 +144,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, nextTick } from 'vue';
 import { useToast } from '@/composables/useToast';
 
 const { success, error: showError } = useToast();
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
 import AddressPickerMap from '@/components/AddressPickerMap.vue';
 
@@ -155,6 +169,10 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const page = usePage();
+const deliveryStatus = computed(() => (page.props as any).deliveryStatus as { available: boolean; couriers: number; eta: string | null } | null);
+const couriersAvailable = computed(() => deliveryStatus.value?.available ?? true);
 
 const deliveryMethod = ref<'dine_in' | 'takeaway'>(props.deliveryMethod);
 const customerNotes = ref('');
