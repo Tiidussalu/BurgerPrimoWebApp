@@ -21,6 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_courier',
+        'courier_online',
     ];
 
     /**
