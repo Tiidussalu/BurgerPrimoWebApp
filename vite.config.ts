@@ -34,6 +34,8 @@ export default defineConfig({
                 theme_color: '#cb8732',
                 background_color: '#cb8732',
                 display: 'standalone',
+                scope: '/',
+                start_url: '/',
                 icons: [
                     {
                         src: '/web-app-manifest-192x192.png',
