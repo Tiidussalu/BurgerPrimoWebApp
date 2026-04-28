@@ -65,6 +65,9 @@ import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/composables/useToast';
 import AddonModal from '@/components/Menu/AddonModal.vue';
+import { useI18n } from '@/composables/useI18n';
+
+const { t } = useI18n();
 
 interface MenuItemData {
   id: number; name: string; description: string; price: number;
