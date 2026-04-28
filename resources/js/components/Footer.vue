@@ -42,7 +42,7 @@ const hours = computed(() => [
 </script>
 
 <template>
-  <footer class="relative bg-[#060606] border-t border-white/5 overflow-hidden">
+  <footer class="relative overflow-hidden bg-[#060606] border-t border-white/5">
 
     <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#D2691E]/40 to-transparent" />
 
@@ -68,7 +68,7 @@ const hours = computed(() => [
             </span>
           </div>
 
-          <p class="text-gray-600 text-sm leading-relaxed mb-6">
+          <p class="text-sm leading-relaxed mb-6 text-gray-600">
             {{ t('footer.tagline') }}
           </p>
 
@@ -124,10 +124,10 @@ const hours = computed(() => [
             :class="openSections.contact ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0 md:max-h-40 md:opacity-100'"
           >
             <li>
-              <a href="tel:+37257438483" class="text-gray-600 hover:text-[#D2691E] text-sm transition-colors underline-sweep w-fit block">+372 5743 8483</a>
+              <a href="tel:+37257438483" class="text-sm transition-colors underline-sweep w-fit block text-gray-600 hover:text-[#D2691E]">+372 5743 8483</a>
             </li>
             <li>
-              <a href="mailto:info@burgerprimo.ee" class="text-gray-600 hover:text-[#D2691E] text-sm transition-colors underline-sweep w-fit block">info@burgerprimo.ee</a>
+              <a href="mailto:info@burgerprimo.ee" class="text-sm transition-colors underline-sweep w-fit block text-gray-600 hover:text-[#D2691E]">info@burgerprimo.ee</a>
             </li>
             <li class="text-gray-700 text-sm leading-relaxed pt-1">
               Kauba tn 5/2<br />Kuressaare, 93819
