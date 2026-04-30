@@ -204,37 +204,6 @@
         {{ t('order.show.auto_refresh') }}
       </p>
 
-      <!-- Sihtkoha määramine (kui pole veel seatud) -->
-      <div v-if="canSetLocation" class="mt-6 bg-[#121212] rounded-2xl border border-[#1a1a1a] p-5">
-        <p class="text-sm font-semibold text-white mb-1">{{ t('order.show.set_dest') }}</p>
-        <p class="text-xs text-gray-500 mb-4">{{ t('order.show.set_dest_sub') }}</p>
-        <AddressPickerMap
-          :model-lat="pickLat"
-          :model-lng="pickLng"
-          :model-address="pickAddress"
-          @update:model-lat="pickLat = $event"
-          @update:model-lng="pickLng = $event"
-          @update:model-address="pickAddress = $event"
-        />
-        <button
-          @click="saveDeliveryLocation"
-          :disabled="!pickAddress || savingLocation"
-          class="mt-4 w-full py-3 rounded-xl font-semibold text-sm transition disabled:opacity-40 disabled:cursor-not-allowed"
-          style="background-color: #D2691E; color: white;"
-        >
-          {{ savingLocation ? t('order.show.saving') : t('order.show.save_dest') }}
-        </button>
-      </div>
-
-      <!-- Seatud sihtkoht (näita kui on olemas) -->
-      <div v-else-if="order.delivery_address" class="mt-4 bg-[#121212] rounded-2xl border border-[#1a1a1a] px-5 py-4 flex items-start gap-3">
-        <span class="text-xl mt-0.5">🏠</span>
-        <div>
-          <p class="text-xs text-gray-500 uppercase tracking-widest mb-0.5">{{ t('order.show.dest') }}</p>
-          <p class="text-sm text-gray-200">{{ order.delivery_address }}</p>
-        </div>
-      </div>
-
       <!-- Actions -->
       <div class="mt-6 flex gap-4">
         <Link
@@ -287,7 +256,6 @@
 
 <script setup lang="ts">
 import DeliveryMap from '@/components/DeliveryMap.vue';
-import AddressPickerMap from '@/components/AddressPickerMap.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from '@/composables/useI18n';
@@ -353,12 +321,6 @@ watch(() => props.order.status, (newStatus, oldStatus) => {
   }
 });
 
-// Delivery address picker (shown when address not yet set)
-const pickLat = ref<number | null>(null);
-const pickLng = ref<number | null>(null);
-const pickAddress = ref('');
-const savingLocation = ref(false);
-
 const deliveryEta = computed(() => {
   const { courier_lat, courier_lng, delivery_lat, delivery_lng } = props.order;
   if (!courier_lat || !courier_lng || !delivery_lat || !delivery_lng) return null;
@@ -370,22 +332,6 @@ const deliveryEta = computed(() => {
   return m > 0 ? `~${h}h ${m}min` : `~${h}h`;
 });
 
-const canSetLocation = computed(() =>
-  !props.order.delivery_address &&
-  ['pending', 'confirmed', 'preparing', 'ready', 'delivering'].includes(props.order.status)
-);
-
-const saveDeliveryLocation = () => {
-  if (!pickLat.value || !pickLng.value || !pickAddress.value) return;
-  savingLocation.value = true;
-  router.patch(`/orders/${props.order.id}/delivery-location`, {
-    delivery_lat: pickLat.value,
-    delivery_lng: pickLng.value,
-    delivery_address: pickAddress.value,
-  }, {
-    onFinish: () => { savingLocation.value = false; },
-  });
-};
 
 // Status progress steps — computed so labels react to locale changes
 // The "delivering" step is only shown for delivery orders

@@ -164,7 +164,7 @@ const props = defineProps<Props>();
 const { t } = useI18n();
 const selectedOrders = ref<number[]>([]);
 
-const modal = reactive({ show: false, type: 'danger' as 'danger'|'warning', title: '', message: '', confirmLabel: 'Kinnita', onConfirm: () => {} });
+const modal = reactive({ show: false, type: 'danger' as 'danger'|'warning', title: '', message: '', confirmLabel: '', onConfirm: () => {} });
 const openModal = (opts: Omit<typeof modal, 'show'>) => { Object.assign(modal, { show: true, ...opts }); };
 
 const hasActiveOrders = computed(() => props.orders.some(o => ['pending','confirmed','preparing','ready','delivering'].includes(o.status)));
@@ -180,36 +180,36 @@ const toggleOrderSelection = (id: number) => {
 
 const confirmDeleteSelected = () => {
   const count = selectedOrders.value.length;
-  openModal({ type: 'danger', title: 'Kustuta tellimused', message: `Kas oled kindel, et soovid kustutada ${count} tellimust?`, confirmLabel: 'Kustuta',
+  openModal({ type: 'danger', title: t('orders.modal.delete.title'), message: t('orders.modal.delete.msg').replace('{count}', String(count)), confirmLabel: t('orders.modal.delete.confirm'),
     onConfirm: () => {
       router.post('/orders/bulk-delete' as any, { order_ids: selectedOrders.value }, {
         preserveScroll: true,
-        onSuccess: () => { success(`${count} tellimust kustutatud`); selectedOrders.value = []; },
-        onError: () => error('Kustutamine ebaõnnestus'),
+        onSuccess: () => { success(`${count} ${t('toast.order.deleted')}`); selectedOrders.value = []; },
+        onError: () => error(t('toast.order.delete.error')),
       });
     },
   });
 };
 
 const confirmCancel = (orderId: number) => {
-  openModal({ type: 'danger', title: 'Tühista tellimus', message: 'Kas oled kindel, et soovid tellimuse tühistada?', confirmLabel: 'Tühista tellimus',
+  openModal({ type: 'danger', title: t('orders.modal.cancel.title'), message: t('orders.modal.cancel.msg'), confirmLabel: t('orders.btn.cancel'),
     onConfirm: () => {
       router.post(`/orders/${orderId}/cancel` as any, {}, {
         preserveScroll: true,
-        onSuccess: () => success('Tellimus tühistatud'),
-        onError: () => error('Tühistamine ebaõnnestus'),
+        onSuccess: () => success(t('toast.order.cancelled')),
+        onError: () => error(t('toast.order.cancel.error')),
       });
     },
   });
 };
 
 const confirmDismiss = (orderId: number) => {
-  openModal({ type: 'warning', title: 'Eemalda tellimus', message: 'Kas soovid selle tellimuse nimekirjast eemaldada?', confirmLabel: 'Eemalda',
+  openModal({ type: 'warning', title: t('orders.modal.dismiss.title'), message: t('orders.modal.dismiss.msg'), confirmLabel: t('orders.modal.dismiss.confirm'),
     onConfirm: () => {
       router.delete(`/orders/${orderId}` as any, {
         preserveScroll: true,
-        onSuccess: () => success('Tellimus eemaldatud'),
-        onError: () => error('Eemaldamine ebaõnnestus'),
+        onSuccess: () => success(t('toast.order.removed')),
+        onError: () => error(t('toast.order.remove.error')),
       });
     },
   });
