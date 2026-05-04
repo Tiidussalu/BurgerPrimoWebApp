@@ -40,11 +40,11 @@ const submitReview = () => {
     >
       <div
         v-if="modelValue"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 cursor-pointer"
         @click.self="close"
       >
         <!-- Backdrop -->
-        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="close" />
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm cursor-pointer" @click="close" />
 
         <!-- Modal -->
         <Transition
@@ -57,7 +57,7 @@ const submitReview = () => {
         >
           <div
             v-if="modelValue"
-            class="relative z-10 w-full max-w-sm bg-[#1a1a1a] rounded-2xl border border-[#2a2a2a] shadow-2xl shadow-black/60 p-6"
+            class="relative z-10 w-full max-w-sm bg-[#1a1a1a] rounded-2xl border border-[#2a2a2a] shadow-2xl shadow-black/60 p-6 cursor-pointer"
           >
             <!-- Close button -->
             <button
@@ -80,7 +80,7 @@ const submitReview = () => {
             <div v-if="submitted" class="text-center py-6">
               <p class="text-4xl mb-3">🎉</p>
               <p class="text-green-400 font-medium">Täname!</p>
-              <p class="text-gray-500 text-sm mt-1">Teie arvustus on saadetud ülevaatamiseks.</p>
+              <p class="text-gray-500 text-sm mt-1 cursor-pointer">Teie arvustus on saadetud ülevaatamiseks.</p>
               <button
                 @click="close"
                 class="mt-5 w-full py-2.5 text-sm bg-[#D2691E] text-white font-semibold rounded-xl hover:bg-[#B8511A] transition-all"
@@ -113,7 +113,7 @@ const submitReview = () => {
                 <label class="block text-xs font-medium text-gray-400 mb-1.5">
                   Hinne <span class="text-[#D2691E]">*</span>
                 </label>
-                <div class="flex gap-1">
+                <div class="flex gap-1 cursor-pointer">
                   <button
                     v-for="star in 5"
                     :key="star"

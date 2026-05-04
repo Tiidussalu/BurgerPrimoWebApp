@@ -22,7 +22,7 @@
                 <p class="font-semibold">{{ item.name }}</p>
                 <p class="text-sm text-gray-400">{{ t('checkout.qty') }} {{ item.quantity }}</p>
               </div>
-              <p class="font-bold text-[#D2691E]">€{{ (item.price * item.quantity).toFixed(2) }}</p>
+              <p class="font-bold text-[#D2691E]">{{ (item.price * item.quantity).toFixed(2) }}€</p>
             </div>
           </div>
 
@@ -30,11 +30,11 @@
           <div class="space-y-2 mb-4">
             <div class="flex justify-between text-gray-400">
               <span>{{ t('checkout.subtotal') }}</span>
-              <span>€{{ Number(subtotal).toFixed(2) }}</span>
+              <span>{{ Number(subtotal).toFixed(2) }}€</span>
             </div>
             <div v-if="packagingFee > 0" class="flex justify-between text-[#D2691E]">
               <span>{{ t('checkout.packaging') }}</span>
-              <span>€{{ Number(packagingFee).toFixed(2) }}</span>
+              <span>{{ Number(packagingFee).toFixed(2) }}€</span>
             </div>
           </div>
 
@@ -42,7 +42,7 @@
 
           <div class="flex justify-between items-center text-2xl font-bold">
             <span>{{ t('checkout.total') }}</span>
-            <span class="text-[#D2691E]">€{{ Number(total).toFixed(2) }}</span>
+            <span class="text-[#D2691E]">{{ Number(total).toFixed(2) }}€</span>
           </div>
 
           <!-- Delivery Method Display -->
@@ -107,7 +107,7 @@
               id="card-element" 
               class="bg-[#0B0B0B] border border-gray-700 rounded-xl px-4 py-4"
             ></div>
-            <div v-if="cardError" class="text-red-400 text-sm mt-2">{{ cardError }}</div>
+            <div v-if="cardError" class="text-red-400 text-sm mt-2 cursor-pointer">{{ cardError }}</div>
           </div>
 
           <!-- Submit Button -->
@@ -116,7 +116,7 @@
             :disabled="processing"
             class="w-full bg-gradient-to-r from-[#D2691E] to-[#B8571A] hover:from-[#E07A2E] hover:to-[#D2691E] text-white py-4 rounded-xl font-bold text-lg transition-all shadow-lg hover:shadow-[#D2691E]/50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span v-if="!processing">{{ t('checkout.pay') }} €{{ Number(total).toFixed(2) }}</span>
+            <span v-if="!processing">{{ t('checkout.pay') }} {{ Number(total).toFixed(2) }}€</span>
             <span v-else>{{ t('checkout.processing') }}</span>
           </button>
 

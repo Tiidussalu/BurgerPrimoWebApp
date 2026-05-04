@@ -39,7 +39,7 @@
       <template v-else-if="order.status === 'delivering'">
 
         <!-- Suur kaart -->
-        <div class="mb-4 rounded-2xl overflow-hidden shadow-2xl">
+        <div class="mb-4 rounded-2xl overflow-hidden shadow-2xl" style="isolation: isolate;">
           <DeliveryMap
             :courier-lat="order.courier_lat ?? null"
             :courier-lng="order.courier_lng ?? null"
@@ -228,10 +228,10 @@
     <!-- Kulleri kohalejõudmise teatis -->
     <Transition name="arrived">
       <div v-if="showArrivedBanner"
-           class="fixed inset-0 flex items-center justify-center"
+           class="fixed inset-0 flex items-center justify-center cursor-pointer"
            style="z-index: 9999; background: rgba(0,0,0,0.88);"
            @click="dismissArrivedBanner">
-        <div class="text-center rounded-3xl border border-green-500/30 p-10"
+        <div class="text-center rounded-3xl border border-green-500/30 p-10 cursor-pointer"
              style="background: linear-gradient(135deg, #061206, #0a1f0a); max-width: 360px; width: 90%; box-shadow: 0 0 80px rgba(34,197,94,0.25);"
              @click.stop>
           <div class="text-8xl mb-2" style="filter: drop-shadow(0 0 40px rgba(34,197,94,0.8))">🛵</div>
@@ -239,7 +239,7 @@
           <h2 class="text-3xl font-black text-white mb-2">{{ t('order.show.arrived.title') }}</h2>
           <p class="text-green-400 font-semibold text-lg mb-1">{{ t('order.show.arrived.sub') }}</p>
           <p class="text-gray-500 text-sm mb-8">
-            Tellimus <span class="font-mono text-[#D2691E] font-bold">{{ order.order_number }}</span>
+            Tellimus <span class="font-mono text-[#D2691E] font-bold cursor-pointer">{{ order.order_number }}</span>
           </p>
           <button
             @click="dismissArrivedBanner"

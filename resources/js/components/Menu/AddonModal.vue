@@ -132,7 +132,7 @@ const addToCart = () => {
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" @click.self="emit('close')">
+      <div class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 cursor-default" @click.self="emit('close')">
         <Transition
           enter-active-class="transition ease-out duration-200"
           enter-from-class="opacity-0 scale-95 translate-y-2"
@@ -151,7 +151,7 @@ const addToCart = () => {
                   <p class="text-sm text-gray-400">{{ t('addon.customize') }}</p>
                 </div>
               </div>
-              <button @click="emit('close')" class="w-9 h-9 rounded-lg bg-[#1a1a1a] hover:bg-[#D2691E] text-gray-400 hover:text-white transition-colors flex items-center justify-center">
+              <button @click="emit('close')" class="w-9 h-9 rounded-lg bg-[#1a1a1a] hover:bg-[#D2691E] text-gray-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
@@ -172,7 +172,7 @@ const addToCart = () => {
                 <h3 class="text-sm font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-2">
                   <span class="text-[#D2691E]">📏</span> {{ t('addon.size') }}
                 </h3>
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-3 gap-3 cursor-pointer">
                   <button
                     v-for="size in addons.size"
                     :key="size.id"
@@ -186,7 +186,7 @@ const addToCart = () => {
                   >
                     <div class="font-bold text-sm">{{ size.name }}</div>
                     <div class="text-xs mt-0.5" :class="size.price > 0 ? 'text-[#D2691E]' : 'text-gray-600'">
-                      {{ size.price > 0 ? `+€${size.price.toFixed(2)}` : 'Standard' }}
+                      {{ size.price > 0 ? `+${size.price.toFixed(2)}€` : 'Standard' }}
                     </div>
                   </button>
                 </div>
@@ -213,7 +213,7 @@ const addToCart = () => {
                       />
                       <span class="text-white text-sm font-medium">{{ drink.name }}</span>
                     </div>
-                    <span class="text-[#D2691E] font-bold text-sm">+€{{ drink.price.toFixed(2) }}</span>
+                    <span class="text-[#D2691E] font-bold text-sm">+{{ drink.price.toFixed(2) }}€</span>
                   </label>
                 </div>
               </section>
@@ -239,7 +239,7 @@ const addToCart = () => {
                     <div class="flex-1 min-w-0">
                       <div class="text-white text-sm font-medium truncate">{{ sauce.name }}</div>
                       <div :class="sauce.price > 0 ? 'text-[#D2691E]' : 'text-gray-600'" class="text-xs font-semibold">
-                        {{ sauce.price > 0 ? `+€${sauce.price.toFixed(2)}` : t('addon.free') }}
+                        {{ sauce.price > 0 ? `+${sauce.price.toFixed(2)}€` : t('addon.free') }}
                       </div>
                     </div>
                   </label>
@@ -268,7 +268,7 @@ const addToCart = () => {
                       <span class="text-white text-sm font-medium">{{ fry.name }}</span>
                     </div>
                     <span :class="fry.price > 0 ? 'text-[#D2691E] font-bold' : 'text-gray-600'" class="text-sm">
-                      {{ fry.price > 0 ? `+€${fry.price.toFixed(2)}` : t('addon.no.extra') }}
+                      {{ fry.price > 0 ? `+${fry.price.toFixed(2)}€` : t('addon.no.extra') }}
                     </span>
                   </label>
                 </div>
@@ -306,9 +306,9 @@ const addToCart = () => {
             <div class="flex-shrink-0 bg-[#0B0B0B] px-6 py-4 border-t border-[#1a1a1a] rounded-b-2xl">
               <div class="flex items-center justify-between mb-4">
                 <div class="text-gray-400 text-sm">
-                  {{ t('addon.total') }} <span class="text-xs text-gray-600 ml-1">(€{{ Number(item.price).toFixed(2) }} {{ t('addon.base.note') }})</span>
+                  {{ t('addon.total') }} <span class="text-xs text-gray-600 ml-1">({{ Number(item.price).toFixed(2) }}€ {{ t('addon.base.note') }})</span>
                 </div>
-                <span class="text-3xl font-bold text-[#D2691E]">€{{ totalPrice }}</span>
+                <span class="text-3xl font-bold text-[#D2691E] cursor-pointer">{{ totalPrice }}€</span>
               </div>
               <button
                 @click="addToCart"

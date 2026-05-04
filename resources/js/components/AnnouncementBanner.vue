@@ -56,7 +56,7 @@ const dismiss = () => {
         :style="{ backgroundColor: active().bg_color, color: active().text_color }"
       >
         <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center gap-3">
-          <Megaphone :size="18" class="flex-shrink-0 opacity-80" />
+          <Megaphone :size="18" class="flex-shrink-0 opacity-80 cursor-pointer" />
 
           <button
             v-if="announcements.length > 1"
@@ -69,7 +69,7 @@ const dismiss = () => {
           <div class="flex-1 flex items-center gap-2 min-w-0 justify-center text-center">
             <p class="text-sm font-semibold truncate">{{ active().title }}</p>
             <span class="hidden sm:inline opacity-60 text-xs">·</span>
-            <p class="hidden sm:block text-xs opacity-80 truncate">{{ active().message }}</p>
+            <p class="hidden sm:block text-xs opacity-80 truncate cursor-pointer">{{ active().message }}</p>
           </div>
 
           <button
@@ -80,12 +80,12 @@ const dismiss = () => {
             <ChevronRight :size="18" />
           </button>
 
-          <div v-if="announcements.length > 1" class="flex items-center gap-1 flex-shrink-0">
+          <div v-if="announcements.length > 1" class="flex items-center gap-1 flex-shrink-0 cursor-pointer">
             <span
               v-for="(_, i) in announcements"
               :key="i"
               @click="current = i"
-              class="w-1.5 h-1.5 rounded-full cursor-pointer transition-all"
+              class="cursor-pointer w-1.5 h-1.5 rounded-full cursor-pointer transition-all"
               :class="i === current ? 'opacity-100 scale-125' : 'opacity-40'"
               :style="{ backgroundColor: active().text_color }"
             />

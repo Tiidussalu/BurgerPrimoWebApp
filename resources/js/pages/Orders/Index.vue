@@ -14,7 +14,7 @@
     <!-- Custom Confirm Modal -->
     <Teleport to="body">
       <Transition name="modal">
-        <div v-if="modal.show" class="fixed inset-0 z-50 flex items-center justify-center p-4" @click.self="modal.show = false">
+        <div v-if="modal.show" class="fixed inset-0 z-50 flex items-center justify-center p-4 cursor-default" @click.self="modal.show = false">
           <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" />
           <div class="relative bg-[#161616] border border-white/10 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
             <div class="h-1 w-full bg-linear-to-r from-[#D2691E] to-[#B8571A]" />
@@ -29,8 +29,8 @@
                 </div>
               </div>
               <div class="flex gap-3 mt-6">
-                <button @click="modal.show = false" class="flex-1 py-3 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition font-semibold text-sm">{{ t('orders.modal.cancel') }}</button>
-                <button @click="modal.onConfirm(); modal.show = false" :class="modal.type === 'danger' ? 'bg-red-600 hover:bg-red-500' : 'bg-linear-to-r from-[#D2691E] to-[#B8571A]'" class="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all shadow-lg">{{ modal.confirmLabel }}</button>
+                <button @click="modal.show = false" class="flex-1 py-3 rounded-xl border border-white/10 text-gray-300 hover:bg-white/5 transition font-semibold text-sm cursor-pointer">{{ t('orders.modal.cancel') }}</button>
+                <button @click="modal.onConfirm(); modal.show = false" :class="modal.type === 'danger' ? 'bg-red-600 hover:bg-red-500' : 'bg-linear-to-r from-[#D2691E] to-[#B8571A]'" class="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all shadow-lg cursor-pointer">{{ modal.confirmLabel }}</button>
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@
           <div class="flex-1">
             <p class="font-bold text-lg text-white">{{ t('orders.courier.heading') }}</p>
             <p class="text-sm text-cyan-400">
-              Tellimus <span class="font-mono font-bold">{{ deliveringOrder.order_number }}</span> {{ t('orders.courier.sub') }}
+              {{ t('orders.courier.order') }} <span class="font-mono font-bold">{{ deliveringOrder.order_number }}</span> {{ t('orders.courier.sub') }}
             </p>
           </div>
           <div class="bg-cyan-500 group-hover:bg-cyan-400 text-black font-bold px-5 py-2.5 rounded-xl text-sm transition shrink-0">
@@ -62,7 +62,7 @@
           <h1 class="text-4xl font-bold mb-2">{{ t('orders.heading') }}</h1>
           <p class="text-gray-400">{{ t('orders.sub') }}</p>
         </div>
-        <button v-if="selectedOrders.length > 0" @click="confirmDeleteSelected" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold transition">
+        <button v-if="selectedOrders.length > 0" @click="confirmDeleteSelected" class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-semibold transition cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
           {{ t('orders.delete.selected') }} ({{ selectedOrders.length }})
         </button>
@@ -97,7 +97,7 @@
           </div>
 
           <div class="p-6 relative">
-            <button v-if="order.status === 'rejected'" @click="confirmDismiss(order.id)" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white flex items-center justify-center transition" :title="t('orders.dismiss')">
+            <button v-if="order.status === 'rejected'" @click="confirmDismiss(order.id)" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white flex items-center justify-center transition cursor-pointer" :title="t('orders.dismiss')">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <div v-if="order.status === 'rejected'" class="mb-4 bg-red-900/20 border border-red-800 rounded-xl px-4 py-3">
@@ -131,7 +131,7 @@
             </div>
             <div class="flex gap-3 mt-5">
               <Link :href="`/orders/${order.id}`" class="flex-1 bg-[#1a1a1a] hover:bg-[#222] text-white px-4 py-2.5 rounded-xl font-semibold transition text-center text-sm border border-[#2a2a2a] hover:border-[#D2691E]/30">{{ t('orders.btn.details') }}</Link>
-              <button v-if="order.status === 'pending' || order.status === 'confirmed'" @click="confirmCancel(order.id)" class="flex-1 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white px-4 py-2.5 rounded-xl font-semibold transition text-sm border border-red-800/50 hover:border-red-600">{{ t('orders.btn.cancel') }}</button>
+              <button v-if="order.status === 'pending' || order.status === 'confirmed'" @click="confirmCancel(order.id)" class="flex-1 bg-red-600/10 hover:bg-red-600 text-red-400 hover:text-white px-4 py-2.5 rounded-xl font-semibold transition text-sm border border-red-800/50 hover:border-red-600 cursor-pointer">{{ t('orders.btn.cancel') }}</button>
               <Link v-if="order.status === 'completed'" href="/menu" class="flex-1 text-white px-4 py-2.5 rounded-xl font-semibold transition text-center text-sm hover:opacity-90" style="background-color: #D2691E">{{ t('orders.btn.reorder') }}</Link>
             </div>
           </div>

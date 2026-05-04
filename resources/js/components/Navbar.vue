@@ -164,7 +164,7 @@ const vClickOutside = {
             <a href="https://food.bolt.eu/en-US/164/p/90859-primo-burger" target="_blank" rel="noopener"
               class="btn-magnetic px-3 py-1.5 bg-[#21c93d]/8 border border-[#21c93d]/18 text-[#21c93d] rounded-full text-xs font-bold hover:bg-[#21c93d]/18 transition-all duration-200">Bolt Food</a>
           </div>
-          <button @click="mobileMenuOpen = !mobileMenuOpen" :aria-label="mobileMenuOpen ? 'Sulge menüü' : 'Ava menüü'" :aria-expanded="mobileMenuOpen" class="lg:hidden p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/6 transition-all z-10">
+          <button @click="mobileMenuOpen = !mobileMenuOpen" :aria-label="mobileMenuOpen ? 'Sulge menüü' : 'Ava menüü'" :aria-expanded="mobileMenuOpen" class="lg:hidden p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/6 transition-all z-10 cursor-pointer">
             <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
             <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
@@ -242,7 +242,7 @@ const vClickOutside = {
             </Link>
 
             <div class="relative" v-click-outside="closeDropdown">
-              <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-white/5 transition-all duration-200">
+              <button @click="dropdownOpen = !dropdownOpen" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-white/5 transition-all duration-200 cursor-pointer">
                 <div class="w-7 h-7 bg-gradient-to-br from-[#D2691E] to-[#8B3A00] rounded-full flex items-center justify-center text-white text-xs font-black shadow">{{ user.name.charAt(0).toUpperCase() }}</div>
                 <span class="text-sm font-medium text-gray-400">{{ user.name }}</span>
                 <svg class="h-3 w-3 text-gray-600 transition-transform duration-200" :class="{ 'rotate-180': dropdownOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -277,7 +277,7 @@ const vClickOutside = {
     <Transition enter-active-class="transition ease-out duration-250" enter-from-class="opacity-0 -translate-y-3" enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-200" leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 -translate-y-3">
       <div v-if="mobileMenuOpen" class="lg:hidden border-t border-white/6 bg-[#080808]/98 backdrop-blur-xl w-full">
         <div class="px-4 py-5 space-y-1">
-          <button @click="mobileHomeOpen = !mobileHomeOpen" class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" :class="isHomePage ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">
+          <button @click="mobileHomeOpen = !mobileHomeOpen" class="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer" :class="isHomePage ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">
             {{ t('nav.home') }}
             <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="{ 'rotate-180': mobileHomeOpen }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
           </button>
@@ -288,14 +288,14 @@ const vClickOutside = {
           </div>
 
           <Link v-for="item in navItems" :key="item.href" :href="item.href" @click="mobileMenuOpen = false"
-            class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+            class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer"
             :class="isActive(item) ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">{{ item.label }}</Link>
 
-          <Link href="/cart" @click="mobileMenuOpen = false" class="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" :class="page.url.startsWith('/cart') ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">
+          <Link href="/cart" @click="mobileMenuOpen = false" class="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer" :class="page.url.startsWith('/cart') ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">
             {{ t('nav.cart') }}
             <span v-if="cartCount > 0" class="w-5 h-5 rounded-full bg-[#D2691E] text-white text-[9px] font-black flex items-center justify-center">{{ cartCount > 9 ? '9+' : cartCount }}</span>
           </Link>
-          <Link href="/orders" @click="mobileMenuOpen = false" class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200" :class="page.url.startsWith('/orders') ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">{{ t('nav.orders') }}</Link>
+          <Link href="/orders" @click="mobileMenuOpen = false" class="flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer" :class="page.url.startsWith('/orders') ? 'text-white bg-[#D2691E]/10 border-l-2 border-[#D2691E]' : 'text-gray-500 hover:text-white hover:bg-white/5'">{{ t('nav.orders') }}</Link>
 
           <div class="flex gap-2 px-4 pt-3 pb-1">
             <a href="https://wolt.com/en/est/kuressaare/restaurant/primo-burger" target="_blank" class="px-3 py-1.5 bg-[#00c2e0]/8 border border-[#00c2e0]/15 text-[#00c2e0] rounded-full text-xs font-bold">Wolt</a>
@@ -308,13 +308,13 @@ const vClickOutside = {
             </div>
             <template v-if="user">
               <p class="px-4 py-1 text-[10px] text-gray-700 uppercase tracking-wider font-bold">Konto</p>
-              <Link v-if="user.is_courier && !user.is_admin" href="/courier/dashboard" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm font-medium text-cyan-400 bg-cyan-500/6 hover:bg-cyan-500/12 transition-all">🛵 Kulleri töölaud</Link>
-              <Link v-if="user.is_admin" href="/admin/dashboard" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm font-medium text-yellow-400 bg-yellow-500/6 hover:bg-yellow-500/12 transition-all">⚙️ Admin Dashboard</Link>
-              <Link href="/settings/profile" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">👤 {{ t('nav.profile') }}</Link>
-              <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="block w-full text-left px-4 py-3 rounded-xl text-sm text-red-500 hover:bg-red-500/8 transition-all">🚪 {{ t('nav.logout') }}</Link>
+              <Link v-if="user.is_courier && !user.is_admin" href="/courier/dashboard" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm font-medium text-cyan-400 bg-cyan-500/6 hover:bg-cyan-500/12 transition-all cursor-pointer">🛵 Kulleri töölaud</Link>
+              <Link v-if="user.is_admin" href="/admin/dashboard" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm font-medium text-yellow-400 bg-yellow-500/6 hover:bg-yellow-500/12 transition-all cursor-pointer">⚙️ Admin Dashboard</Link>
+              <Link href="/settings/profile" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all cursor-pointer">👤 {{ t('nav.profile') }}</Link>
+              <Link href="/logout" method="post" as="button" @click="mobileMenuOpen = false" class="block w-full text-left px-4 py-3 rounded-xl text-sm text-red-500 hover:bg-red-500/8 transition-all cursor-pointer">🚪 {{ t('nav.logout') }}</Link>
             </template>
             <template v-else>
-              <Link href="/login" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all">{{ t('nav.login') }}</Link>
+              <Link href="/login" @click="mobileMenuOpen = false" class="block px-4 py-3 rounded-xl text-sm text-gray-500 hover:text-white hover:bg-white/5 transition-all cursor-pointer">{{ t('nav.login') }}</Link>
             </template>
           </div>
         </div>

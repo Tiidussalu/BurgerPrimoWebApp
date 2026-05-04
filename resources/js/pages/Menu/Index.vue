@@ -58,7 +58,7 @@
       </div>
 
       <!-- Category filter chips -->
-      <div class="flex gap-2 px-4 pb-2.5 overflow-x-auto no-scrollbar">
+      <div class="flex gap-2 px-4 pb-2.5 overflow-x-auto no-scrollbar cursor-pointer">
         <button
           v-if="favorites && favorites.length > 0"
           @click="toggleCategory('favorites')"

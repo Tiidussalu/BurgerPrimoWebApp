@@ -1,5 +1,5 @@
 <template>
-  <div class="relative">
+  <div class="relative" style="isolation: isolate;">
     <div ref="mapContainer" class="w-full rounded-xl overflow-hidden" :style="{ height }"></div>
 
     <!-- Bolt-stiil info overlay -->
@@ -19,7 +19,7 @@
       </div>
       <div v-else class="bg-black/80 backdrop-blur-sm rounded-xl px-4 py-3 flex items-center gap-3">
         <div class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse flex-shrink-0"></div>
-        <p class="text-gray-300 text-sm">Ootame kulleri GPS signaali...</p>
+        <p class="text-gray-300 text-sm">{{ t('orders.courier.gps') }}</p>
       </div>
     </div>
 
@@ -36,7 +36,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, watch, computed } from 'vue';
 import { ref } from 'vue';
+import { useI18n } from '@/composables/useI18n';
 
+const { t } = useI18n();
 const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
